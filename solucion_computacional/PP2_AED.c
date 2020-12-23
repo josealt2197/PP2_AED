@@ -12,7 +12,7 @@ typedef struct Nino Nino;
 typedef struct ListaNinos ListaNinos;
 
 typedef struct AydanteSanta AydanteSanta;
-typedef struct PilaAyudantes PilaAyudantes;
+typedef struct ListaAyudantes ListaAyudantes;
 
 //Procedimientos para Menus de Opciones
 void MenuPrincipal();
@@ -27,6 +27,8 @@ void AnalisisDeDatos();
 void registrarNinos(struct ListaNinos *LNinos);
 void mostrarNinos(struct ListaNinos *LNinos);
 
+//Procedimientos para gestion de de Ayudantes de santa
+void registrarAyudante(struct ListaAyudantes *LAyudantes);
 
 
 struct Nino{
@@ -56,8 +58,9 @@ struct AydanteSanta{
     AydanteSanta *siguiente;  
 };
 
-struct PilaAyudantes{
-    AydanteSanta *Tope;  
+struct ListaAyudantes{
+    AydanteSanta *inicio;
+	AydanteSanta *final;  
 };
 
 
@@ -92,6 +95,12 @@ void MenuPrincipal(){
 	LNinos->inicio = NULL;
 	LNinos->final = NULL;
 	
+	struct ListaAyudantes *LAyudantes;
+	LAyudantes = (struct ListaAyudantes *) malloc(sizeof(struct ListaAyudantes));
+	LAyudantes->inicio = NULL;
+	LAyudantes->final = NULL;
+	
+	
 	do{
         system( "CLS" );
         fflush(stdin);
@@ -117,7 +126,7 @@ void MenuPrincipal(){
                 break;
             case '3': GestionDomicilios();
                 break;
-			case '4': GestionAyudantes();
+			case '4': GestionAyudantes(LAyudantes);
                 break;
             case '5': GestionCartas();
 				break;
@@ -286,7 +295,7 @@ void GestionDomicilios(){
 	Salidas:
 	Restricciones: 
 */
-void GestionAyudantes(){
+void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 	char opcion, ch;	
 
 	do{
@@ -306,13 +315,13 @@ void GestionAyudantes(){
 		
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
-				case '1': MenuPrincipal();
+				case '1': registrarAyudante(LAyudantes);
 					break;
 				case '2': MenuPrincipal();
 					break;
 				case '3': MenuPrincipal();
 					break;
-				case '0': MenuPrincipal();
+				case '0':
 					break;
 				default:
 					fflush(stdin);
@@ -320,9 +329,8 @@ void GestionAyudantes(){
 					getchar();
 					break;		
 		}	
-	}while(opcion!=3);			
+	}while(opcion!='0');			
 	fflush(stdin);
-	getchar();
 }
 
 
@@ -522,20 +530,21 @@ void mostrarNinos(struct ListaNinos *LNinos){
 	Salidas:
 	Restricciones: 
 */
-void registrarMiembro(){
+void registrarAyudante(struct ListaAyudantes *LAyudantes){
     system( "CLS" );
     printf("\n\n*********************************\n");
 		printf("        Sistema NaviTEC \n");
 		printf("*********************************\n");
 		printf(" Registro de Ayudantes de Santa\n");
-		printf("*********************************\n");
-	
-    struct PilaAyudantes *ayudante;
-    ayudante=(struct PilaAyudantes *) malloc (sizeof(struct PilaAyudantes));
+		printf("*********************************\n");	
 		
+	struct AydanteSanta *ayudante;
+
+    ayudante=(struct AydanteSanta *) malloc (sizeof(struct AydanteSanta));
+			
     //do{
 	printf("\n Ingrese la Identificacion: (Ejm.105450656) \n");
-	gets(ayudante->Tope->identificacion);
+	gets(ayudante->identificacion);
 
         //if(validarCedula(ayudante->cedula)==1){
         //    printf("\n**Esta cedula ya ha sido registrada**\n ");
@@ -545,25 +554,28 @@ void registrarMiembro(){
     //}while(1);
     
     printf("\n Ingrese el Nombre del Ayudante: (Ejm.Juan Perez) \n");
-    gets(ayudante->Tope->nombre);
+    gets(ayudante->nombre);
     printf("\n Ingrese el Puesto del ayudante: (Ejm.Empacador) \n");
-    gets(ayudante->Tope->puesto);
+    gets(ayudante->puesto);
     printf("\n Ingrese la funcion que cumple en ese puesto: (Ejm. Colaboro con...) \n");
-    gets(ayudante->Tope->funcionPuesto);
+    gets(ayudante->funcionPuesto);
     printf("\n Ingrese la fecha en la que empezó a trabajar con santa: (Ejm. 20/12/2020) \n");
-    gets(ayudante->Tope->fechaComienzo);
+    gets(ayudante->fechaComienzo);
     
-    if(ayudante->Tope==NULL);{
-		ayudante=ayudante->Tope;
+    if(LAyudantes->inicio == NULL) 
+	{
+		LAyudantes->inicio = ayudante;
+		LAyudantes->inicio->siguiente = NULL; 
+		LAyudantes->final = LAyudantes->inicio;
+
 	}
-	else{
-		ayudante->Tope=ayudante->Tope->siguiente;
-		ayudante=ayudante->Tope; 	
+	else
+	{	
+		LAyudantes->final->siguiente = ayudante;
+		LAyudantes->final->siguiente->siguiente = NULL; 
+		LAyudantes->final = LAyudantes->final->siguiente;
 	}
 
-    //guardarMiembro(miembro);
-    //free(miembro);
-    getchar();
 }
 
 /*
@@ -571,6 +583,8 @@ void registrarMiembro(){
 	Salidas:
 	Restricciones: 
 */
+
+/*
 void eliminarInfoAyudante(){
 	system( "CLS" );
     printf("\n\n*********************************\n");
@@ -598,7 +612,7 @@ void eliminarInfoAyudante(){
 	}
 
 }
-
+*/
 
 int main(){ 
 
