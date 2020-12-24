@@ -448,7 +448,6 @@ void AnalisisDeDatos(){
 }
 
 /****************************************************************Gestion de Niños***********************************************************************************************/
-/****************************************************************Gestion de Niños***********************************************************************************************/
 /*
 	Entradas: 
 	Salidas:
@@ -1042,9 +1041,9 @@ int validarIdentificacion(struct ListaAyudantes *LAyudantes, const char identifi
     struct AydanteSanta *i = LAyudantes->inicio;
     int comp=3;
 	
-    if(i != NULL)
+    if(LAyudantes->inicio != NULL)
     {
-        while( i= NULL){
+        while( i != NULL){
 			comp=strcmp(identificacion,i->identificacion);
 	        if(comp==0)
 			{
