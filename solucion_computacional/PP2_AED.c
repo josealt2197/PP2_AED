@@ -32,6 +32,9 @@ void eliminarNino(struct ListaNinos *LNinos);
 
 //Procedimientos para gestion de de Ayudantes de santa
 void registrarAyudante(struct ListaAyudantes *LAyudantes);
+int validarIdentificacion(struct ListaAyudantes *LAyudantes, const char identificacion []);
+void modificarAyudante(struct ListaAyudantes *LAyudantes);
+void eliminarAyudante(struct ListaAyudantes *LAyudantes);
 
 struct Nino{
     char cedula[12];
@@ -58,7 +61,8 @@ struct AydanteSanta{
     char puesto[50];
     char funcionPuesto[50];
     char fechaComienzo[10];
-    AydanteSanta *siguiente;  
+    AydanteSanta *siguiente; 
+	AydanteSanta *anterior; 
 };
 
 struct ListaAyudantes{
@@ -299,16 +303,16 @@ void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 		printf("\n 1. REGISTRAR informacion de un Ayudante de Santa.");
 		printf("\n 2. MODIFICAR informacion de un Ayudante de Santa.");
 		printf("\n 3. ELIMINAR informacion de un Ayudante de Santa.");
-		printf("\n\n<--Digite una opcion (1-7): ");	
+		printf("\n\n<--Digite una opcion (1-3): ");	
 		opcion=getchar();
 		
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
 				case '1': registrarAyudante(LAyudantes);
 					break;
-				case '2': MenuPrincipal();
+				case '2': modificarAyudante(LAyudantes);
 					break;
-				case '3': MenuPrincipal();
+				case '3': eliminarAyudante(LAyudantes);
 					break;
 				case '0':
 					break;
@@ -506,7 +510,6 @@ int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
             i = i->siguiente;
         }
     }
-
     return 0;
 }
 
@@ -820,16 +823,16 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 
     ayudante=(struct AydanteSanta *) malloc (sizeof(struct AydanteSanta));
 			
-    //do{
+    do{
 	printf("\n Ingrese la Identificacion: (Ejm.105450656) \n");
 	gets(ayudante->identificacion);
 
-        //if(validarCedula(ayudante->cedula)==1){
-        //    printf("\n**Esta cedula ya ha sido registrada**\n ");
-        //}else{
-        //    break;
-        //}
-    //}while(1);
+        if((validarIdentificacion(LAyudantes, ayudante->identificacion ))==1){
+            printf("\n**Esta cedula ya ha sido registrada**\n ");
+        }else{
+            break;
+        }
+    }while(1);
     
     printf("\n Ingrese el Nombre del Ayudante: (Ejm.Juan Perez) \n");
     gets(ayudante->nombre);
@@ -837,13 +840,14 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
     gets(ayudante->puesto);
     printf("\n Ingrese la funcion que cumple en ese puesto: (Ejm. Colaboro con...) \n");
     gets(ayudante->funcionPuesto);
-    printf("\n Ingrese la fecha en la que empezó a trabajar con santa: (Ejm. 20/12/2020) \n");
+    printf("\n Ingrese la fecha en la que empezo a trabajar con santa: (Ejm. 20/12/2020) \n");
     gets(ayudante->fechaComienzo);
     
     if(LAyudantes->inicio == NULL) 
 	{
 		LAyudantes->inicio = ayudante;
 		LAyudantes->inicio->siguiente = NULL; 
+		LAyudantes->inicio->anterior = NULL; 
 		LAyudantes->final = LAyudantes->inicio;
 
 	}
@@ -851,9 +855,9 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 	{	
 		LAyudantes->final->siguiente = ayudante;
 		LAyudantes->final->siguiente->siguiente = NULL; 
+		LAyudantes->final->siguiente->anterior = LAyudantes->final; 
 		LAyudantes->final = LAyudantes->final->siguiente;
 	}
-
 }
 
 /*
@@ -861,36 +865,225 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 	Salidas:
 	Restricciones: 
 */
+int validarIdentificacion(struct ListaAyudantes *LAyudantes, const char identificacion []){
+
+    struct AydanteSanta *i = LAyudantes->inicio;
+    int comp=3;
+	
+    if(i != NULL)
+    {
+        while( i= NULL){
+			comp=strcmp(identificacion,i->identificacion);
+	        if(comp==0)
+			{
+                return 1;
+            }
+            i = i->siguiente;
+        }
+    }
+    return 0;
+}
 
 /*
-void eliminarInfoAyudante(){
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
+void modificarAyudante(struct ListaAyudantes *LAyudantes){
 	system( "CLS" );
-    printf("\n\n*********************************\n");
+	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
-	printf(" Registro de Ayudantes de Santa\n");
+	printf(" Modificar Info. de Ayudantes\n" );
 	printf("*********************************\n");
 	
-	printf("Ingrese la identificacion del ayudante que desea eliminar:");
-	char consulta[15];
-	gets(consulta);
-
-    struct PilaAyudantes *ayudante;
-    struct AydanteSanta *i;
-    
-    ayudante=(struct PilaAyudantes *) malloc (sizeof(struct PilaAyudantes));
- 
-    i=ayudante->Tope;
-    
-    for(i ; i==NULL ; i->siguiente){
-  		if (strcmp(consulta,i->identificacion)==1){
-  			printf("Se a eliminado el ayudante: %s", i->nombre);
-		  	free(i);	
-		  }	
+	struct AydanteSanta *ayudante;
+	int hallado=0, comp=3, resp;
+	char id[15], respuesta[2], nombre[50], puesto[50], funcionPuesto[50], fechaComienzo[10]; 
+	
+	
+    if(LAyudantes->inicio!=NULL)
+	{
+		
+		printf("\n Ingrese el numero de identificacion: (Ejm. 105450656) \n ");
+    	gets(id);
+		
+        ayudante = LAyudantes->inicio;
+        while(ayudante!=NULL){
+            comp=strcmp(id,ayudante->identificacion);
+            if(comp==0){
+            	printf("\n+------------------------------------+");
+				printf("\n      Datos del  Ayudante " );
+            	printf("\n+------------------------------------+");
+                printf("\n  Identificacion: %s \n", ayudante->identificacion );
+                printf("\n  Nombre: %s \n", ayudante->nombre);
+                printf("\n  Puesto: %s \n", ayudante->puesto);
+                printf("\n  Funcion que desempeña en el puesto: %s \n", ayudante->funcionPuesto);
+                printf("\n  Fecha en que empezo a trabajar con santa: %s \n", ayudante->fechaComienzo );
+                printf("+-------------------------------------+\n");
+                
+                //Modificar el Nombre Completo
+                do{
+			        printf("\nDesea modificar el Nombre? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el valor para el Nombre: (Ej. Juan Perez) \n");
+			    	gets(nombre);	
+					strcpy(ayudante->nombre,nombre);
+				}
+				
+				//Modificar el Puesto
+				do{
+			        printf("\nDesea modificar el Puesto? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el puesto: (Ejm.Empacador) \n");
+			    	gets(puesto);	
+					strcpy(ayudante->puesto,puesto);
+				}
+				//Modificar la funcion
+				do{
+			        printf("\nDesea modificar la Funcion que desempeña en el puesto? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese la funcion que desempeña en ese puesto: (Ejm. Colaboro con...) \n");
+			    	gets(funcionPuesto);	
+					strcpy(ayudante->funcionPuesto,funcionPuesto);
+				}
+				//Modificar la fecha
+				do{
+			        printf("\nDesea modificar la Fecha en que empezo a trabajar con santa? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese la fecha en la que empezo a trabajar con santa: (Ejm. 20/12/2020) \n");
+			    	gets(fechaComienzo);	
+					strcpy(ayudante->fechaComienzo,fechaComienzo);
+				}
+      
+                hallado=1;
+				break;
+			}
+			ayudante = ayudante->siguiente;
+        }
+        
+		if(hallado==0){
+			printf( "\n***No se ha encontrado un Nino/Nina para la identificacion ingresada***");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos registrados***");
 	}
-
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
 }
+
+
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
 */
+void eliminarAyudante(struct ListaAyudantes *LAyudantes){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Eliminar Info. de Ayudantes\n" );
+	printf("*********************************\n");
+	
+	
+	
+	struct AydanteSanta *aux= LAyudantes->inicio;
+	int hallado=0, comp=3;
+	char id[15]; 
+	
+    if(LAyudantes->inicio!=NULL)
+	{
+		
+		printf("\n Ingrese el numero de identificacion: (Ejm. 105450656) \n ");
+    	gets(id);
+	
+		comp=strcmp(id,LAyudantes->inicio->identificacion);
+        if(comp==0)
+		{
+			if(LAyudantes->inicio == LAyudantes->final){ 
+				LAyudantes->final = NULL;
+				LAyudantes->inicio = NULL;
+			}else{
+				LAyudantes->inicio = LAyudantes->inicio->siguiente;
+				LAyudantes->inicio->anterior = NULL;
+			}
+			hallado=1;				
+		}
+		else 
+		{
+			while(aux != NULL)
+			{
+				comp=strcmp(id,aux->identificacion);
+		        if(comp==0)
+				{
+					aux->anterior->siguiente = aux->siguiente;
+					if(aux != LAyudantes->final)
+						aux->siguiente->anterior = aux->anterior;
+					else if(aux == LAyudantes->final) 
+						LAyudantes->final = LAyudantes->final->anterior;					
+					
+					hallado=1;
+					break;
+					
+				}
+				aux = aux->siguiente;					
+			}
+
+		}
+		
+		if(hallado==0){
+			printf( "\n***No se ha encontrado un AYUDANTE para la identificacion ingresada***");
+		}
+		
+		if(aux != NULL)
+		{
+			printf("\n-->Se ha eliminado el AYUDANTE con la identificacion ingresada");
+			free(aux);
+		}			
+	
+	}else{
+		printf( "\n***No se han encontrado AYUDANTES registrados***");
+	}
+	
+
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
 
 int main(){ 
 
