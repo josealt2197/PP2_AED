@@ -28,10 +28,10 @@ void AnalisisDeDatos();
 void registrarNinos(struct ListaNinos *LNinos);
 void mostrarNinos(struct ListaNinos *LNinos);
 void modificarNino(struct ListaNinos *LNinos);
+void eliminarNino(struct ListaNinos *LNinos);
 
 //Procedimientos para gestion de de Ayudantes de santa
 void registrarAyudante(struct ListaAyudantes *LAyudantes);
-
 
 struct Nino{
     char cedula[12];
@@ -43,6 +43,7 @@ struct Nino{
     char edad[5];
     char necesidades_esp[150];
     Nino *siguiente;
+    Nino *anterior;
     
 };
 
@@ -64,22 +65,6 @@ struct ListaAyudantes{
     AydanteSanta *inicio;
 	AydanteSanta *final;  
 };
-
-
-
-//struct Requerimiento{
-//    char identificador[50];
-//    char tipo[20];
-//    char descripcion[200];
-//    char riesgo[60];
-//    char dependencia[10];
-//    char recursos[55];
-//    char estado [15];
-//    char esfuerzo[5];
-//    char oficina [15];
-//    Requerimiento *siguiente;
-//
-//};
 
 
 /****************************************************************Menús de Opciones***********************************************************************************************/
@@ -179,7 +164,7 @@ void GestionNinos(struct ListaNinos *LNinos){
 					break;
 				case '3': modificarNino(LNinos);
 					break;
-				case '4': MenuPrincipal();
+				case '4': eliminarNino(LNinos);
 					break;
 				case '0': 
 					break;
@@ -450,16 +435,16 @@ void registrarNinos(struct ListaNinos *LNinos){
 
     nino=(struct Nino *) malloc (sizeof(struct Nino));
 
-//    do{
+    do{
         printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
         gets(nino->cedula);
 
-//        if(validarCedula(nino->cedula)==1){
-//            printf("\n**Esta Identificacion ya ha sido registrada**\n ");
-//        }else{
-//            break;
-//        }
-//    }while(1);
+        if(validarCedula(nino->cedula)==1){
+            printf("\n**Esta Identificacion ya ha sido registrada**\n ");
+        }else{
+            break;
+        }
+    }while(1);
     
     printf("\n-->Ingrese el Nombre Completo: (Ej. Juan Perez) \n");
     gets(nino->nombre_completo);
@@ -480,6 +465,7 @@ void registrarNinos(struct ListaNinos *LNinos){
 	{
 		LNinos->inicio = nino;
 		LNinos->inicio->siguiente = NULL; 
+		LNinos->inicio->anterior = NULL; 
 		LNinos->final = LNinos->inicio;
 
 	}
@@ -487,12 +473,43 @@ void registrarNinos(struct ListaNinos *LNinos){
 	{	
 		LNinos->final->siguiente = nino;
 		LNinos->final->siguiente->siguiente = NULL; 
+		LNinos->final->siguiente->anterior = LNinos->final; 
 		LNinos->final = LNinos->final->siguiente;
 	}	
     
 	mostrarNinos(LNinos);
-    
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
 }
+
+
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
+int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
+
+    struct Nino *i;
+    int comp=3;
+
+    if(LNinos->inicio!=NULL)
+    {
+        i = LNinos->inicio;
+        while( i->siguiente!= NULL){
+			comp=strcmp(identificacion,LNinos->inicio->cedula);
+	        if(comp==0)
+			{
+                return 1;
+            }
+            i = i->siguiente;
+        }
+    }
+
+    return 0;
+}
+
 
 /*
 	Entradas: 
@@ -681,6 +698,82 @@ void modificarNino(struct ListaNinos *LNinos){
 	Salidas:
 	Restricciones: 
 */
+void eliminarNino(struct ListaNinos *LNinos){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Eliminar Info. de Ninos y Ninas\n" );
+	printf("*********************************\n");
+	
+	struct Nino *aux = LNinos->inicio;
+	int hallado=0, comp=3;
+	char id[15]; 
+	
+    if(LNinos->inicio!=NULL)
+	{
+		
+		printf("\n Ingrese el numero de identificacion: (Ejm. 105450656) \n ");
+    	gets(id);
+	
+		comp=strcmp(id,LNinos->inicio->cedula);
+        if(comp==0)
+		{
+			if(LNinos->inicio == LNinos->final){ 
+				LNinos->final = NULL;
+				LNinos->inicio = NULL;
+			}else{
+				LNinos->inicio = LNinos->inicio->siguiente;
+				LNinos->inicio->anterior = NULL;
+			}
+			hallado=1;				
+		}
+		else 
+		{
+			while(aux != NULL)
+			{
+				comp=strcmp(id,aux->cedula);
+		        if(comp==0)
+				{
+					aux->anterior->siguiente = aux->siguiente;
+					if(aux != LNinos->final)
+						aux->siguiente->anterior = aux->anterior;
+					else if(aux == LNinos->final) 
+						LNinos->final = LNinos->final->anterior;					
+					
+					hallado=1;
+					break;
+					
+				}
+				aux = aux->siguiente;					
+			}
+
+		}
+		
+		if(hallado==0){
+			printf( "\n***No se ha encontrado un Nino/Nina para la identificacion ingresada***");
+		}
+		
+		if(aux != NULL)
+		{
+			printf("\n-->Se ha eliminado el Nino/Nina con la identificacion ingresada");
+			free(aux);
+		}			
+	
+	}else{
+		printf( "\n***No se han encontrado Ninos registrados***");
+	}
+	
+
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
 void mostrarNinos(struct ListaNinos *LNinos){
 
 	struct Nino *iNino;
@@ -705,7 +798,7 @@ void mostrarNinos(struct ListaNinos *LNinos){
 	}else{
 		printf( "\n***No se han encontrado Ninos registrados***");
 	}
-	getchar();
+
 }
 
 /****************************************************************Gestion de Ayudantes***********************************************************************************************/
