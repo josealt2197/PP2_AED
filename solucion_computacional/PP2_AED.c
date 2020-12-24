@@ -12,6 +12,9 @@
 typedef struct Nino Nino;
 typedef struct ListaNinos ListaNinos;
 
+typedef struct Comportamiento Comportamiento;
+typedef struct ListaComport ListaComport;
+
 typedef struct AydanteSanta AydanteSanta;
 typedef struct ListaAyudantes ListaAyudantes;
 
@@ -29,6 +32,10 @@ void registrarNinos(struct ListaNinos *LNinos);
 void mostrarNinos(struct ListaNinos *LNinos);
 void modificarNino(struct ListaNinos *LNinos);
 void eliminarNino(struct ListaNinos *LNinos);
+int validarCedula(struct ListaNinos *LNinos, const char identificacion []);
+void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LComp);
+void mostrarComp(struct ListaComport *LComp);
+void validarComp(struct ListaComport *LComp, const char identificacion []);
 
 //Procedimientos para gestion de de Ayudantes de santa
 void registrarAyudante(struct ListaAyudantes *LAyudantes);
@@ -53,6 +60,22 @@ struct Nino{
 struct ListaNinos {
 	Nino *inicio;
 	Nino *final;
+};
+
+struct Comportamiento{
+	char nombre_padre_madre[50];
+	char cedula_nino[12];
+    char fecha_registro[20];
+    char indicacion[15];
+    char descripcion[150];
+    Comportamiento *siguiente;
+    Comportamiento *anterior;
+    
+};
+
+struct ListaComport {
+	Comportamiento *inicio;
+	Comportamiento *final;
 };
 
 struct AydanteSanta{
@@ -86,6 +109,11 @@ void MenuPrincipal(){
 	LNinos->inicio = NULL;
 	LNinos->final = NULL;
 	
+	struct ListaComport *LComp;
+	LComp = (struct ListaComport *) malloc(sizeof(struct ListaComport));
+	LComp->inicio = NULL;
+	LComp->final = NULL;
+	
 	struct ListaAyudantes *LAyudantes;
 	LAyudantes = (struct ListaAyudantes *) malloc(sizeof(struct ListaAyudantes));
 	LAyudantes->inicio = NULL;
@@ -111,7 +139,7 @@ void MenuPrincipal(){
         opcion = getchar();
         
         switch ( opcion ){
-            case '1': GestionNinos(LNinos);
+            case '1': GestionNinos(LNinos, LComp);
                 break;
 			case '2': GestionJuguetes();
                 break;
@@ -141,7 +169,7 @@ void MenuPrincipal(){
 	Salidas:
 	Restricciones: 
 */
-void GestionNinos(struct ListaNinos *LNinos){
+void GestionNinos(struct ListaNinos *LNinos, struct ListaComport *LComp){
 	char opcion, ch;	
 
 	do{
@@ -164,7 +192,7 @@ void GestionNinos(struct ListaNinos *LNinos){
 			switch(opcion){
 				case '1': registrarNinos(LNinos);
 					break;
-				case '2': MenuPrincipal();
+				case '2': registrarComportamiento(LNinos, LComp);
 					break;
 				case '3': modificarNino(LNinos);
 					break;
@@ -420,6 +448,7 @@ void AnalisisDeDatos(){
 }
 
 /****************************************************************Gestion de Niños***********************************************************************************************/
+/****************************************************************Gestion de Niños***********************************************************************************************/
 /*
 	Entradas: 
 	Salidas:
@@ -442,8 +471,8 @@ void registrarNinos(struct ListaNinos *LNinos){
     do{
         printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
         gets(nino->cedula);
-
-        if(validarCedula(nino->cedula)==1){
+	
+        if(validarCedula(LNinos, nino->cedula)==1){
             printf("\n**Esta Identificacion ya ha sido registrada**\n ");
         }else{
             break;
@@ -458,7 +487,7 @@ void registrarNinos(struct ListaNinos *LNinos){
     gets(nino->correo);
     printf("\n-->Ingrese el Código del Domicilio (Ej. DOM-001): \n");
     gets(nino->codigo_domicilio);
-    printf("\n-->Ingrese el Fecha de Nacimiento (Ej. 12/12/2000) \n");
+    printf("\n-->Ingrese la Fecha de Nacimiento (Ej. 12/12/2000) \n");
     gets(nino->fecha_nacimiento);
     printf("\n-->Ingrese la Edad del nino/nina:\n");
     gets(nino->edad);
@@ -487,6 +516,73 @@ void registrarNinos(struct ListaNinos *LNinos){
 	getchar();
 }
 
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
+void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LComp){
+	 
+	system( "CLS" );
+    printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("   Registro de Comportamiento\n" );
+	printf("*********************************\n");
+	
+	if(LNinos->inicio!=NULL)
+	{
+	    struct Comportamiento *comport;
+	
+	    comport=(struct Comportamiento *) malloc (sizeof(struct Comportamiento));
+	
+	    do{
+	        printf("\n-->Ingrese el numero de Identificacion del Nino/Nina: (Ej. 105450656) \n");
+	        gets(comport->cedula_nino);
+		
+	        if(validarCedula(LNinos, comport->cedula_nino)==0){
+	            printf("\n**Esta Identificacion NO ha sido registrada**\n ");
+	        }else{
+	            break;
+	        }
+	    }while(1);
+	    
+		printf("\n-->Ingrese el Nombre del Padre/Madre: (Ej. Juan Perez) \n");
+	    gets(comport->nombre_padre_madre);
+	    printf("\n-->Ingrese la Fecha de Registro del comportamiento: (Ej. 12/12/2000) \n");
+	    gets(comport->fecha_registro);
+	    printf("\n-->Ingrese el indicador para el comportamiento: 1-BUENO o 2-MALO:\n");
+	    gets(comport->indicacion);
+	    printf("\n-->Ingrese la Descripcion del Comportamiento: \n");
+	    gets(comport->descripcion);
+	    
+	    if(LComp->inicio == NULL) 
+		{
+			LComp->inicio = comport;
+			LComp->inicio->siguiente = NULL; 
+			LComp->inicio->anterior = NULL; 
+			LComp->final = LComp->inicio;
+	
+		}
+		else
+		{	
+			LComp->final->siguiente = comport;
+			LComp->final->siguiente->siguiente = NULL; 
+			LComp->final->siguiente->anterior = LComp->final; 
+			LComp->final = LComp->final->siguiente;
+		}	
+	    
+		mostrarComp(LComp);
+		validarComp(LComp, comport->cedula_nino);
+	
+	}else{
+		printf( "\n***No se han encontrado Ninos(as) registrados***");
+	}
+	
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
+}
 
 /*
 	Entradas: 
@@ -495,14 +591,13 @@ void registrarNinos(struct ListaNinos *LNinos){
 */
 int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
 
-    struct Nino *i;
+    struct Nino *i= LNinos->inicio;
     int comp=3;
 
     if(LNinos->inicio!=NULL)
     {
-        i = LNinos->inicio;
-        while( i->siguiente!= NULL){
-			comp=strcmp(identificacion,LNinos->inicio->cedula);
+        while( i!= NULL){
+			comp=strcmp(identificacion,i->cedula);
 	        if(comp==0)
 			{
                 return 1;
@@ -510,6 +605,7 @@ int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
             i = i->siguiente;
         }
     }
+
     return 0;
 }
 
@@ -689,7 +785,7 @@ void modificarNino(struct ListaNinos *LNinos){
 		}
 		
 	}else{
-		printf( "\n***No se han encontrado Ninos registrados***");
+		printf( "\n***No se han encontrado Ninos(as) registrados***");
 	}
 	
 	printf("\n\nPresione una tecla para regresar..." );
@@ -764,7 +860,7 @@ void eliminarNino(struct ListaNinos *LNinos){
 		}			
 	
 	}else{
-		printf( "\n***No se han encontrado Ninos registrados***");
+		printf( "\n***No se han encontrado Ninos(as) registrados***");
 	}
 	
 
@@ -800,6 +896,82 @@ void mostrarNinos(struct ListaNinos *LNinos){
 		
 	}else{
 		printf( "\n***No se han encontrado Ninos registrados***");
+	}
+
+}
+
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
+void mostrarComp(struct ListaComport *LComp){
+
+	struct Comportamiento *iComp;
+	
+	printf("\n+-------------------------------------------------------------------+\n");
+	printf( "                      Lista de Comportamientos" );
+	printf("\n+-------------------------------------------------------------------+\n");
+	
+
+	if(LComp->inicio!=NULL)
+	{
+        iComp = LComp->inicio;
+        int cont=1;
+        	printf(" Cedula        Nombre Padre            Fecha de Registro\n" ); 
+        while(iComp!=NULL){
+            printf("\n %s          %s                      %s\n" , iComp->cedula_nino, iComp->nombre_padre_madre, iComp->fecha_registro);
+            iComp = iComp->siguiente;
+
+        }
+        printf("\n+-------------------------------------------------------------------+\n");		
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos registrados***");
+	}
+
+}
+
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
+void validarComp(struct ListaComport *LComp, const char identificacion []){
+
+	struct Comportamiento *iComp;
+	int contador=0, comp=3;
+	
+	printf("\n+----------------------------+\n");
+	printf( " Validación de Comportamiento" );
+	printf("\n+----------------------------+\n");
+	
+
+	if(LComp->inicio!=NULL)
+	{
+        iComp = LComp->inicio;
+        while(iComp!=NULL){
+            comp=strcmp(identificacion,iComp->cedula_nino);
+	        if(comp==0)
+			{
+				comp=strcmp("2",iComp->indicacion);
+		        if(comp==0)
+				{
+					contador++;
+				}
+			}
+			iComp = iComp->siguiente;
+
+        }		
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos registrados***");
+	}
+	
+	if(contador>=6){
+		printf( "\n***El nino(a) tiene 6 o mas comportamiento MALOS)***");
+	}else{
+		printf( "\n***El nino(a) tiene menos de 6 comportamiento MALOS)***");
 	}
 
 }
