@@ -6,6 +6,7 @@
   
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //Tipos para la gestion de los datos de cada elemento
 typedef struct Nino Nino;
@@ -26,6 +27,7 @@ void AnalisisDeDatos();
 //Procedimientos para gestion de de Ninos/as
 void registrarNinos(struct ListaNinos *LNinos);
 void mostrarNinos(struct ListaNinos *LNinos);
+void modificarNino(struct ListaNinos *LNinos);
 
 //Procedimientos para gestion de de Ayudantes de santa
 void registrarAyudante(struct ListaAyudantes *LAyudantes);
@@ -164,8 +166,8 @@ void GestionNinos(struct ListaNinos *LNinos){
 		printf("\n 0. REGRESAR al Menu Principal.");
 		printf("\n 1. REGISTRAR informacion de un nino o nina.");
 		printf("\n 2. REGISTRAR comportamiento de un nino o nina.");
-		printf("\n 3. ELIMINAR informacion de un nino o nina.");
-		printf("\n 4. MODIFICAR informacion de un nino o nina.");
+		printf("\n 3. MODIFICAR informacion de un nino o nina.");
+		printf("\n 4. ELIMINAR informacion de un nino o nina.");
 		printf("\n\n<--Digite una opcion (0-4): ");	
 		opcion=getchar();
 		
@@ -175,7 +177,9 @@ void GestionNinos(struct ListaNinos *LNinos){
 					break;
 				case '2': MenuPrincipal();
 					break;
-				case '3': MenuPrincipal();
+				case '3': modificarNino(LNinos);
+					break;
+				case '4': MenuPrincipal();
 					break;
 				case '0': 
 					break;
@@ -427,7 +431,6 @@ void AnalisisDeDatos(){
 }
 
 /****************************************************************Gestion de Niños***********************************************************************************************/
-
 /*
 	Entradas: 
 	Salidas:
@@ -448,7 +451,7 @@ void registrarNinos(struct ListaNinos *LNinos){
     nino=(struct Nino *) malloc (sizeof(struct Nino));
 
 //    do{
-        printf("\n-->Ingrese el numero de Identificacion: (Ej.105450656) \n");
+        printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
         gets(nino->cedula);
 
 //        if(validarCedula(nino->cedula)==1){
@@ -470,7 +473,7 @@ void registrarNinos(struct ListaNinos *LNinos){
     gets(nino->fecha_nacimiento);
     printf("\n-->Ingrese la Edad del nino/nina:\n");
     gets(nino->edad);
-    printf("\n-->Ingrese alguna necesidad especial: \n");
+    printf("\n-->Ingrese alguna Necesidad(es) especial(es): \n");
     gets(nino->necesidades_esp);
     
     if(LNinos->inicio == NULL) 
@@ -489,6 +492,188 @@ void registrarNinos(struct ListaNinos *LNinos){
     
 	mostrarNinos(LNinos);
     
+}
+
+/*
+	Entradas: 
+	Salidas:
+	Restricciones: 
+*/
+void modificarNino(struct ListaNinos *LNinos){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Modificar Info. de Ninos y Ninas\n" );
+	printf("*********************************\n");
+	
+	struct Nino *iNino;
+	int hallado=0, comp=3, resp;
+	char id[15], respuesta[2], nombre[50], usuario[20], correo[50], domicilio[20], 
+		  nacimiento[15], edad[5], necesidades[150]; 
+	
+	
+    if(LNinos->inicio!=NULL)
+	{
+		
+		printf("\n Ingrese el numero de identificacion: (Ejm. 105450656) \n ");
+    	gets(id);
+		
+        iNino = LNinos->inicio;
+        while(iNino!=NULL){
+            
+            comp=strcmp(id,iNino->cedula);
+            if(comp==0){
+            	printf("\n+------------------------------------+");
+				printf("\n      Datos del  Nino/Nina " );
+            	printf("\n+------------------------------------+");
+                printf("\n  Identificacion: %s \n", iNino->cedula);
+                printf("  Nombre Completo: %s \n", iNino->nombre_completo);
+                printf("  Descripcion: %s \n", iNino->nombre_completo);
+                printf("  Riesgo: %s \n", iNino->correo);
+                printf("  Dependencia: %s \n", iNino->codigo_domicilio);
+                printf("  Recursos: %s \n", iNino->fecha_nacimiento);
+                printf("  Estado: %s \n", iNino->edad);
+                printf("  Esfuerzo: %s \n", iNino->necesidades_esp );
+                printf("+-------------------------------------+\n");
+                
+                
+                //Modificar el Nombre Completo
+                do{
+			        printf("\nDesea modificar el Nombre? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el valor para el Nombre: (Ej. Juan Perez) \n");
+			    	gets(nombre);	
+					strcpy(iNino->nombre_completo,nombre);
+				}
+				
+				//Modificar el Nombre de Usuario
+				do{
+			        printf("\nDesea modificar el Nombre de Usuario? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el valor para el Nombre de Usuario: (Ej. juanp123) \n");
+			    	gets(usuario);	
+					strcpy(iNino->nombre_usuario,usuario);
+				}
+				
+				//Modificar el Correo Electronico
+				do{
+			        printf("\nDesea modificar el Correo Electronico? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el valor para el Correo Electronico: (Ej. juanp123@correo.com) \n");
+			    	gets(usuario);	
+					strcpy(iNino->correo,correo);
+				}
+				
+				//Modificar el Domicilio
+				do{
+			        printf("\nDesea modificar el Domicilio? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el Código del Domicilio (Ej. DOM-001): \n");
+			    	gets(domicilio);	
+					strcpy(iNino->codigo_domicilio,domicilio);
+				}
+				
+				//Modificar la Fecha de Nacimiento
+				do{
+			        printf("\nDesea modificar la Fecha de Nacimiento? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese la Fecha de Nacimiento (Ej. 12/12/2000)\n");
+			    	gets(nacimiento);	
+					strcpy(iNino->fecha_nacimiento,nacimiento);
+				}
+				
+               	//Modificar la Edad
+				do{
+			        printf("\nDesea modificar la Edad? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese la Edad del nino/nina\n");
+			    	gets(edad);	
+					strcpy(iNino->edad,edad);
+				}
+			   
+			   	//Modificar las Necesidades Especiales
+				do{
+			        printf("\nDesea modificar la Necesidad(es) especial(es)? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese la Necesidad(es) especial(es): \n");
+			    	gets(necesidades);	
+					strcpy(iNino->necesidades_esp,necesidades);
+				}
+                      
+                hallado=1;
+				break;
+			}
+			iNino = iNino->siguiente;
+
+        }
+        
+		if(hallado==0){
+			printf( "\n***No se ha encontrado un Nino/Nina para la identificacion ingresada***");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos registrados***");
+	}
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
 }
 
 /*
