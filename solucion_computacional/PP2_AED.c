@@ -167,7 +167,7 @@ Juguete *jugueteRaiz=NULL;
 
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
-	Salidas: Llamada a las demas funciones de menús.
+	Salidas: Llamada a las demás funciones de menús.
 	Restricciones: Solo se deben ingresar números en un rango de 0 a 7.
 */
 void MenuPrincipal(){
@@ -243,9 +243,10 @@ void MenuPrincipal(){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Un número (tipo char) en un rango de 0 a 4 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones para la gestión de de Ninos (registro, modificación, borrado de niños, 
+			 y registro de comportamiento)
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 4.
 */
 void GestionNinos(struct ListaNinos *LNinos, struct ListaComport *LComp){
 	char opcion, ch;	
@@ -290,9 +291,10 @@ void GestionNinos(struct ListaNinos *LNinos, struct ListaComport *LComp){
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Un número (tipo char) en un rango de 0 a 4 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones para la gestión de de Juguetes (registro, modificación, borrado, 
+			 y entrega de juguetes)
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 4.
 */
 void GestionJuguetes(){
 	char opcion, ch;	
@@ -338,9 +340,10 @@ void GestionJuguetes(){
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Un número (tipo char) en un rango de 0 a 6 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones para la gestión de Domicilios y Rutas (registro, modificación, borrado 
+			 de Domicilios, y registro, modificación, borrado de Rutas entre Domicilios)
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 6.
 */
 void GestionDomicilios(){
 	char opcion, ch;	
@@ -392,9 +395,10 @@ void GestionDomicilios(){
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Un número (tipo char) en un rango de 0 a 3 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones para la gestión de Ayudantes de Santa (registro, modificación, borrado 
+			 de Ayudantes)
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 3.
 */
 void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 	char opcion, ch;	
@@ -436,9 +440,10 @@ void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Un número (tipo char) en un rango de 0 a 4 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones para la gestión de Cartas y Listas de Deseos (registro, modificación,  
+			 consulta y procesamiento de Cartas para Santa)
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 4.
 */
 void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct ListaDeseo *LDeseo){
 	char opcion, ch;	
@@ -453,9 +458,9 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct 
 		printf("*********************************\n");
 		printf("\n 0. REGRESAR al Menu Principal.");
 		printf("\n 1. REGISTRAR una Carta para Santa.");
-		printf("\n 3. MODIFICAR una Carta para Santa.");
-		printf("\n 1. CONSULTAR una Carta para Santa.");
-		printf("\n 3. PROCESAR una Carta para Santa.");
+		printf("\n 2. MODIFICAR una Carta para Santa.");
+		printf("\n 3. CONSULTAR una Carta para Santa.");
+		printf("\n 4. PROCESAR una Carta para Santa.");
 		printf("\n\n<--Digite una opcion (0-3): ");	
 		opcion=getchar();
 		
@@ -467,7 +472,9 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct 
 					break;
 				case '3': MenuPrincipal();
 					break;
-				case '0': MenuPrincipal();
+				case '4': MenuPrincipal();
+					break;
+				case '0': 
 					break;
 				default:
 					fflush(stdin);
@@ -482,9 +489,9 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct 
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones de Analisis de Datos
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 7.
 */
 void AnalisisDeDatos(){
 	char opcion, ch;	
@@ -530,9 +537,9 @@ void AnalisisDeDatos(){
 /****************************************************************Gestion de Niños***********************************************************************************************/
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos para almacenar los datos de un Nino/Nina
+	Salidas: Se agrega un nuevo nodo de tipo Nino a la lista recibida.
+	Restricciones: Ninguna.
 */
 void registrarNinos(struct ListaNinos *LNinos){
   
@@ -596,9 +603,10 @@ void registrarNinos(struct ListaNinos *LNinos){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos  y otra de ListaComport para almacenar los datos del comportamiento
+			  de un Nino/Nina antes registrado
+	Salidas: Se agrega un nuevo nodo de tipo Comportamiento a la lista recibida.
+	Restricciones: Ninguna.
 */
 void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LComp){
 	 
@@ -664,9 +672,9 @@ void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LCo
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos y una char identificacion para consultar los datos de un Nino/Nina
+	Salidas: 1 si ya existe un nodo con la misma identificacion y 0 si no existe.
+	Restricciones: Ninguna.
 */
 int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
 
@@ -689,9 +697,9 @@ int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos para tomar los datos de un Nino/Nina
+	Salidas: Se modifican los datos un nodo de tipo Nino de la lista recibida.
+	Restricciones: Ninguna.
 */
 void modificarNino(struct ListaNinos *LNinos){
 	system( "CLS" );
@@ -870,9 +878,9 @@ void modificarNino(struct ListaNinos *LNinos){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos para tomar los datos de un Nino/Nina
+	Salidas: Se eliminan los datos un nodo de tipo Nino de la lista recibida.
+	Restricciones: Ninguna.
 */
 void eliminarNino(struct ListaNinos *LNinos){
 	system( "CLS" );
@@ -946,9 +954,9 @@ void eliminarNino(struct ListaNinos *LNinos){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos para tomar los datos de un Nino/Nina
+	Salidas: Se muestran los datos un nodo de tipo Nino de la lista recibida.
+	Restricciones: Ninguna.
 */
 void mostrarNinos(struct ListaNinos *LNinos){
 
@@ -979,9 +987,9 @@ void mostrarNinos(struct ListaNinos *LNinos){
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaComport para tomar los datos de comportamiento de un Nino/Nina
+	Salidas: Se muestran los datos un nodo de tipo Nino de la lista recibida.
+	Restricciones: Ninguna.
 */
 void mostrarComp(struct ListaComport *LComp){
 
@@ -1011,9 +1019,9 @@ void mostrarComp(struct ListaComport *LComp){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaComport para tomar los datos de comportamiento de un Nino/Nina
+	Salidas: Se muestran los datos un nodo de tipo Comportamiento de la lista recibida.
+	Restricciones: Ninguna.
 */
 void validarComp(struct ListaComport *LComp, const char identificacion []){
 
@@ -1057,9 +1065,9 @@ void validarComp(struct ListaComport *LComp, const char identificacion []){
 /****************************************************************Gestion de Ayudantes***********************************************************************************************/
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaAyudantes para almacenar los datos de un Ayudante de Santa
+	Salidas: Se agrega un nuevo nodo de tipo AyudanteSanta a la lista recibida.
+	Restricciones: Ninguna.
 */
 void registrarAyudante(struct ListaAyudantes *LAyudantes){
     system( "CLS" );
@@ -1111,9 +1119,9 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaAyudantes y una char identificacion para consultar los datos de un Ayudante de Santa
+	Salidas: 1 si ya existe un nodo con la misma identificacion y 0 si no existe.
+	Restricciones: Ninguna.
 */
 int validarIdentificacion(struct ListaAyudantes *LAyudantes, const char identificacion []){
 
@@ -1136,9 +1144,9 @@ int validarIdentificacion(struct ListaAyudantes *LAyudantes, const char identifi
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaAyudantes para tomar los datos de un Ayudante de Santa
+	Salidas: Se modifican los datos un nodo de tipo AyudanteSanta de la lista recibida.
+	Restricciones: Ninguna.
 */
 void modificarAyudante(struct ListaAyudantes *LAyudantes){
 	system( "CLS" );
@@ -1258,9 +1266,9 @@ void modificarAyudante(struct ListaAyudantes *LAyudantes){
 
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaAyudantes para tomar los datos de un Ayudante de Santa
+	Salidas: Se eliminan los datos un nodo de tipo Ayudante de la lista recibida.
+	Restricciones: Ninguna.
 */
 void eliminarAyudante(struct ListaAyudantes *LAyudantes){
 	system( "CLS" );
@@ -1338,9 +1346,9 @@ void eliminarAyudante(struct ListaAyudantes *LAyudantes){
 /****************************************************************Gestion de Juguetes***********************************************************************************************/
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una nodo de tipo Juguete para adjuntar los datos de uno nuevo a un Arbol binario de Busqueda
+	Salidas: Se agrega un nuevo nodo de tipo Juguete al Arbol binario de Busqueda
+	Restricciones: Ninguna.
 */
 void registrarJuguetes(){
 	
@@ -1423,9 +1431,9 @@ void registrarJuguetes(){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: El nodo raiz del Arbol de juguetes y una char nombre para consultar los datos de un Juguete
+	Salidas: 1 si ya existe un nodo con el mismo nombre y 0 si no existe.
+	Restricciones: Ninguna.
 */
 int validarNombreJuguete(char nombre []){
 
@@ -1444,9 +1452,9 @@ int validarNombreJuguete(char nombre []){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: El nodo padre del Arbol de Juguetes  y el nombre del juguete buscado
+	Salidas: 1 si existe un nodo con el mismo nombre y 0 si no existe.
+	Restricciones: Ninguna.
 */
 struct Juguete* buscarJuguete(struct Juguete *arbol, char jugueteBuscado[]){
 	struct Juguete *aux = arbol;
@@ -1467,9 +1475,9 @@ struct Juguete* buscarJuguete(struct Juguete *arbol, char jugueteBuscado[]){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: El nodo raiz del Arbol de Juguetes para tomar los datos de un Juguete
+	Salidas: Se modifican los datos un nodo de tipo Juguete del arbol recibido.
+	Restricciones: Ninguna.
 */
 void modificarJuguetes(){
 	system( "CLS" );
@@ -1603,9 +1611,9 @@ void modificarJuguetes(){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: El nodo padre del Arbol de Juguetes  y el nombre del juguete por borrar
+	Salidas: Se borran los datos un nodo de tipo Juguete según su posición en el Arbol.
+	Restricciones: Ninguna.
 */
 struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]){
  	
@@ -1661,9 +1669,9 @@ struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]){
  }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: El nodo raiz del Arbol de Juguetes para tomar los datos de un Juguete
+	Salidas: Se modifican los datos un nodo de tipo Juguete del arbol recibido.
+	Restricciones: Ninguna.
 */
 void eliminarJuguete(){
 	system( "CLS" );
@@ -1729,9 +1737,9 @@ void eliminarJuguete(){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: El nodo raiz del Arbol de Juguetes para tomar los datos de un Juguete
+	Salidas: Se muestran los datos un nodo de tipo Juguete del arbol recibido.
+	Restricciones: Ninguna.
 */
 void mostrarJuguetes(struct Juguete *recorrer){
     
@@ -1746,9 +1754,9 @@ void mostrarJuguetes(struct Juguete *recorrer){
 
 /****************************************************************Gestion de Cartas***********************************************************************************************/
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCarta para almacenar los datos de una Carta para Santa
+	Salidas: Se agrega un nuevo nodo de tipo Carta a la lista recibida.
+	Restricciones: Ninguna.
 */
 void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct ListaDeseo *LDeseo){
   
@@ -1921,9 +1929,9 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCarta, un char identificacion y otro Anno para consultar los datos de una carta para Santa
+	Salidas: 1 si ya existe un nodo con la misma identificacion y Anno, y 0 si no existe.
+	Restricciones: Ninguna.
 */
 int validarCarta(struct ListaCarta *LCarta, const char identificacion [], const char anno []){
 
@@ -1947,9 +1955,9 @@ int validarCarta(struct ListaCarta *LCarta, const char identificacion [], const 
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCarta, un char identificacion y otro Anno para consultar los datos de una carta para Santa
+	Salidas: 1 si ya existen 10 un nodos con la misma identificacion y Anno, y 0 si no existen.
+	Restricciones: Ninguna.
 */
 int contarJuguetes(struct ListaCarta *LCarta, const char identificacion [], const char anno []){
 
@@ -1979,9 +1987,9 @@ int contarJuguetes(struct ListaCarta *LCarta, const char identificacion [], cons
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCarta, un char identificacion y otro Anno para consultar los datos de una carta para Santa
+	Salidas: Se modifican los datos un nodo de tipo Carta de la lista recibida.
+	Restricciones: Ninguna.
 */
 void modificarCarta(struct ListaCarta *LCarta){
 	system( "CLS" );
@@ -2058,9 +2066,9 @@ void modificarCarta(struct ListaCarta *LCarta){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCarta para tomar los datos de los juguetes de una Carta para Santa 
+	Salidas: Se muestran los datos de una Carta para Santa y de una Lista de Deseos en caso de que exista.
+	Restricciones: Ninguna.
 */
 void consultarCarta(struct ListaCarta *LCarta){
 	system( "CLS" );
@@ -2076,9 +2084,9 @@ void consultarCarta(struct ListaCarta *LCarta){
 }
 
 /*
-	Entradas: 
-	Salidas:
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCarta para tomar los datos de los juguetes de una Carta para Santa 
+	Salidas: Se muestran los datos un nodo de tipo Carta de la lista recibida.
+	Restricciones: Ninguna.
 */
 void mostrarCarta(struct ListaCarta *LCarta, const char identificacion [], const char anno []){
 
