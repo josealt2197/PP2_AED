@@ -20,11 +20,14 @@ typedef struct ListaAyudantes ListaAyudantes;
 
 typedef struct Juguete Juguete;
 
+typedef struct JuguetesCarta JuguetesCarta;
+typedef struct ListaJugCarta ListaJugCarta;
+
 typedef struct Carta Carta;
-typedef struct ListaCarta ListaCarta;
+typedef struct ListaCartas ListaCartas;
 
 typedef struct Deseo Deseo;
-typedef struct ListaDeseo ListaDeseo;
+typedef struct ListaDeseos ListaDeseos;
 
 //Procedimientos para Menus de Opciones
 void MenuPrincipal();
@@ -60,13 +63,12 @@ struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]);
 void eliminarJuguete();
 
 //Procedimientos para gestion de Cartas para Santa
-void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct ListaDeseo *LDeseo);
-int validarCarta(struct ListaCarta *LCarta, const char identificacion [], const char anno []);
-int contarJuguetes(struct ListaCarta *LCarta, const char identificacion [], const char anno []);
-void modificarCarta(struct ListaCarta *LCarta);
-void consultarCarta(struct ListaCarta *LCarta);
-void mostrarCarta(struct ListaCarta *LCarta, const char identificacion [], const char anno []);
-
+void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos);
+int validarCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno []);
+int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
+void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta);
+void consultarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta);
+void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
 
 struct Nino{
     char cedula[12];
@@ -130,17 +132,32 @@ struct Juguete{
     
 };
 
-struct Carta{
+struct JuguetesCarta{
     char identificacion[12];
 	char anno[50];
     char nombre_juguete[20];
     char estado[50];
+    JuguetesCarta *siguiente;
+    JuguetesCarta *anterior;
+    
+};
+
+struct ListaJugCarta{
+	JuguetesCarta *inicio;
+	JuguetesCarta *final;
+};
+
+struct Carta{
+    char identificacion[12];
+	char anno[50];
+    char estado[50];
+    char procesada_por[50];
     Carta *siguiente;
     Carta *anterior;
     
 };
 
-struct ListaCarta {
+struct ListaCartas{
 	Carta *inicio;
 	Carta *final;
 };
@@ -154,11 +171,10 @@ struct Deseo{
     
 };
 
-struct ListaDeseo {
+struct ListaDeseos{
 	Deseo *inicio;
 	Deseo *final;
 };
-
 
 
 /****************************************************************Menús de Opciones***********************************************************************************************/
@@ -188,15 +204,20 @@ void MenuPrincipal(){
 	LAyudantes->inicio = NULL;
 	LAyudantes->final = NULL;
 	
-	struct ListaCarta *LCarta;
-	LCarta = (struct ListaCarta *) malloc(sizeof(struct ListaCarta));
-	LCarta->inicio = NULL;
-	LCarta->final = NULL;
+	struct ListaCartas *LCartas;
+	LCartas = (struct ListaCartas *) malloc(sizeof(struct ListaCartas));
+	LCartas->inicio = NULL;
+	LCartas->final = NULL;
 	
-	struct ListaDeseo *LDeseo;
-	LDeseo = (struct ListaDeseo *) malloc(sizeof(struct ListaDeseo));
-	LDeseo->inicio = NULL;
-	LDeseo->final = NULL;
+	struct ListaJugCarta *LJugCartas;
+	LJugCartas = (struct ListaJugCarta *) malloc(sizeof(struct ListaJugCarta));
+	LJugCartas->inicio = NULL;
+	LJugCartas->final = NULL;
+	
+	struct ListaDeseos *LDeseos;
+	LDeseos = (struct ListaDeseos *) malloc(sizeof(struct ListaDeseos));
+	LDeseos->inicio = NULL;
+	LDeseos->final = NULL;
 	
 	do{
         system( "CLS" );
@@ -225,7 +246,7 @@ void MenuPrincipal(){
                 break;
 			case '4': GestionAyudantes(LAyudantes);
                 break;
-            case '5': GestionCartas(LNinos, LCarta, LDeseo);
+            case '5': GestionCartas(LNinos, LJugCartas, LCartas, LDeseos);
 				break;
 			case '6': AnalisisDeDatos();
 				break;
@@ -335,7 +356,6 @@ void GestionJuguetes(){
 		}	
 	}while(opcion!='0');			
 	fflush(stdin);
-	getchar();
 }
 
 
@@ -390,7 +410,6 @@ void GestionDomicilios(){
 		}	
 	}while(opcion!='0');			
 	fflush(stdin);
-	getchar();
 }
 
 
@@ -415,7 +434,7 @@ void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 		printf("\n 1. REGISTRAR informacion de un Ayudante de Santa.");
 		printf("\n 2. MODIFICAR informacion de un Ayudante de Santa.");
 		printf("\n 3. ELIMINAR informacion de un Ayudante de Santa.");
-		printf("\n\n<--Digite una opcion (1-3): ");	
+		printf("\n\n<--Digite una opcion (0-3): ");	
 		opcion=getchar();
 		
 		while((ch = getchar()) != EOF && ch != '\n');
@@ -445,7 +464,7 @@ void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 			 consulta y procesamiento de Cartas para Santa)
 	Restricciones: Solo se deben ingresar números en un rango de 0 a 4.
 */
-void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct ListaDeseo *LDeseo){
+void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos){
 	char opcion, ch;	
 
 	do{
@@ -466,7 +485,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct 
 		
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
-				case '1': registrarCartas(LNinos, LCarta, LDeseo);
+				case '1': registrarCartas(LNinos, LJugCartas, LCartas, LDeseos);
 					break;
 				case '2': MenuPrincipal();
 					break;
@@ -482,9 +501,8 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct 
 					getchar();
 					break;	
 		}	
-	}while(opcion!=3);			
+	}while(opcion!='0');			
 	fflush(stdin);
-	getchar();
 }
 
 
@@ -506,12 +524,12 @@ void AnalisisDeDatos(){
 		printf("*********************************\n");
 		printf("\n 0. REGRESAR al Menu Principal.");
 		printf("\n 1. Cantidad de juguetes solicitados por año ");
-		printf("\n 2. Lugar donde se solicitaron más y menos juguetes ");
-		printf("\n 3. Cantidad de niños a los que se les aprobó su carta por año ");
-		printf("\n 4. Cantidad de niños a los que se les rechazó su carta por año ");
+		printf("\n 2. Lugar donde se solicitaron mas y menos juguetes ");
+		printf("\n 3. Cantidad de ninos a los que se les aprobo su carta por anno ");
+		printf("\n 4. Cantidad de ninos a los que se les rechazo su carta por anno ");
 		printf("\n 5. Cantidad de comportamientos buenos y malos registrados");
-		printf("\n 6. Cantidad de cartas procesadas según ayudante. ");
-		printf("\n 7. Top 10 de los juguetes más pedidos  ");
+		printf("\n 6. Cantidad de cartas procesadas segun ayudante. ");
+		printf("\n 7. Top 10 de los juguetes mas pedidos  ");
 		printf("\n\n<--Digite una opcion (0-7): ");		
 		opcion=getchar();
 		
@@ -529,9 +547,9 @@ void AnalisisDeDatos(){
 					getchar();
 					break;	
 		}	
-	}while(opcion!=3);			
+	}while(opcion!='0');		
 	fflush(stdin);
-	getchar();
+
 }
 
 /****************************************************************Gestion de Niños***********************************************************************************************/
@@ -571,7 +589,7 @@ void registrarNinos(struct ListaNinos *LNinos){
     gets(nino->nombre_usuario);
     printf("\n-->Ingrese el Correo Electronico: (Ej. juanp123@correo.com) \n");
     gets(nino->correo);
-    printf("\n-->Ingrese el Código del Domicilio (Ej. DOM-001): \n");
+    printf("\n-->Ingrese el Codigo del Domicilio (Ej. DOM-001): \n");
     gets(nino->codigo_domicilio);
     printf("\n-->Ingrese la Fecha de Nacimiento (Ej. 12/12/2000) \n");
     gets(nino->fecha_nacimiento);
@@ -1758,7 +1776,7 @@ void mostrarJuguetes(struct Juguete *recorrer){
 	Salidas: Se agrega un nuevo nodo de tipo Carta a la lista recibida.
 	Restricciones: Ninguna.
 */
-void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struct ListaDeseo *LDeseo){
+void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos){
   
 	system( "CLS" );
     printf("\n\n*********************************\n");
@@ -1770,7 +1788,10 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
     struct Carta *carta;
     struct Deseo *deseo;
     struct Juguete *buscado;
+    struct JuguetesCarta *solicitado;
+    
     buscado = (struct Juguete *) malloc (sizeof(struct Juguete));
+    carta=(struct Carta *) malloc (sizeof(struct Carta));
     
     char identificacion[20], anno[10], nombreJuguete[50], opcion[3], opcion2[3];
     
@@ -1791,17 +1812,37 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 		printf("\n-->Ingrese el Anno que corresponda:\n");
 		gets(anno);
 	
-        if(validarCarta(LCarta, identificacion, anno)==1){
+        if(validarCarta(LCartas, identificacion, anno)==1){
             printf("\n**La identificacion ya tiene registrada una carta para el anno ingresado**\n ");
         }else{
             break;
         }
+        
     }while(1);
     
     
 	
     if(jugueteRaiz!=NULL)
 	{
+		strcpy(carta->identificacion, identificacion);
+		strcpy(carta->anno, anno);
+		strcpy(carta->estado, "Solicitada");
+		
+		if(LCartas->inicio == NULL) 
+		{
+			LCartas->inicio = carta;
+			LCartas->inicio->siguiente = NULL; 
+			LCartas->inicio->anterior = NULL; 
+			LCartas->final = LCartas->inicio;
+		}
+		else
+		{	
+			LCartas->final->siguiente = carta;
+			LCartas->final->siguiente->siguiente = NULL; 
+			LCartas->final->siguiente->anterior = LCartas->final; 
+			LCartas->final = LCartas->final->siguiente;
+		}
+								
 		printf("*********************************\n");
 		printf("        Agregar Juguetes\n" );
 		printf("*********************************\n");
@@ -1811,9 +1852,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 	    do{
 	    	
 			if (strcmp(opcion ,"1")==0){
-				
-				carta=(struct Carta *) malloc (sizeof(struct Carta));
-				
+						
 				printf("\n-->Ingrese el nombre del juguete que desea agregar:\n");
 	        	gets(nombreJuguete);
 				
@@ -1832,38 +1871,41 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 			        printf("+-------------------------------------+\n");
 			       	
 					do{
-						printf("\n-->Desea agregar este juguete?:\n");
-				    	printf("   Digite 1-Carta para Santa"); 
-						printf("\n          2-Lista de Deseos");
-						printf("\n          3-Omitir\n<--");
+						printf("\n-->Desea agregar este juguete?:");
+				    	printf("\nDigite 1-Carta para Santa"); 
+						printf("\n       2-Lista de Deseos");
+						printf("\n       3-Omitir\n<--");
 						gets(opcion2);
 							
 						if (strcmp(opcion2 ,"1")==0){
 							
-							juguetesRegistrados=contarJuguetes(LCarta, identificacion, anno);
+							juguetesRegistrados=contarJuguetes(LJugCarta, identificacion, anno);
 							
 							if(juguetesRegistrados==1){
 								printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
 								break;
 							}else{
-								strcpy(carta->identificacion, identificacion);
-								strcpy(carta->anno, anno);
-								strcpy(carta->nombre_juguete, nombreJuguete);
-								strcpy(carta->estado, "Solicitado");
+																
+								solicitado = (struct JuguetesCarta *) malloc (sizeof(struct JuguetesCarta));
 								
-								if(LCarta->inicio == NULL) 
+								strcpy(solicitado->identificacion, identificacion);
+								strcpy(solicitado->anno, anno);
+								strcpy(solicitado->nombre_juguete, nombreJuguete);
+								strcpy(solicitado->estado, "Solicitado");
+								
+								if(LJugCarta->inicio == NULL) 
 								{
-									LCarta->inicio = carta;
-									LCarta->inicio->siguiente = NULL; 
-									LCarta->inicio->anterior = NULL; 
-									LCarta->final = LCarta->inicio;
+									LJugCarta->inicio = solicitado;
+									LJugCarta->inicio->siguiente = NULL; 
+									LJugCarta->inicio->anterior = NULL; 
+									LJugCarta->final = LJugCarta->inicio;
 								}
 								else
 								{	
-									LCarta->final->siguiente = carta;
-									LCarta->final->siguiente->siguiente = NULL; 
-									LCarta->final->siguiente->anterior = LCarta->final; 
-									LCarta->final = LCarta->final->siguiente;
+									LJugCarta->final->siguiente = solicitado;
+									LJugCarta->final->siguiente->siguiente = NULL; 
+									LJugCarta->final->siguiente->anterior = LJugCarta->final; 
+									LJugCarta->final = LJugCarta->final->siguiente;
 								}					
 							}
 							break;
@@ -1874,23 +1916,23 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 							
 							deseo=(struct Deseo *) malloc (sizeof(struct Deseo));
 							
-							strcpy(deseo->anno, carta->anno);
-							strcpy(deseo->identificacion, carta->identificacion);
-							strcpy(deseo->nombre_juguete, carta->nombre_juguete);
+							strcpy(deseo->anno, anno);
+							strcpy(deseo->identificacion, identificacion);
+							strcpy(deseo->nombre_juguete, nombreJuguete);
 							
-							if(LDeseo->inicio == NULL) 
+							if(LDeseos->inicio == NULL) 
 							{
-								LDeseo->inicio = deseo;
-								LDeseo->inicio->siguiente = NULL; 
-								LDeseo->inicio->anterior = NULL; 
-								LDeseo->final = LDeseo->inicio;
+								LDeseos->inicio = deseo;
+								LDeseos->inicio->siguiente = NULL; 
+								LDeseos->inicio->anterior = NULL; 
+								LDeseos->final = LDeseos->inicio;
 							}
 							else
 							{	
-								LDeseo->final->siguiente = deseo;
-								LDeseo->final->siguiente->siguiente = NULL; 
-								LDeseo->final->siguiente->anterior = LDeseo->final; 
-								LDeseo->final = LDeseo->final->siguiente;
+								LDeseos->final->siguiente = deseo;
+								LDeseos->final->siguiente->siguiente = NULL; 
+								LDeseos->final->siguiente->anterior = LDeseos->final; 
+								LDeseos->final = LDeseos->final->siguiente;
 							}
 							break;						
 						}
@@ -1922,7 +1964,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
        
-	mostrarCarta(LCarta, carta->identificacion, carta->anno);
+	mostrarCarta(LJugCarta, carta->identificacion, carta->anno);
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -1933,16 +1975,16 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaCarta *LCarta, struc
 	Salidas: 1 si ya existe un nodo con la misma identificacion y Anno, y 0 si no existe.
 	Restricciones: Ninguna.
 */
-int validarCarta(struct ListaCarta *LCarta, const char identificacion [], const char anno []){
+int validarCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno []){
 
-    struct Carta *i= LCarta->inicio;
+    struct Carta *i= LCartas->inicio;
     int comp1=3, comp2=3;
 
-    if(LCarta->inicio!=NULL)
+    if(LCartas->inicio!=NULL)
     {
         while( i!= NULL){
 			comp1=strcmp(identificacion,i->identificacion);
-			comp1=strcmp(identificacion,i->anno);
+			comp1=strcmp(anno,i->anno);
 	        if(comp1==0 && comp2==0)
 			{
                 return 1;
@@ -1959,12 +2001,12 @@ int validarCarta(struct ListaCarta *LCarta, const char identificacion [], const 
 	Salidas: 1 si ya existen 10 un nodos con la misma identificacion y Anno, y 0 si no existen.
 	Restricciones: Ninguna.
 */
-int contarJuguetes(struct ListaCarta *LCarta, const char identificacion [], const char anno []){
+int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []){
 
-    struct Carta *i= LCarta->inicio;
+    struct JuguetesCarta *i= LJugCarta->inicio;
     int comp1=3, comp2=3, cont=0;
 
-    if(LCarta->inicio!=NULL)
+    if(LJugCarta->inicio!=NULL)
     {
         while( i!= NULL){
 			comp1=strcmp(identificacion,i->identificacion);
@@ -1991,14 +2033,14 @@ int contarJuguetes(struct ListaCarta *LCarta, const char identificacion [], cons
 	Salidas: Se modifican los datos un nodo de tipo Carta de la lista recibida.
 	Restricciones: Ninguna.
 */
-void modificarCarta(struct ListaCarta *LCarta){
+void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta){
 	system( "CLS" );
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
 	printf(" Modificar una Carta para Santa\n" );
 	printf("*********************************\n");
-	
+//
 //	struct Nino *iNino;
 //	int hallado=0, comp=3, resp;
 //	char id[15], respuesta[2], nombre[50], usuario[20], correo[50], domicilio[20], 
@@ -2045,7 +2087,8 @@ void modificarCarta(struct ListaCarta *LCarta){
 //			    	gets(nombre);	
 //					strcpy(iNino->nombre_completo,nombre);
 //				}
-//				           
+//				
+//				
 //                hallado=1;
 //				break;
 //			}
@@ -2070,7 +2113,7 @@ void modificarCarta(struct ListaCarta *LCarta){
 	Salidas: Se muestran los datos de una Carta para Santa y de una Lista de Deseos en caso de que exista.
 	Restricciones: Ninguna.
 */
-void consultarCarta(struct ListaCarta *LCarta){
+void consultarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta){
 	system( "CLS" );
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
@@ -2088,9 +2131,9 @@ void consultarCarta(struct ListaCarta *LCarta){
 	Salidas: Se muestran los datos un nodo de tipo Carta de la lista recibida.
 	Restricciones: Ninguna.
 */
-void mostrarCarta(struct ListaCarta *LCarta, const char identificacion [], const char anno []){
+void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []){
 
-	struct Carta *iCarta;
+	struct JuguetesCarta *iJugCarta = LJugCarta->inicio;
 	
 	printf("\n+-------------------------------------------------------------------+\n");
 	printf( "                      Carta para Santa" );
@@ -2098,15 +2141,14 @@ void mostrarCarta(struct ListaCarta *LCarta, const char identificacion [], const
 	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
 	printf("\n+-------------------------------------------------------------------+\n");
 	
-	if(LCarta->inicio!=NULL)
+	if(LJugCarta->inicio!=NULL)
 	{
-        iCarta = LCarta->inicio;
         int cont=1;
-        	printf(" Nombre del juguete     -    Estado del Juguete\n" ); 
-        while(iCarta!=NULL){
-            printf("\n %s     -      %s  \n" , iCarta->nombre_juguete, iCarta->estado);
-            iCarta = iCarta->siguiente;
+        printf(" Nombre del juguete     -    Estado del Juguete\n" ); 
 
+        while(iJugCarta!=NULL){
+            printf("\n %s     -      %s  \n" , iJugCarta->nombre_juguete, iJugCarta->estado);
+            iJugCarta = iJugCarta->siguiente;
         }
         printf("\n+-------------------------------------------------------------------+\n");		
 		
@@ -2138,7 +2180,6 @@ void mostrarCarta(struct ListaCarta *LCarta, const char identificacion [], const
 //		printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
 //	}
 }
-
 
 
 int main(){ 
