@@ -66,9 +66,15 @@ void eliminarJuguete();
 void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos);
 int validarCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno []);
 int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
-void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta);
+void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos);
 void consultarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta);
 void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
+void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
+int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
+void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
+int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
+void mostrarListaCartas(struct ListaCartas *LCartas);
+
 
 struct Nino{
     char cedula[12];
@@ -487,7 +493,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 			switch(opcion){
 				case '1': registrarCartas(LNinos, LJugCartas, LCartas, LDeseos);
 					break;
-				case '2': MenuPrincipal();
+				case '2': modificarCarta(LCartas, LJugCartas, LDeseos);
 					break;
 				case '3': MenuPrincipal();
 					break;
@@ -1788,7 +1794,6 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
     struct Carta *carta;
     struct Deseo *deseo;
     struct Juguete *buscado;
-    struct JuguetesCarta *solicitado;
     
     buscado = (struct Juguete *) malloc (sizeof(struct Juguete));
     carta=(struct Carta *) malloc (sizeof(struct Carta));
@@ -1842,6 +1847,8 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 			LCartas->final->siguiente->anterior = LCartas->final; 
 			LCartas->final = LCartas->final->siguiente;
 		}
+		
+		mostrarListaCartas(LCartas);
 								
 		printf("*********************************\n");
 		printf("        Agregar Juguetes\n" );
@@ -1884,29 +1891,8 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 							if(juguetesRegistrados==1){
 								printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
 								break;
-							}else{
-																
-								solicitado = (struct JuguetesCarta *) malloc (sizeof(struct JuguetesCarta));
-								
-								strcpy(solicitado->identificacion, identificacion);
-								strcpy(solicitado->anno, anno);
-								strcpy(solicitado->nombre_juguete, nombreJuguete);
-								strcpy(solicitado->estado, "Solicitado");
-								
-								if(LJugCarta->inicio == NULL) 
-								{
-									LJugCarta->inicio = solicitado;
-									LJugCarta->inicio->siguiente = NULL; 
-									LJugCarta->inicio->anterior = NULL; 
-									LJugCarta->final = LJugCarta->inicio;
-								}
-								else
-								{	
-									LJugCarta->final->siguiente = solicitado;
-									LJugCarta->final->siguiente->siguiente = NULL; 
-									LJugCarta->final->siguiente->anterior = LJugCarta->final; 
-									LJugCarta->final = LJugCarta->final->siguiente;
-								}					
+							}else{	
+								agregarJuguete(LJugCarta, identificacion, anno, nombreJuguete);											
 							}
 							break;
 								
@@ -1914,26 +1900,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 						
 						if (strcmp(opcion2 ,"2")==0){
 							
-							deseo=(struct Deseo *) malloc (sizeof(struct Deseo));
-							
-							strcpy(deseo->anno, anno);
-							strcpy(deseo->identificacion, identificacion);
-							strcpy(deseo->nombre_juguete, nombreJuguete);
-							
-							if(LDeseos->inicio == NULL) 
-							{
-								LDeseos->inicio = deseo;
-								LDeseos->inicio->siguiente = NULL; 
-								LDeseos->inicio->anterior = NULL; 
-								LDeseos->final = LDeseos->inicio;
-							}
-							else
-							{	
-								LDeseos->final->siguiente = deseo;
-								LDeseos->final->siguiente->siguiente = NULL; 
-								LDeseos->final->siguiente->anterior = LDeseos->final; 
-								LDeseos->final = LDeseos->final->siguiente;
-							}
+							agregarDeseo(LDeseos, identificacion, anno, nombreJuguete);
 							break;						
 						}
 						
@@ -1983,9 +1950,7 @@ int validarCarta(struct ListaCartas *LCartas, const char identificacion [], cons
     if(LCartas->inicio!=NULL)
     {
         while( i!= NULL){
-			comp1=strcmp(identificacion,i->identificacion);
-			comp1=strcmp(anno,i->anno);
-	        if(comp1==0 && comp2==0)
+	        if(strcmp(i->identificacion,identificacion) == 0 && strcmp(i->anno,anno) == 0)
 			{
                 return 1;
             }
@@ -2029,80 +1994,316 @@ int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion []
 }
 
 /*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []){
+
+    struct JuguetesCarta *solicitado;
+    solicitado = (struct JuguetesCarta *) malloc (sizeof(struct JuguetesCarta));
+
+    strcpy(solicitado->identificacion, identificacion);
+    strcpy(solicitado->anno, anno);
+    strcpy(solicitado->nombre_juguete, nombreJuguete);
+    strcpy(solicitado->estado, "Solicitado");
+
+    if(LJugCarta->inicio == NULL) 
+    {
+        LJugCarta->inicio = solicitado;
+        LJugCarta->inicio->siguiente = NULL; 
+        LJugCarta->inicio->anterior = NULL; 
+        LJugCarta->final = LJugCarta->inicio;
+    }
+    else
+    {
+        LJugCarta->final->siguiente = solicitado;
+        LJugCarta->final->siguiente->siguiente = NULL; 
+        LJugCarta->final->siguiente->anterior = LJugCarta->final; 
+        LJugCarta->final = LJugCarta->final->siguiente;
+    }
+
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []){
+
+    struct JuguetesCarta *eliminado = LJugCarta->inicio;
+    
+    if(LJugCarta->inicio!=NULL)
+	{
+	
+		if(strcmp(eliminado->anno,anno) == 0 && strcmp(eliminado->identificacion,identificacion) == 0 && strcmp(eliminado->nombre_juguete,nombreJuguete) == 0){
+			if(LJugCarta->inicio == LJugCarta->final){ 
+				LJugCarta->final = NULL;
+				LJugCarta->inicio = NULL;
+			}else{
+				LJugCarta->inicio = LJugCarta->inicio->siguiente;
+				LJugCarta->inicio->anterior = NULL;
+			}
+			
+		  	printf("\n-->El juguete se ha eliminado de la Carta para Santa");
+		  	free(eliminado);
+            return 1;
+							
+		}
+		else 
+		{
+			while (eliminado != NULL){
+	    	
+		        if (strcmp(eliminado->anno,anno) == 0 && strcmp(eliminado->identificacion,identificacion) == 0 && strcmp(eliminado->nombre_juguete,nombreJuguete) == 0){
+		               
+					    eliminado->anterior->siguiente = eliminado->siguiente;
+		                if(eliminado != LJugCarta->final)
+		                    eliminado->siguiente->anterior = eliminado->anterior;
+		                else if(eliminado == LJugCarta->final) 
+		                    LJugCarta->final = LJugCarta->final->anterior;
+		
+		                printf("\n-->El juguete se ha eliminado de la Carta para Santa");
+		                free(eliminado);
+		                return 1;
+		                
+		        }
+		        
+		        eliminado = eliminado->siguiente;
+		    }
+		}
+	}else{
+		printf( "\n***No se han encontrado Juguetes registrados***");
+	}
+
+    
+    printf("**El juguete solicitado NO existe en la Carta para Santa***");
+	return 0;
+
+}
+
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []){
+
+    struct Deseo *deseo;
+    deseo=(struct Deseo *) malloc (sizeof(struct Deseo));
+
+    strcpy(deseo->anno, anno);
+    strcpy(deseo->identificacion, identificacion);
+    strcpy(deseo->nombre_juguete, nombreJuguete);
+
+    if(LDeseos->inicio == NULL) 
+    {
+        LDeseos->inicio = deseo;
+        LDeseos->inicio->siguiente = NULL; 
+        LDeseos->inicio->anterior = NULL; 
+        LDeseos->final = LDeseos->inicio;
+    }
+    else
+    {
+        LDeseos->final->siguiente = deseo;
+        LDeseos->final->siguiente->siguiente = NULL; 
+        LDeseos->final->siguiente->anterior = LDeseos->final; 
+        LDeseos->final = LDeseos->final->siguiente;
+    }
+
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []){
+
+    struct Deseo *eliminado =  LDeseos->inicio;
+
+	if(LDeseos->inicio!=NULL)
+	{
+	
+		if(strcmp(eliminado->anno,anno) == 0 && strcmp(eliminado->identificacion,identificacion) == 0 && strcmp(eliminado->nombre_juguete,nombreJuguete) == 0){
+			if(LDeseos->inicio == LDeseos->final){ 
+				LDeseos->final = NULL;
+				LDeseos->inicio = NULL;
+			}else{
+				LDeseos->inicio = LDeseos->inicio->siguiente;
+				LDeseos->inicio->anterior = NULL;
+			}
+			
+			printf("\n-->El juguete se ha eliminado de la Lista de Deseos");
+            free(eliminado);
+            return 1;
+							
+		}
+		else 
+		{
+			while (eliminado != NULL){
+	    	
+		        if (strcmp(eliminado->anno,anno) == 0 && strcmp(eliminado->identificacion,identificacion) == 0 && strcmp(eliminado->nombre_juguete,nombreJuguete) == 0){
+		               
+					    eliminado->anterior->siguiente = eliminado->siguiente;
+		                if(eliminado != LDeseos->final)
+		                    eliminado->siguiente->anterior = eliminado->anterior;
+		                else if(eliminado == LDeseos->final) 
+		                    LDeseos->final = LDeseos->final->anterior;
+		
+		                printf("\n-->El juguete se ha eliminado de la Lista de Deseos");
+		                free(eliminado);
+		                return 1;
+		                
+		        }
+		        
+		        eliminado = eliminado->siguiente;
+		    }
+		}
+	}else{
+		printf( "\n***No se han encontrado Deseos registrados***");
+	}
+
+    
+    printf("**El juguete solicitado NO existe en la Lista de Deseos***");
+	return 0;
+}
+
+/*
 	Entradas: Una lista de tipo ListaCarta, un char identificacion y otro Anno para consultar los datos de una carta para Santa
 	Salidas: Se modifican los datos un nodo de tipo Carta de la lista recibida.
 	Restricciones: Ninguna.
 */
-void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta){
+void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos){
+	
 	system( "CLS" );
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
 	printf(" Modificar una Carta para Santa\n" );
 	printf("*********************************\n");
-//
-//	struct Nino *iNino;
-//	int hallado=0, comp=3, resp;
-//	char id[15], respuesta[2], nombre[50], usuario[20], correo[50], domicilio[20], 
-//		  nacimiento[15], edad[5], necesidades[150]; 
-//	
-//	
-//    if(LNinos->inicio!=NULL)
-//	{
-//		
-//		printf("\n Ingrese el numero de identificacion: (Ejm. 105450656) \n ");
-//    	gets(id);
-//		
-//        iNino = LNinos->inicio;
-//        while(iNino!=NULL){
-//            
-//            comp=strcmp(id,iNino->cedula);
-//            if(comp==0){
-//            	printf("\n+------------------------------------+");
-//				printf("\n      Datos del  Nino/Nina " );
-//            	printf("\n+------------------------------------+");
-//                printf("\n  Identificacion: %s \n", iNino->cedula);
-//                printf("  Nombre Completo: %s \n", iNino->nombre_completo);
-//                printf("  Correo: %s \n", iNino->correo);
-//                printf("  Domicilio: %s \n", iNino->codigo_domicilio);
-//                printf("  Fecha de Nacimiento: %s \n", iNino->fecha_nacimiento);
-//                printf("  Edad: %s \n", iNino->edad);
-//                printf("  Necesidades Especiales: %s \n", iNino->necesidades_esp );
-//                printf("+-------------------------------------+\n");
-//                
-//                
-//                //Modificar el Nombre Completo
-//                do{
-//			        printf("\nDesea modificar el Nombre? (1-Si 2-No)\n" );
-//                	gets(respuesta);
-//					resp=atoi(respuesta);
-//                
-//			        if(resp==1 || resp==2){
-//			            break;
-//			        }
-//			    }while(1);
-//                
-//                if(resp==1){
-//                	printf("\n-->Ingrese el valor para el Nombre: (Ej. Juan Perez) \n");
-//			    	gets(nombre);	
-//					strcpy(iNino->nombre_completo,nombre);
-//				}
-//				
-//				
-//                hallado=1;
-//				break;
-//			}
-//			iNino = iNino->siguiente;
-//
-//        }
-//        
-//		if(hallado==0){
-//			printf( "\n***No se ha encontrado un Nino/Nina para la identificacion ingresada***");
-//		}
-//		
-//	}else{
-//		printf( "\n***No se han encontrado Ninos(as) registrados***");
-//	}
+
+	struct Juguete *buscado;
+	buscado = (struct Juguete *) malloc (sizeof(struct Juguete));
+	char identificacion[20], anno[10], nombreJuguete[50], opcion[3], opcion2[3];
+    int juguetesRegistrados=0, resultado=0;
+	
+    if(LCartas->inicio!=NULL){
+    	
+    	mostrarListaCartas(LCartas);
+
+        printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
+        gets(identificacion);
+	
+		printf("\n-->Ingrese el Anno que corresponda:\n");
+		gets(anno);
+	
+        if(validarCarta(LCartas, identificacion, anno)==1){
+        	
+            mostrarCarta(LJugCarta, identificacion, anno);
+
+			do{
+				printf("\n-->Elija la operacion que desea realizar?:");
+		    	printf("\nDigite 1-Agregar Juguete a la Carta para Santa"); 
+				printf("\n       2-Eliminar Juguete de la Carta para Santa");
+				printf("\n       3-Mover Juguete de la Lista de Deseos a la");
+				printf("\n         Carta para Santa");
+				printf("\n       4-Omitir operacion\n<--");
+				gets(opcion);
+					
+				if (strcmp(opcion ,"1")==0){//Agregar un juguete
+					
+					juguetesRegistrados=contarJuguetes(LJugCarta, identificacion, anno);
+					
+					if(juguetesRegistrados==1){
+						printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
+						break;
+					}else{
+														
+						printf("\n-->Ingrese el nombre del juguete que desea agregar:\n");
+			        	gets(nombreJuguete);
+						
+						buscado = buscarJuguete(jugueteRaiz, nombreJuguete);
+						
+						if(buscado!=NULL){
+						   	printf("\n+------------------------------------+");
+							printf("\n        Datos del Juguete " );
+					    	printf("\n+------------------------------------+");
+					        printf("\n  Nombre: %s \n", buscado->nombre);
+					        printf("  Codigo: %s \n", buscado->codigo);
+					        printf("  Descripcion: %s \n", buscado->descripcion);
+					        printf("  Categoria: %s \n", buscado->categoria);
+					        printf("  Rango de Edad: %s \n", buscado->rango_edad);
+					        printf("+-------------------------------------+\n");
+					        
+					        printf("\n-->Desea agregar este juguete?:");
+					    	printf("\nDigite 1-Si"); 
+							printf("\n       2-No\n<--");
+							gets(opcion2);
+					        
+					        if (strcmp(opcion ,"1")==0){
+					        	agregarJuguete(LJugCarta, identificacion, anno, nombreJuguete);	
+					        	printf("\n-->El juguete se ha agregado a la Carta para Santa\n");
+							}
+					        
+					    }else{
+							printf( "\n***No se ha encontrado un Juguete con el Nombre ingresado***");
+						}
+						
+					}
+					break;
+							
+				}
+					
+				if (strcmp(opcion ,"2")==0){
+					
+					printf("\n-->Ingrese el nombre del juguete que desea eliminar de la carta:\n");
+			        gets(nombreJuguete);
+					
+					resultado=eliminarJugueteCarta(LJugCarta, identificacion, anno, nombreJuguete);
+					
+					break;						
+				}
+				
+				if (strcmp(opcion ,"3")==0){
+					
+					juguetesRegistrados=contarJuguetes(LJugCarta, identificacion, anno);
+					
+					if(juguetesRegistrados==1){
+						printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
+						break;
+					}else{
+														
+						printf("\n-->Ingrese el nombre del juguete que desea mover:\n");
+			        	gets(nombreJuguete);
+						
+						resultado = eliminarDeseo(LDeseos, identificacion, anno, nombreJuguete);
+						
+						if(resultado==1){
+							agregarJuguete(LJugCarta, identificacion, anno, nombreJuguete);
+							
+							printf("\n-->El juguete se ha movido a la Carta para Santa\n");
+						}
+						
+					}
+					
+					break;			
+				}
+				
+				if (strcmp(opcion ,"4")==0){
+					break;			
+				}
+					
+			}while(strcmp(opcion ,"1")!=0);	
+	
+		}else{
+			printf("\n**No se tiene una carta para la identificacion y el anno ingresados**\n ");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -2136,7 +2337,7 @@ void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [],
 	struct JuguetesCarta *iJugCarta = LJugCarta->inicio;
 	
 	printf("\n+-------------------------------------------------------------------+\n");
-	printf( "                      Carta para Santa" );
+	printf( "                        CARTA PARA SANTA" );
 	printf("\n+-------------------------------------------------------------------+\n");
 	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
 	printf("\n+-------------------------------------------------------------------+\n");
@@ -2154,8 +2355,55 @@ void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [],
 		
 	}else{
 		printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");
+		printf("\n+-------------------------------------------------------------------+\n");
 	}
 	
+//	struct Deseo *iDeseo;
+//	
+//	printf("\n+-------------------------------------------------------------------+\n");
+//	printf( "                      Lista de Deseos" );
+//	printf("\n+-------------------------------------------------------------------+\n");
+//	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
+//	printf("\n+-------------------------------------------------------------------+\n");
+//	
+//	if(LDeseo->inicio!=NULL)
+//	{
+//        iDeseo = LDeseo->inicio;
+//        int cont=1;
+//        	printf(" Nombre del juguete \n" ); 
+//        while(iDeseo!=NULL){
+//            printf("\n %s \n" , iDeseo->nombre_juguete);
+//            iDeseo = iDeseo->siguiente;
+//
+//        }
+//        printf("\n+-------------------------------------------------------------------+\n");		
+//		
+//	}else{
+//		printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
+//	}
+}
+
+
+void mostrarListaCartas(struct ListaCartas *LCartas){
+
+	struct Carta *iCarta = LCartas->inicio;
+	
+	printf("\n+-------------------------------------------------------------------+\n");
+	printf( "                      CARTAS PARA SANTA REGISTRADAS" );
+	printf("\n+-------------------------------------------------------------------+\n");
+		
+	if(LCartas->inicio!=NULL)
+	{
+        while(iCarta!=NULL){
+            printf("\n+Identificacion: %s    -    Anno: %s   -   Estado: %s\n", iCarta->identificacion, iCarta->anno, iCarta->estado);
+            iCarta = iCarta->siguiente;
+        }		
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
+	
+	printf("\n+-------------------------------------------------------------------+\n");
 //	struct Deseo *iDeseo;
 //	
 //	printf("\n+-------------------------------------------------------------------+\n");
