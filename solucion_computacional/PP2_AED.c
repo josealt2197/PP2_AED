@@ -75,7 +75,14 @@ void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], con
 int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
 void mostrarListaCartas(struct ListaCartas *LCartas);
 
-
+//Procedimientos para el Analisis de Datos
+void juguetesPorAnno(struct ListaJugCarta *LJugCarta);
+void masMenosCartas(struct ListaCartas *LCartas);
+void aprobadasPorAnno(struct ListaCartas *LCartas);
+void rechazadasPorAnno(struct ListaCartas *LCartas);
+void comportRegistrados(struct ListaComport *LComp);
+void cartasPorAyudante(struct ListaCartas *LCartas);
+void juguetesMasPedidos(struct ListaJugCarta *LJugCarta);
 
 struct Nino{
     char cedula[12];
@@ -489,7 +496,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 		printf("\n 4. PROCESAR una Carta para Santa.");
 		printf("\n\n<--Digite una opcion (0-4): ");	
 		opcion=getchar();
-		
+				
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
 				case '1': registrarCartas(LNinos, LJugCartas, LCartas, LDeseos);
@@ -518,7 +525,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 	Salidas: Llamada a las demás funciones de Analisis de Datos
 	Restricciones: Solo se deben ingresar números en un rango de 0 a 7.
 */
-void AnalisisDeDatos(){
+void AnalisisDeDatos(struct ListaJugCarta *LJugCartas, struct ListaCartas *LCartas, struct ListaComport *LComp){
 	char opcion, ch;	
 
 	do{
@@ -542,11 +549,21 @@ void AnalisisDeDatos(){
 		
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
-				case '1': MenuPrincipal();
+				case '1': juguetesPorAnno(LJugCartas);
 					break;
-				case '2': MenuPrincipal();
+				case '2': masMenosCartas(LCartas);
 					break;
-				case '0': MenuPrincipal();
+				case '3': aprobadasPorAnno(LCartas);
+					break;
+				case '4': rechazadasPorAnno(LCartas);
+					break;
+				case '5': comportRegistrados(LComp);
+					break;
+				case '6': cartasPorAyudante(LCartas);
+					break;
+				case '7': juguetesMasPedidos(LJugCartas);
+					break;
+				case '0': 
 					break;
 				default:
 					fflush(stdin);
@@ -2439,7 +2456,7 @@ void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, 
 
 /*
 	Entradas: Una lista de tipo ListaCarta para tomar los datos de los juguetes de una Carta para Santa 
-	Salidas: Se muestran los datos un nodo de tipo Carta de la lista recibida.
+	Salidas: Se muestran los datos de todo los nodos de tipo Carta de la lista recibida.
 	Restricciones: Ninguna.
 */
 void mostrarListaCartas(struct ListaCartas *LCartas){
@@ -2462,29 +2479,127 @@ void mostrarListaCartas(struct ListaCartas *LCartas){
 	}
 	
 	printf("\n+-------------------------------------------------------------------+\n");
-//	struct Deseo *iDeseo;
-//	
-//	printf("\n+-------------------------------------------------------------------+\n");
-//	printf( "                      Lista de Deseos" );
-//	printf("\n+-------------------------------------------------------------------+\n");
-//	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
-//	printf("\n+-------------------------------------------------------------------+\n");
-//	
-//	if(LDeseo->inicio!=NULL)
-//	{
-//        iDeseo = LDeseo->inicio;
-//        int cont=1;
-//        	printf(" Nombre del juguete \n" ); 
-//        while(iDeseo!=NULL){
-//            printf("\n %s \n" , iDeseo->nombre_juguete);
-//            iDeseo = iDeseo->siguiente;
-//
-//        }
-//        printf("\n+-------------------------------------------------------------------+\n");		
-//		
-//	}else{
-//		printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
-//	}
+}
+
+
+/****************************************************************Analisis de Datos***********************************************************************************************/
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void juguetesPorAnno(struct ListaJugCarta *LJugCarta){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("  Juguetes solicitados por Anno\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void masMenosCartas(struct ListaCartas *LCartas){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("  Lugares con mas/menos cartas\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void aprobadasPorAnno(struct ListaCartas *LCartas){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("  Cartas aprobadas por Anno\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void rechazadasPorAnno(struct ListaCartas *LCartas){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("  Cartas rechazadas por Anno\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void comportRegistrados(struct ListaComport *LComp){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("    Comportamientos Registrados\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void cartasPorAyudante(struct ListaCartas *LCartas){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Cartas procesadas según Ayudante\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Top de Juguetes mas solicitados\n" );
+	printf("*********************************\n");
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
 }
 
 
