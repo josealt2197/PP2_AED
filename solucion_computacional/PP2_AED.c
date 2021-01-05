@@ -67,13 +67,14 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 int validarCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno []);
 int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
 void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos);
-void consultarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta);
-void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
+void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, struct ListaJugCarta *LJugCarta);
+void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, const char identificacion [], const char anno []);
 void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
 int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
 void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
 int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
 void mostrarListaCartas(struct ListaCartas *LCartas);
+
 
 
 struct Nino{
@@ -495,7 +496,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 					break;
 				case '2': modificarCarta(LCartas, LJugCartas, LDeseos);
 					break;
-				case '3': MenuPrincipal();
+				case '3': consultarCarta(LCartas, LDeseos, LJugCartas);
 					break;
 				case '4': MenuPrincipal();
 					break;
@@ -1961,7 +1962,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
        
-	mostrarCarta(LJugCarta, carta->identificacion, carta->anno);
+	mostrarCarta(LJugCarta, LDeseos, carta->identificacion, carta->anno);
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -2024,8 +2025,8 @@ int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion []
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaJugCarta, un char identificacion, otro Anno, y el nombre de un juguete, para agregar los datos de un juguete una carta para Santa
+	Salidas: Se agrega un nuevo nodo de tipo Juguete a la lista recibida.
 	Restricciones: Ninguna.
 */
 void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []){
@@ -2056,8 +2057,8 @@ void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaJugCarta, un char identificacion, otro Anno, y el nombre de un juguete, para eliminar los datos de un juguete una carta para Santa
+	Salidas: Se elimina un nodo de tipo Juguete a la lista recibida.
 	Restricciones: Ninguna.
 */
 int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []){
@@ -2114,8 +2115,8 @@ int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificac
 
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaDeseos, un char identificacion, otro Anno, y el nombre de un juguete, para agregar los datos de un juguete una carta para Santa
+	Salidas: Se agrega un nuevo nodo de tipo Deseo a la lista recibida.
 	Restricciones: Ninguna.
 */
 void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []){
@@ -2145,8 +2146,8 @@ void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], con
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaJugCarta, un char identificacion, otro Anno, y el nombre de un juguete, para eliminar los datos de un juguete una lista de deseos
+	Salidas: Se elimina un nodo de tipo Deseo a la lista recibida.
 	Restricciones: Ninguna.
 */
 int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []){
@@ -2231,7 +2232,7 @@ void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta
 	
         if(validarCarta(LCartas, identificacion, anno)==1){
         	
-            mostrarCarta(LJugCarta, identificacion, anno);
+            mostrarCarta(LJugCarta, LDeseos, identificacion, anno);
 
 			do{
 				printf("\n-->Elija la operacion que desea realizar?:");
@@ -2340,11 +2341,11 @@ void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta
 }
 
 /*
-	Entradas: Una lista de tipo ListaCarta para tomar los datos de los juguetes de una Carta para Santa 
-	Salidas: Se muestran los datos de una Carta para Santa y de una Lista de Deseos en caso de que exista.
+	Entradas: Una lista de tipo ListaCarta, otra ListaJugCarta y otra ListaDeseos para tomar los datos de los juguetes de una Carta para Santa y una lista de deseos
+	Salidas: Se muestran los datos de una Carta para Santa y de una Lista de Deseos en caso de que exista, para el anno e identificación ingresados 
 	Restricciones: Ninguna.
 */
-void consultarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta){
+void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, struct ListaJugCarta *LJugCarta){
 	system( "CLS" );
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
@@ -2352,21 +2353,45 @@ void consultarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta
 	printf(" Consultar una Carta para Santa\n" );
 	printf("*********************************\n");
 	
+	char identificacion[20], anno[10];
+	
+	if(LCartas->inicio!=NULL){
+    	
+    	mostrarListaCartas(LCartas);
+
+        printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
+        gets(identificacion);
+	
+		printf("\n-->Ingrese el Anno que corresponda:\n");
+		gets(anno);
+	
+        if(validarCarta(LCartas, identificacion, anno)==1){
+        	
+            mostrarCarta(LJugCarta, LDeseos, identificacion, anno);
+	
+		}else{
+			printf("\n**No se tiene una carta para la identificacion y el anno ingresados**\n ");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
 
 /*
-	Entradas: Una lista de tipo ListaCarta para tomar los datos de los juguetes de una Carta para Santa 
-	Salidas: Se muestran los datos un nodo de tipo Carta de la lista recibida.
+	Entradas: Una lista de tipo ListaCarta, otra ListaJugCarta y otra ListaDeseos, un char identificacion y otro Anno, para tomar los datos de los juguetes de una Carta para 
+			   Santa y una lista de deseos
+	Salidas: Se muestran los datos de una Carta para Santa y de una Lista de Deseos en caso de que exista, para el anno e identificación ingresados 
 	Restricciones: Ninguna.
 */
-void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []){
+void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, const char identificacion [], const char anno []){
 
 	struct JuguetesCarta *iJugCarta = LJugCarta->inicio;
 	
-	printf("\n+-------------------------------------------------------------------+\n");
+	printf("\n\n+-------------------------------------------------------------------+\n");
 	printf( "                        CARTA PARA SANTA" );
 	printf("\n+-------------------------------------------------------------------+\n");
 	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
@@ -2388,32 +2413,35 @@ void mostrarCarta(struct ListaJugCarta *LJugCarta, const char identificacion [],
 		printf("\n+-------------------------------------------------------------------+\n");
 	}
 	
-//	struct Deseo *iDeseo;
-//	
-//	printf("\n+-------------------------------------------------------------------+\n");
-//	printf( "                      Lista de Deseos" );
-//	printf("\n+-------------------------------------------------------------------+\n");
-//	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
-//	printf("\n+-------------------------------------------------------------------+\n");
-//	
-//	if(LDeseo->inicio!=NULL)
-//	{
-//        iDeseo = LDeseo->inicio;
-//        int cont=1;
-//        	printf(" Nombre del juguete \n" ); 
-//        while(iDeseo!=NULL){
-//            printf("\n %s \n" , iDeseo->nombre_juguete);
-//            iDeseo = iDeseo->siguiente;
-//
-//        }
-//        printf("\n+-------------------------------------------------------------------+\n");		
-//		
-//	}else{
-//		printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
-//	}
+	struct Deseo *iJugDeseo = LDeseos->inicio;
+	
+	printf("\n+-------------------------------------------------------------------+\n");
+	printf( "                        LISTA DE DESEOS" );
+	printf("\n+-------------------------------------------------------------------+\n");
+	
+	if(LDeseos->inicio!=NULL)
+	{
+        int cont=1;
+        printf(" Nombre del juguete \n" ); 
+
+        while(iJugDeseo!=NULL){
+            printf("\n %s   \n" , iJugDeseo->nombre_juguete);
+            iJugDeseo = iJugDeseo->siguiente;
+        }
+        printf("\n+-------------------------------------------------------------------+\n");		
+		
+	}else{
+		printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
+		printf("\n+-------------------------------------------------------------------+\n");
+	}
+	
 }
 
-
+/*
+	Entradas: Una lista de tipo ListaCarta para tomar los datos de los juguetes de una Carta para Santa 
+	Salidas: Se muestran los datos un nodo de tipo Carta de la lista recibida.
+	Restricciones: Ninguna.
+*/
 void mostrarListaCartas(struct ListaCartas *LCartas){
 
 	struct Carta *iCarta = LCartas->inicio;
