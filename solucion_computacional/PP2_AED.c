@@ -208,6 +208,8 @@ struct PilaCartasProcesadas{
 
 struct JugSolicitado{
     char nombre_juguete[50];
+    char anno[50];
+    char estado[50];
     int cantidad;
     JugSolicitado *siguiente; 
 };
@@ -2521,6 +2523,77 @@ void juguetesPorAnno(struct ListaJugCarta *LJugCarta){
 	printf("  Juguetes solicitados por Anno\n" );
 	printf("*********************************\n");
 	
+	
+	struct JuguetesCarta *iJugCarta;
+	struct JugSolicitado *iJugSolicitado, *nJugSolicitado;
+	
+	struct PilaJugSolicitados *JugSolic;
+	JugSolic = (struct PilaJugSolicitados *) malloc(sizeof(struct PilaJugSolicitados));
+	JugSolic->tope = NULL;
+
+    //Conteo de las Juguetes Solicitados	
+	if(LJugCarta->inicio!=NULL)
+	{
+        iJugCarta = LJugCarta->inicio;
+		while( iJugCarta!= NULL){
+			
+			if(JugSolic->tope==NULL)
+			{
+				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+					
+				strcpy(nJugSolicitado->anno, iJugCarta->anno);
+				nJugSolicitado->cantidad = 1;
+				
+				nJugSolicitado->siguiente = JugSolic->tope;
+				JugSolic->tope = nJugSolicitado;
+			}else{
+				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
+				
+					if(strcmp(iJugCarta->anno,iJugSolicitado->anno)==0){
+						iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
+						break;
+					}else{
+						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+						
+						strcpy(nJugSolicitado->anno, iJugCarta->anno);
+						nJugSolicitado->cantidad = 1;
+						
+						nJugSolicitado->siguiente = JugSolic->tope;
+						JugSolic->tope = nJugSolicitado;
+						break;
+					}
+					
+				}
+			}
+						
+			iJugCarta = iJugCarta->siguiente;
+		}
+		
+		//Mostrar cantidades contadas
+		printf("\n+----------------------------------------+\n");
+		printf( "  Anno del juguete    -   Cant. Solicitudes" );
+		printf("\n+----------------------------------------+\n");
+		
+		iJugSolicitado = JugSolic->tope;
+			
+		if(JugSolic->tope!=NULL)
+		{
+	        while(iJugSolicitado!=NULL){
+	            printf("\n %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
+	            iJugSolicitado = iJugSolicitado->siguiente;
+	        }		
+			
+		}else{
+			printf( "\n***No se han encontrado juguetes***");
+		}
+				
+		
+	}else{
+		printf( "\n***No se han encontrado juguetes***");
+	}
+	
+	
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -2555,6 +2628,78 @@ void aprobadasPorAnno(struct ListaCartas *LCartas){
 	printf("  Cartas aprobadas por Anno\n" );
 	printf("*********************************\n");
 	
+	
+	struct Carta *iJugCarta;
+	struct JugSolicitado *iJugSolicitado, *nJugSolicitado;
+	
+	struct PilaJugSolicitados *JugSolic;
+	JugSolic = (struct PilaJugSolicitados *) malloc(sizeof(struct PilaJugSolicitados));
+	JugSolic->tope = NULL;
+
+    //Conteo de las Juguetes Solicitados	
+	if(LCartas->inicio!=NULL)
+	{
+        iJugCarta = LCartas->inicio;
+		while( iJugCarta!= NULL){
+			
+			if(JugSolic->tope==NULL)
+			{
+				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+					
+				strcpy(nJugSolicitado->anno, iJugCarta->anno);
+				if (strcmp(iJugCarta->estado,"A")==0)
+					nJugSolicitado->cantidad = 1;
+				
+				nJugSolicitado->siguiente = JugSolic->tope;
+				JugSolic->tope = nJugSolicitado;
+			}else{
+				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
+				
+					if(strcmp(iJugCarta->anno,iJugSolicitado->anno)==0){
+						if (strcmp(iJugCarta->estado,"A")==0)
+							iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
+						break;
+					}else{
+						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+						
+						strcpy(nJugSolicitado->anno, iJugCarta->anno);
+						if (strcmp(iJugCarta->estado,"A")==0)
+							nJugSolicitado->cantidad = 1;
+						
+						nJugSolicitado->siguiente = JugSolic->tope;
+						JugSolic->tope = nJugSolicitado;
+						break;
+					}
+					
+				}
+			}
+						
+			iJugCarta = iJugCarta->siguiente;
+		}
+		
+		//Mostrar cantidades contadas
+		printf("\n+----------------------------------------+\n");
+		printf( "  Anno de la Carta    -   Cant. Aprobadas" );
+		printf("\n+----------------------------------------+\n");
+		
+		iJugSolicitado = JugSolic->tope;
+			
+		if(JugSolic->tope!=NULL)
+		{
+	        while(iJugSolicitado!=NULL){
+	            printf("\n %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
+	            iJugSolicitado = iJugSolicitado->siguiente;
+	        }		
+			
+		}else{
+			printf( "\n***No se han encontrado Cartas***");
+		}
+				
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas***");
+	}
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -2571,6 +2716,77 @@ void rechazadasPorAnno(struct ListaCartas *LCartas){
 	printf("*********************************\n");
 	printf("  Cartas rechazadas por Anno\n" );
 	printf("*********************************\n");
+	
+		struct Carta *iJugCarta;
+	struct JugSolicitado *iJugSolicitado, *nJugSolicitado;
+	
+	struct PilaJugSolicitados *JugSolic;
+	JugSolic = (struct PilaJugSolicitados *) malloc(sizeof(struct PilaJugSolicitados));
+	JugSolic->tope = NULL;
+
+    //Conteo de las Juguetes Solicitados	
+	if(LCartas->inicio!=NULL)
+	{
+        iJugCarta = LCartas->inicio;
+		while( iJugCarta!= NULL){
+			
+			if(JugSolic->tope==NULL)
+			{
+				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+					
+				strcpy(nJugSolicitado->anno, iJugCarta->anno);
+				if (strcmp(iJugCarta->estado,"R")==0)
+					nJugSolicitado->cantidad = 1;
+				
+				nJugSolicitado->siguiente = JugSolic->tope;
+				JugSolic->tope = nJugSolicitado;
+			}else{
+				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
+				
+					if(strcmp(iJugCarta->anno,iJugSolicitado->anno)==0){
+						if (strcmp(iJugCarta->estado,"R")==0)
+							iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
+						break;
+					}else{
+						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+						
+						strcpy(nJugSolicitado->anno, iJugCarta->anno);
+						if (strcmp(iJugCarta->estado,"R")==0)
+							nJugSolicitado->cantidad = 1;
+						
+						nJugSolicitado->siguiente = JugSolic->tope;
+						JugSolic->tope = nJugSolicitado;
+						break;
+					}
+					
+				}
+			}
+						
+			iJugCarta = iJugCarta->siguiente;
+		}
+		
+		//Mostrar cantidades contadas
+		printf("\n+----------------------------------------+\n");
+		printf( "  Anno de la Carta    -   Cant. Rechazadas" );
+		printf("\n+----------------------------------------+\n");
+		
+		iJugSolicitado = JugSolic->tope;
+			
+		if(JugSolic->tope!=NULL)
+		{
+	        while(iJugSolicitado!=NULL){
+	            printf("\n %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
+	            iJugSolicitado = iJugSolicitado->siguiente;
+	        }		
+			
+		}else{
+			printf( "\n***No se han encontrado Cartas***");
+		}
+				
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas***");
+	}
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -2773,7 +2989,7 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 		if(JugSolic->tope!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
-	            printf("\n %s   -   %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
+	            printf("\n %s       -         %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
 	            iJugSolicitado = iJugSolicitado->siguiente;
 	        }		
 			
