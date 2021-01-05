@@ -52,7 +52,7 @@ void eliminarNino(struct ListaNinos *LNinos);
 int validarCedula(struct ListaNinos *LNinos, const char identificacion []);
 void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LComp);
 void mostrarComp(struct ListaComport *LComp);
-void validarComp(struct ListaComport *LComp, const char identificacion []);
+int validarComp(struct ListaComport *LComp, const char identificacion []);
 
 //Procedimientos para gestion de de Ayudantes de santa
 void registrarAyudante(struct ListaAyudantes *LAyudantes);
@@ -69,17 +69,33 @@ struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]);
 void eliminarJuguete();
 
 //Procedimientos para gestion de Cartas para Santa
+
+	//  Funciones para registro de cartas
 void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos);
 int validarCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno []);
 int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
+
+
+	//  Funciones para modificar las cartas
 void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos);
-void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, struct ListaJugCarta *LJugCarta);
-void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, const char identificacion [], const char anno []);
 void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
 int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
 void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
 int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
+
+
+	//  Funciones para mostrar/conultar lascartas
+void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, struct ListaJugCarta *LJugCarta);
+void mostrarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
+void mostrarListaDeDeseos(struct ListaDeseos *LDeseos, const char identificacion [], const char anno []);
 void mostrarListaCartas(struct ListaCartas *LCartas);
+
+	//  Funciones para procesar las cartas
+void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaAyudantes *LAyudantes, struct ListaComport *LComp);
+void mostrarCartasPorAnno(struct ListaCartas *LCartas, struct ListaNinos *LNinos, const char anno []);
+void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre);
+void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno [], const char estado [], const char id_ayudante [] );
+void obtenerEstadoCarta(struct ListaCartas *LCartas, const char id [], const char anno [], char *estado);
 
 //Procedimientos para el Analisis de Datos
 void juguetesPorAnno(struct ListaJugCarta *LJugCarta);
@@ -206,10 +222,10 @@ struct PilaCartasProcesadas{
 	CartaProcesada *tope;
 };
 
+
 struct JugSolicitado{
     char nombre_juguete[50];
     char anno[50];
-    char estado[50];
     int cantidad;
     JugSolicitado *siguiente; 
 };
@@ -287,7 +303,7 @@ void MenuPrincipal(){
                 break;
 			case '4': GestionAyudantes(LAyudantes);
                 break;
-            case '5': GestionCartas(LNinos, LJugCartas, LCartas, LDeseos);
+            case '5': GestionCartas(LNinos, LJugCartas, LCartas, LDeseos, LAyudantes, LComp);
 				break;
 			case '6': AnalisisDeDatos(LJugCartas, LCartas, LComp);
 				break;
@@ -505,7 +521,7 @@ void GestionAyudantes(struct ListaAyudantes *LAyudantes){
 			 consulta y procesamiento de Cartas para Santa)
 	Restricciones: Solo se deben ingresar números en un rango de 0 a 4.
 */
-void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos){
+void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, struct ListaAyudantes *LAyudantes, struct ListaComport *LComp){
 	char opcion, ch;	
 
 	do{
@@ -532,7 +548,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 					break;
 				case '3': consultarCarta(LCartas, LDeseos, LJugCartas);
 					break;
-				case '4': MenuPrincipal();
+				case '4': procesarCartas(LCartas, LNinos, LJugCartas, LAyudantes, LComp);
 					break;
 				case '0': 
 					break;
@@ -564,7 +580,7 @@ void AnalisisDeDatos(struct ListaJugCarta *LJugCarta, struct ListaCartas *LCarta
 		printf("      Analisis de Datos\n");
 		printf("*********************************\n");
 		printf("\n 0. REGRESAR al Menu Principal.");
-		printf("\n 1. Cantidad de juguetes solicitados por año ");
+		printf("\n 1. Cantidad de juguetes solicitados por anno ");
 		printf("\n 2. Lugar donde se solicitaron mas y menos juguetes ");
 		printf("\n 3. Cantidad de ninos a los que se les aprobo su carta por anno ");
 		printf("\n 4. Cantidad de ninos a los que se les rechazo su carta por anno ");
@@ -1105,50 +1121,6 @@ void mostrarComp(struct ListaComport *LComp){
 		
 	}else{
 		printf( "\n***No se han encontrado Ninos registrados***");
-	}
-
-}
-
-/*
-	Entradas: Una lista de tipo ListaComport para tomar los datos de comportamiento de un Nino/Nina
-	Salidas: Se muestran los datos un nodo de tipo Comportamiento de la lista recibida.
-	Restricciones: Ninguna.
-*/
-void validarComp(struct ListaComport *LComp, const char identificacion []){
-
-	struct Comportamiento *iComp;
-	int contador=0, comp=3;
-	
-	printf("\n+----------------------------+\n");
-	printf( " Validacion de Comportamiento" );
-	printf("\n+----------------------------+\n");
-	
-
-	if(LComp->inicio!=NULL)
-	{
-        iComp = LComp->inicio;
-        while(iComp!=NULL){
-            comp=strcmp(identificacion,iComp->cedula_nino);
-	        if(comp==0)
-			{
-				comp=strcmp("2",iComp->indicacion);
-		        if(comp==0)
-				{
-					contador++;
-				}
-			}
-			iComp = iComp->siguiente;
-
-        }		
-		
-	}else{
-		printf( "\n***No se han encontrado Ninos registrados***");
-	}
-	
-	if(contador>=6){
-		printf( "\n***El nino(a) tiene 6 o mas comportamiento MALOS)***");
-	}else{
-		printf( "\n***El nino(a) tiene menos de 6 comportamiento MALOS)***");
 	}
 
 }
@@ -2006,7 +1978,8 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
        
-	mostrarCarta(LJugCarta, LDeseos, carta->identificacion, carta->anno);
+	mostrarCarta(LCartas, LJugCarta, carta->identificacion, carta->anno);
+	mostrarListaDeDeseos(LDeseos, carta->identificacion, carta->anno);
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -2276,7 +2249,8 @@ void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta
 	
         if(validarCarta(LCartas, identificacion, anno)==1){
         	
-            mostrarCarta(LJugCarta, LDeseos, identificacion, anno);
+            mostrarCarta(LCartas, LJugCarta, identificacion, anno);
+			mostrarListaDeDeseos(LDeseos, identificacion, anno);
 
 			do{
 				printf("\n-->Elija la operacion que desea realizar?:");
@@ -2411,8 +2385,9 @@ void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, st
 	
         if(validarCarta(LCartas, identificacion, anno)==1){
         	
-            mostrarCarta(LJugCarta, LDeseos, identificacion, anno);
-	
+            mostrarCarta(LCartas, LJugCarta, identificacion, anno);
+			mostrarListaDeDeseos(LDeseos, identificacion, anno);
+			
 		}else{
 			printf("\n**No se tiene una carta para la identificacion y el anno ingresados**\n ");
 		}
@@ -2426,19 +2401,23 @@ void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, st
 }
 
 /*
-	Entradas: Una lista de tipo ListaCarta, otra ListaJugCarta y otra ListaDeseos, un char identificacion y otro Anno, para tomar los datos de los juguetes de una Carta para 
-			   Santa y una lista de deseos
-	Salidas: Se muestran los datos de una Carta para Santa y de una Lista de Deseos en caso de que exista, para el anno e identificación ingresados 
+	Entradas: Una lista de tipo ListaJugCarta  un char identificacion y otro Anno, para tomar los datos de los juguetes de una Carta para Santa 
+	Salidas: Se muestran los datos de una Carta para Santa en caso de que exista, para el anno e identificación ingresados 
 	Restricciones: Ninguna.
 */
-void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, const char identificacion [], const char anno []){
+void mostrarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []){
 
 	struct JuguetesCarta *iJugCarta = LJugCarta->inicio;
+	int registrados=0;
+	
+	char estado[30];
+	
+	obtenerEstadoCarta(LCartas, identificacion, anno, estado);
 	
 	printf("\n\n+-------------------------------------------------------------------+\n");
 	printf( "                        CARTA PARA SANTA" );
 	printf("\n+-------------------------------------------------------------------+\n");
-	printf("\n+Identificacion: %s    -    Anno: %s\n", identificacion, anno);
+	printf("\n  Identificacion: %s   -   Anno: %s   -   Estado: %s\n", identificacion, anno, estado);
 	printf("\n+-------------------------------------------------------------------+\n");
 	
 	if(LJugCarta->inicio!=NULL)
@@ -2447,16 +2426,33 @@ void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, 
         printf(" Nombre del juguete     -    Estado del Juguete\n" ); 
 
         while(iJugCarta!=NULL){
-            printf("\n %s     -      %s  \n" , iJugCarta->nombre_juguete, iJugCarta->estado);
+            if(strcmp(iJugCarta->identificacion, identificacion)==0 && strcmp(iJugCarta->anno,anno)==0){
+            	printf("\n %s     -      %s  \n" , iJugCarta->nombre_juguete, iJugCarta->estado);
+            	registrados=1;
+			}	
             iJugCarta = iJugCarta->siguiente;
-        }
-        printf("\n+-------------------------------------------------------------------+\n");		
-		
+            
+        }		
+		if(registrados==0){
+			printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");
+		}
 	}else{
-		printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");
-		printf("\n+-------------------------------------------------------------------+\n");
+		printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");		
 	}
-	
+	printf("\n+-------------------------------------------------------------------+\n");
+		
+
+}
+
+/*
+	Entradas: Una lista de tipo ListaDeseos, un char identificacion y otro Anno, para tomar los datos de los juguetes de una lista de deseos
+	Salidas: Se muestran los datos de una Lista de Deseos en caso de que exista, para el anno e identificación ingresados 
+	Restricciones: Ninguna.
+*/
+void mostrarListaDeDeseos(struct ListaDeseos *LDeseos, const char identificacion [], const char anno []){
+
+	int registrados=0;
+		
 	struct Deseo *iJugDeseo = LDeseos->inicio;
 	
 	printf("\n+-------------------------------------------------------------------+\n");
@@ -2469,15 +2465,23 @@ void mostrarCarta(struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos, 
         printf(" Nombre del juguete \n" ); 
 
         while(iJugDeseo!=NULL){
-            printf("\n %s   \n" , iJugDeseo->nombre_juguete);
+            if(strcmp(iJugDeseo->identificacion, identificacion)==0 && strcmp(iJugDeseo->anno,anno)==0){
+            	printf("\n %s   \n" , iJugDeseo->nombre_juguete);
+            	registrados=1;
+			}
             iJugDeseo = iJugDeseo->siguiente;
         }
-        printf("\n+-------------------------------------------------------------------+\n");		
+        
+        if(registrados==0){
+			printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
+		}	
+				
 		
 	}else{
 		printf( "\n***No se han encontrado Juguetes registrados en la Lista de Deseos***");
-		printf("\n+-------------------------------------------------------------------+\n");
+		
 	}
+	printf("\n+-------------------------------------------------------------------+\n");
 	
 }
 
@@ -2506,6 +2510,337 @@ void mostrarListaCartas(struct ListaCartas *LCartas){
 	}
 	
 	printf("\n+-------------------------------------------------------------------+\n");
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void mostrarCartasPorAnno(struct ListaCartas *LCartas, struct ListaNinos *LNinos, const char anno []){
+
+	struct Carta *iCarta = LCartas->inicio;
+	
+	char nombre[50];
+	
+	printf("\n+---------------------------------------+\n");
+	printf( "       CARTAS PARA SANTA REGISTRADAS\n" );
+	printf( "              ANNO: %s\n",  anno);
+	printf("+---------------------------------------+\n");
+		
+	if(LCartas->inicio!=NULL)
+	{
+		printf("\n  Identificacion  -  Nombre  -  Estado: \n");
+        while(iCarta!=NULL){
+            if(strcmp(iCarta->anno, anno)==0 && strcmp(iCarta->estado, "Solicitada")==0){
+            	printf("\n %s  -   ", iCarta->identificacion);
+            	obtenerNombre(LNinos, iCarta->identificacion ,nombre);
+            	printf("%s  -   ", nombre);
+            	printf("%s\n", iCarta->estado);
+            	
+			}
+            iCarta = iCarta->siguiente;
+        }		
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
+	
+	printf("\n+---------------------------------------+\n");
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre){
+
+	struct Nino *iNino;
+	int hallado=0, comp=3;
+	
+    if(LNinos->inicio!=NULL)
+	{
+        iNino = LNinos->inicio;
+        while(iNino!=NULL){
+            
+            comp=strcmp(id,iNino->cedula);
+            if(comp==0){
+            	
+            	strcpy(nombre, iNino->nombre_completo);
+            	   
+                hallado=1;
+				break;
+			}
+			iNino = iNino->siguiente;
+
+        }
+        
+		if(hallado==0){
+			printf( "\n***No se ha encontrado un Nino/Nina para la identificacion ingresada***");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos(as) registrados***");
+	}
+}
+
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
+void obtenerEstadoCarta(struct ListaCartas *LCartas, const char id [], const char anno [], char *estado){
+
+	struct Carta *iCarta;	
+	int hallado=0;
+	
+    if(LCartas->inicio!=NULL)
+	{
+        iCarta = LCartas->inicio;
+        while(iCarta!=NULL){
+
+            if(strcmp(id,iCarta->identificacion)==0 && strcmp(anno,iCarta->anno)==0){
+            	
+            	strcpy(estado, iCarta->estado);
+            	   
+                hallado=1;
+				break;
+			}
+			iCarta = iCarta->siguiente;
+
+        }
+        
+		if(hallado==0){
+			printf( "\n***No se ha encontrado una Cartas para Santa con la informacion ingresada***");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registrados***");
+	}
+}
+
+
+/*
+	Entradas: Una lista de tipo ListaComport para tomar los datos de comportamiento de un Nino/Nina
+	Salidas: Se muestran los datos un nodo de tipo Comportamiento de la lista recibida.
+	Restricciones: Ninguna.
+*/
+int validarComp(struct ListaComport *LComp, const char identificacion []){
+
+	struct Comportamiento *iComp;
+	int contador=0, comp=3;
+	
+	printf("\n\n+-------------------------------------------------------------------+\n");
+	printf( "                    Validacion de Comportamiento" );
+	printf("\n\n+-------------------------------------------------------------------+\n");
+	
+	if(LComp->inicio!=NULL)
+	{
+        iComp = LComp->inicio;
+        while(iComp!=NULL){
+            comp=strcmp(identificacion,iComp->cedula_nino);
+	        if(comp==0)
+			{
+				comp=strcmp("2",iComp->indicacion);
+		        if(comp==0)
+				{
+					contador++;
+				}
+			}
+			iComp = iComp->siguiente;
+
+        }		
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos registrados***");
+	}
+	
+	if(contador>=1){
+		printf( "\n***El nino(a) tiene 6 o MAS comportamiento MALOS***");
+		printf("\n\n+-------------------------------------------------------------------+\n");
+		return 1;
+	}else{
+		printf( "\n-->El nino(a) tiene MENOS de 6 comportamiento MALOS");
+		printf("\n\n+-------------------------------------------------------------------+\n");
+		return 0;
+	}
+
+}
+
+
+/*
+	Entradas:  
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, 
+					struct ListaAyudantes *LAyudantes, struct ListaComport *LComp){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Procesar una Carta para Santa\n" );
+	printf("*********************************\n");
+	
+	struct JuguetesCarta *iJugCarta ;
+	char identificacion[20], anno[10], id_ayudante[50], opcion[3];
+	int res=0;
+	
+	if(LCartas->inicio==NULL){
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}else if (LAyudantes->inicio==NULL){
+		printf( "\n***No se han encontrado Ayudantes de Santa registrados***");
+	}else{
+		
+		//Mostrar lista de niños que registraron una carta (con Identificación y nombre)
+		printf("\n-->Ingrese el Anno que corresponda consultar:\n");
+		gets(anno);
+		
+		mostrarCartasPorAnno(LCartas, LNinos, anno);
+		
+		do{ //Solicitar identificacion del niño
+			printf("\n-->Ingrese el numero de Identificacion del Nino(a): (Ej. 105450656) \n");
+			gets(identificacion);
+			
+			if(validarCarta(LCartas, identificacion, anno)!=1){
+			    printf("\n**No se tiene registrada una carta para la identificación y anno ingresados**\n ");
+			}else{//Mostrar detalle de la carta para ese año e identificación
+			    mostrarCarta(LCartas, LJugCarta, identificacion, anno);
+				break;
+			}
+		
+		}while(1);
+
+		do{ //Registrar los datos de Ayudante que proceso la carta
+
+			printf("\n Ingrese la Identificacion del Ayudante de Santa: (Ejm.105450656) \n");
+			gets(id_ayudante);
+		
+	        if((validarIdentificacion(LAyudantes, id_ayudante ))!=1){
+	            printf("\n**No se tiene un Ayudante registrado con la Identificacion ingresada**\n ");
+	        }else{
+	            break;
+	        }
+	        
+	    }while(1);
+	    
+	    res=validarComp(LComp,identificacion);
+	    
+	    if(res==1){ //+ de 6 malos comportamientos
+	    	//Cambiar estado Carta = Cancelada 
+	    	cambiarEstadoCarta(LCartas, identificacion, anno, "Cancelada", id_ayudante);
+	    	
+	    	//Rechazar todos los Juguetes
+	    	iJugCarta = LJugCarta->inicio;
+			int registrados=0;
+
+			if(LJugCarta->inicio!=NULL)
+			{
+		        
+		        while(iJugCarta!=NULL){
+		            if(strcmp(iJugCarta->identificacion, identificacion)==0 && strcmp(iJugCarta->anno,anno)==0){
+						registrados=1;					
+						
+						strcpy(iJugCarta->estado, "Rechazado"); 
+					}	
+		            iJugCarta = iJugCarta->siguiente;
+		            
+		        }		
+				if(registrados==0){
+					printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");
+				}
+			}else{
+				printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");		
+			}
+			
+	    	//Enviar Correo
+	    	
+		}else{ //- de 6 malos comportamientos 
+			
+			//Consultar por cada juguete
+			iJugCarta = LJugCarta->inicio;
+			int registrados=0;
+
+			if(LJugCarta->inicio!=NULL)
+			{
+		        
+		        while(iJugCarta!=NULL){
+		            if(strcmp(iJugCarta->identificacion, identificacion)==0 && strcmp(iJugCarta->anno,anno)==0){
+		            	printf("\nNombre del juguete: %s   -   Estado del Juguete: %s\n" , iJugCarta->nombre_juguete, iJugCarta->estado ); 
+						
+						registrados=1;
+						
+						do{ 
+							printf("\n-->Desea Aprobar este juguete?:");
+					    	printf("\nDigite 1-Si"); 
+							printf("\n       2-No\n<--");
+							gets(opcion);
+							
+							if(strcmp(opcion ,"1")==0){
+			            		strcpy(iJugCarta->estado, "Listo para entregar"); 
+			            		printf("\n   -->Juguete listo para entregar" );
+			            		break;
+							}else if(strcmp(opcion ,"2")==0){
+								strcpy(iJugCarta->estado, "Rechazado"); 
+								printf("\n   -->Juguete rechazado\n " );
+								break;
+							}else{
+								printf("\n   **Opción no valida**\n ");
+							}
+
+					    }while(1);
+						printf("\n\n+-------------------------------------------------------------------+\n");
+					}	
+		            iJugCarta = iJugCarta->siguiente;
+
+		        }		
+				if(registrados==0){
+					printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");
+				}
+			}else{
+				printf( "\n***No se han encontrado Juguetes registrados en la Carta para Santa***");		
+			}
+			
+			//Cambiar estado Carta = Procesada 
+			cambiarEstadoCarta(LCartas, identificacion, anno, "Procesada", id_ayudante);
+			
+		}
+		
+		printf("\n+++ Carta procesada correctamente +++" );
+			
+	}
+		
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
+}
+
+/*
+	Entradas:  
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno [], const char estado [], const char id_ayudante [] ){
+	struct Carta *iCarta = LCartas->inicio;
+	
+	if(LCartas->inicio!=NULL)
+	{
+        while(iCarta!=NULL){
+            if(strcmp(iCarta->identificacion, identificacion)==0 && strcmp(iCarta->anno,anno)==0){			
+				
+				strcpy(iCarta->estado, estado); 
+				strcpy(iCarta->procesada_por, id_ayudante); 
+				
+				break;
+			}
+			iCarta = iCarta->siguiente;
+        }		
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
+	
 }
 
 
@@ -2579,7 +2914,7 @@ void juguetesPorAnno(struct ListaJugCarta *LJugCarta){
 		if(JugSolic->tope!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
-	            printf("\n %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
+	            printf("\n         %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
 	            iJugSolicitado = iJugSolicitado->siguiente;
 	        }		
 			
@@ -2647,7 +2982,7 @@ void aprobadasPorAnno(struct ListaCartas *LCartas){
 				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 					
 				strcpy(nJugSolicitado->anno, iJugCarta->anno);
-				if (strcmp(iJugCarta->estado,"A")==0)
+				if (strcmp(iJugCarta->estado,"Procesada")==0)
 					nJugSolicitado->cantidad = 1;
 				
 				nJugSolicitado->siguiente = JugSolic->tope;
@@ -2656,14 +2991,14 @@ void aprobadasPorAnno(struct ListaCartas *LCartas){
 				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
 				
 					if(strcmp(iJugCarta->anno,iJugSolicitado->anno)==0){
-						if (strcmp(iJugCarta->estado,"A")==0)
+						if (strcmp(iJugCarta->estado,"Procesada")==0)
 							iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
 						break;
 					}else{
 						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 						
 						strcpy(nJugSolicitado->anno, iJugCarta->anno);
-						if (strcmp(iJugCarta->estado,"A")==0)
+						if (strcmp(iJugCarta->estado,"Procesada")==0)
 							nJugSolicitado->cantidad = 1;
 						
 						nJugSolicitado->siguiente = JugSolic->tope;
@@ -2687,7 +3022,7 @@ void aprobadasPorAnno(struct ListaCartas *LCartas){
 		if(JugSolic->tope!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
-	            printf("\n %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
+	            printf("\n         %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
 	            iJugSolicitado = iJugSolicitado->siguiente;
 	        }		
 			
@@ -2735,7 +3070,7 @@ void rechazadasPorAnno(struct ListaCartas *LCartas){
 				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 					
 				strcpy(nJugSolicitado->anno, iJugCarta->anno);
-				if (strcmp(iJugCarta->estado,"R")==0)
+				if (strcmp(iJugCarta->estado,"Cancelada")==0)
 					nJugSolicitado->cantidad = 1;
 				
 				nJugSolicitado->siguiente = JugSolic->tope;
@@ -2744,14 +3079,14 @@ void rechazadasPorAnno(struct ListaCartas *LCartas){
 				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
 				
 					if(strcmp(iJugCarta->anno,iJugSolicitado->anno)==0){
-						if (strcmp(iJugCarta->estado,"R")==0)
+						if (strcmp(iJugCarta->estado,"Cancelada")==0)
 							iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
 						break;
 					}else{
 						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 						
 						strcpy(nJugSolicitado->anno, iJugCarta->anno);
-						if (strcmp(iJugCarta->estado,"R")==0)
+						if (strcmp(iJugCarta->estado,"Cancelada")==0)
 							nJugSolicitado->cantidad = 1;
 						
 						nJugSolicitado->siguiente = JugSolic->tope;
@@ -2775,7 +3110,7 @@ void rechazadasPorAnno(struct ListaCartas *LCartas){
 		if(JugSolic->tope!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
-	            printf("\n %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
+	            printf("\n         %s   -   %d", iJugSolicitado->anno, iJugSolicitado->cantidad);
 	            iJugSolicitado = iJugSolicitado->siguiente;
 	        }		
 			
@@ -2791,6 +3126,7 @@ void rechazadasPorAnno(struct ListaCartas *LCartas){
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
+
 
 /*
 	Entradas: 
@@ -2823,7 +3159,7 @@ void comportRegistrados(struct ListaComport *LComp){
 
         }
 
-		printf("\n+-----------------------------------------+\n");
+		printf("+-----------------------------------------+\n");
 		printf( " -->Total Comportamientos BUENOS: %d", compBuenos );
 		printf("\n+-----------------------------------------+\n");
 		printf( " -->Total Comportamientos MALOS: %d", compMalos );
@@ -2847,7 +3183,7 @@ void cartasPorAyudante(struct ListaCartas *LCartas){
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
-	printf(" Cartas procesadas según Ayudante\n" );
+	printf(" Cartas procesadas segun Ayudante\n" );
 	printf("*********************************\n");
 		
 	struct Carta *iCarta = LCartas->inicio;
@@ -2904,7 +3240,7 @@ void cartasPorAyudante(struct ListaCartas *LCartas){
 		if(CProc->tope!=NULL)
 		{
 	        while(iCartaProc!=NULL){
-	            printf("\n %s   -   %d", iCartaProc->procesada_por, iCartaProc->cantidad);
+	            printf("\n   %s   -   %d", iCartaProc->procesada_por, iCartaProc->cantidad);
 	            iCartaProc = iCartaProc->siguiente;
 	        }		
 			
@@ -2989,7 +3325,7 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 		if(JugSolic->tope!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
-	            printf("\n %s       -         %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
+	            printf("\n     %s   -   %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
 	            iJugSolicitado = iJugSolicitado->siguiente;
 	        }		
 			
