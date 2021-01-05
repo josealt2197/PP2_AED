@@ -486,7 +486,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 		printf("\n 2. MODIFICAR una Carta para Santa.");
 		printf("\n 3. CONSULTAR una Carta para Santa.");
 		printf("\n 4. PROCESAR una Carta para Santa.");
-		printf("\n\n<--Digite una opcion (0-3): ");	
+		printf("\n\n<--Digite una opcion (0-4): ");	
 		opcion=getchar();
 		
 		while((ch = getchar()) != EOF && ch != '\n');
@@ -595,6 +595,16 @@ void registrarNinos(struct ListaNinos *LNinos){
     gets(nino->nombre_usuario);
     printf("\n-->Ingrese el Correo Electronico: (Ej. juanp123@correo.com) \n");
     gets(nino->correo);
+    printf("\n+---------------------------------------------+\n");
+	printf( "       Lista de Domicilios" );
+	printf("\n+---------------------------------------------+\n");
+	printf("\n Codigo          Lugar        Codigo Postal ");
+	printf("\n+---------------------------------------------+\n");
+	printf("\n DOM-001   El Carmen, Cartago		  30103 ");
+	printf("\n DOM-002   Pocosol, San Carlos      21013");
+	printf("\n DOM-003   San Pedro, San Jose      11501 ");
+	printf("\n DOM-004   La Cruz, Guanacaste      51001");
+	printf("\n+---------------------------------------------+\n");
     printf("\n-->Ingrese el Codigo del Domicilio (Ej. DOM-001): \n");
     gets(nino->codigo_domicilio);
     printf("\n-->Ingrese la Fecha de Nacimiento (Ej. 12/12/2000) \n");
@@ -620,7 +630,9 @@ void registrarNinos(struct ListaNinos *LNinos){
 		LNinos->final = LNinos->final->siguiente;
 	}	
     
-	mostrarNinos(LNinos);
+//	mostrarNinos(LNinos);
+	
+	printf("\n+++ Informacion registrada correctamente +++" );
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -683,8 +695,9 @@ void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LCo
 			LComp->final = LComp->final->siguiente;
 		}	
 	    
-		mostrarComp(LComp);
-		validarComp(LComp, comport->cedula_nino);
+//		mostrarComp(LComp);
+//		validarComp(LComp, comport->cedula_nino);
+		printf("\n+++ Informacion registrada correctamente +++" );
 	
 	}else{
 		printf( "\n***No se han encontrado Ninos(as) registrados***");
@@ -826,7 +839,16 @@ void modificarNino(struct ListaNinos *LNinos){
 			    }while(1);
                 
                 if(resp==1){
-                	printf("\n-->Ingrese el Código del Domicilio (Ej. DOM-001): \n");
+                	printf("\n+---------------------------------------------+\n");
+					printf( "       Lista de Domicilios" );
+					printf("\n+---------------------------------------------+\n");
+					printf("\n Codigo          Lugar        Codigo Postal ");
+					printf("\n+---------------------------------------------+\n");
+					printf("\n DOM-001   El Carmen, Cartago		  30103 ");
+					printf("\n DOM-003   San Pedro, San Jose      11501 ");
+					printf("\n DOM-004   La Cruz, Guanacaste      51001");
+					printf("\n+---------------------------------------------+\n");
+                	printf("\n-->Ingrese el Codigo del Domicilio (Ej. DOM-001): \n");
 			    	gets(domicilio);	
 					strcpy(iNino->codigo_domicilio,domicilio);
 				}
@@ -1053,7 +1075,7 @@ void validarComp(struct ListaComport *LComp, const char identificacion []){
 	int contador=0, comp=3;
 	
 	printf("\n+----------------------------+\n");
-	printf( " Validación de Comportamiento" );
+	printf( " Validacion de Comportamiento" );
 	printf("\n+----------------------------+\n");
 	
 
@@ -1122,7 +1144,7 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
     gets(ayudante->puesto);
     printf("\n Ingrese la funcion que cumple en ese puesto: (Ejm. Colaboro con...) \n");
     gets(ayudante->funcionPuesto);
-    printf("\n Ingrese la fecha en la que empezo a trabajar con santa: (Ejm. 20/12/2020) \n");
+    printf("\n Ingrese la fecha en la que empezo a trabajar con Santa: (Ejm. 20/12/2020) \n");
     gets(ayudante->fechaComienzo);
     
     if(LAyudantes->inicio == NULL) 
@@ -1140,6 +1162,11 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 		LAyudantes->final->siguiente->anterior = LAyudantes->final; 
 		LAyudantes->final = LAyudantes->final->siguiente;
 	}
+	
+	printf("\n+++ Informacion registrada correctamente +++" );
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
 }
 
 /*
@@ -1202,7 +1229,7 @@ void modificarAyudante(struct ListaAyudantes *LAyudantes){
                 printf("\n  Nombre: %s \n", ayudante->nombre);
                 printf("\n  Puesto: %s \n", ayudante->puesto);
                 printf("\n  Funcion que desempeña en el puesto: %s \n", ayudante->funcionPuesto);
-                printf("\n  Fecha en que empezo a trabajar con santa: %s \n", ayudante->fechaComienzo );
+                printf("\n  Fecha en que empezo a trabajar con Santa: %s \n", ayudante->fechaComienzo );
                 printf("+-------------------------------------+\n");
                 
                 //Modificar el Nombre Completo
@@ -1278,11 +1305,11 @@ void modificarAyudante(struct ListaAyudantes *LAyudantes){
         }
         
 		if(hallado==0){
-			printf( "\n***No se ha encontrado un Nino/Nina para la identificacion ingresada***");
+			printf( "\n***No se ha encontrado un Ayudante para la identificacion ingresada***");
 		}
 		
 	}else{
-		printf( "\n***No se han encontrado Ninos registrados***");
+		printf( "\n***No se han encontrado Ayudantes registrados***");
 	}
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -1349,17 +1376,17 @@ void eliminarAyudante(struct ListaAyudantes *LAyudantes){
 		}
 		
 		if(hallado==0){
-			printf( "\n***No se ha encontrado un AYUDANTE para la identificacion ingresada***");
+			printf( "\n***No se ha encontrado un Ayudante para la identificacion ingresada***");
 		}
 		
 		if(aux != NULL)
 		{
-			printf("\n-->Se ha eliminado el AYUDANTE con la identificacion ingresada");
+			printf("\n-->Se ha eliminado el Ayudante con la identificacion ingresada");
 			free(aux);
 		}			
 	
 	}else{
-		printf( "\n***No se han encontrado AYUDANTES registrados***");
+		printf( "\n***No se han encontrado Ayudantes registrados***");
 	}
 	
 
@@ -1387,7 +1414,7 @@ void registrarJuguetes(){
 	struct Juguete *nuevo;
     nuevo = (struct Juguete *) malloc (sizeof(struct Juguete));
 
-    printf("\n-->Ingrese el Codigo del Juguete: (Ej. 001) \n");
+    printf("\n-->Ingrese el Codigo del Juguete: (Ej. JUG-001) \n");
     gets(nuevo->codigo);
     
     do{
@@ -1442,13 +1469,15 @@ void registrarJuguetes(){
             
     }
     
-	printf("\n+------------------------------+\n");
-	printf( "      Lista de Juguetes" );
-	printf("\n+------------------------------+\n");
-	
-	printf(" Codigo - Nombre \n" ); 
-	
-	mostrarJuguetes(jugueteRaiz);
+//	printf("\n+------------------------------+\n");
+//	printf( "      Lista de Juguetes" );
+//	printf("\n+------------------------------+\n");
+//	
+//	printf(" Codigo - Nombre \n" ); 
+//	
+//	mostrarJuguetes(jugueteRaiz);
+
+	printf("\n+++ Informacion registrada correctamente +++" );
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -1740,7 +1769,8 @@ void eliminarJuguete(){
 				}
 		
 				if (strcmp(opcion ,"1")==0){
-					jugueteRaiz = borrarJuguete(jugueteRaiz, nombreJuguete);
+//					jugueteRaiz = borrarJuguete(jugueteRaiz, nombreJuguete);
+					printf("\n-->Se ha eliminado el Ayudante con la identificacion ingresada");
 					break;						
 				}
 			
@@ -1754,7 +1784,7 @@ void eliminarJuguete(){
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
 	
-	mostrarJuguetes(jugueteRaiz);
+//	mostrarJuguetes(jugueteRaiz);
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -1848,7 +1878,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 			LCartas->final = LCartas->final->siguiente;
 		}
 		
-		mostrarListaCartas(LCartas);
+//		mostrarListaCartas(LCartas);
 								
 		printf("*********************************\n");
 		printf("        Agregar Juguetes\n" );
