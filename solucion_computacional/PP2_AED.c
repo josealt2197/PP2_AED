@@ -29,6 +29,12 @@ typedef struct ListaCartas ListaCartas;
 typedef struct Deseo Deseo;
 typedef struct ListaDeseos ListaDeseos;
 
+typedef struct CartaProcesada CartaProcesada;
+typedef struct PilaCartasProcesadas PilaCartasProcesadas;
+
+typedef struct JugSolicitado JugSolicitado;
+typedef struct PilaJugSolicitados PilaJugSolicitados;
+
 //Procedimientos para Menus de Opciones
 void MenuPrincipal();
 void GestionNinos();
@@ -190,6 +196,25 @@ struct ListaDeseos{
 	Deseo *final;
 };
 
+struct CartaProcesada{
+    char procesada_por[50];
+    int cantidad;
+    CartaProcesada *siguiente; 
+};
+
+struct PilaCartasProcesadas{
+	CartaProcesada *tope;
+};
+
+struct JugSolicitado{
+    char nombre_juguete[50];
+    int cantidad;
+    JugSolicitado *siguiente; 
+};
+
+struct PilaJugSolicitados{
+	JugSolicitado *tope;
+};
 
 /****************************************************************Menús de Opciones***********************************************************************************************/
 
@@ -262,7 +287,7 @@ void MenuPrincipal(){
                 break;
             case '5': GestionCartas(LNinos, LJugCartas, LCartas, LDeseos);
 				break;
-			case '6': AnalisisDeDatos();
+			case '6': AnalisisDeDatos(LJugCartas, LCartas, LComp);
 				break;
 			case '7': exit(1);
 				break;
@@ -525,7 +550,7 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 	Salidas: Llamada a las demás funciones de Analisis de Datos
 	Restricciones: Solo se deben ingresar números en un rango de 0 a 7.
 */
-void AnalisisDeDatos(struct ListaJugCarta *LJugCartas, struct ListaCartas *LCartas, struct ListaComport *LComp){
+void AnalisisDeDatos(struct ListaJugCarta *LJugCarta, struct ListaCartas *LCartas, struct ListaComport *LComp){
 	char opcion, ch;	
 
 	do{
@@ -549,7 +574,7 @@ void AnalisisDeDatos(struct ListaJugCarta *LJugCartas, struct ListaCartas *LCart
 		
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
-				case '1': juguetesPorAnno(LJugCartas);
+				case '1': juguetesPorAnno(LJugCarta);
 					break;
 				case '2': masMenosCartas(LCartas);
 					break;
@@ -561,7 +586,7 @@ void AnalisisDeDatos(struct ListaJugCarta *LJugCartas, struct ListaCartas *LCart
 					break;
 				case '6': cartasPorAyudante(LCartas);
 					break;
-				case '7': juguetesMasPedidos(LJugCartas);
+				case '7': juguetesMasPedidos(LJugCarta);
 					break;
 				case '0': 
 					break;
@@ -2564,6 +2589,34 @@ void comportRegistrados(struct ListaComport *LComp){
 	printf("    Comportamientos Registrados\n" );
 	printf("*********************************\n");
 	
+	struct Comportamiento *iComp;
+	int compBuenos=0, compMalos=0;
+	
+	if(LComp->inicio!=NULL)
+	{
+        iComp = LComp->inicio;
+        while(iComp!=NULL){
+            if(strcmp(iComp->indicacion, "1")==0){
+            	compBuenos++;
+			}else if (strcmp(iComp->indicacion, "1")==0){
+				compMalos++;
+			}else{
+				break;
+			}
+            iComp = iComp->siguiente;
+
+        }
+
+		printf("\n+-----------------------------------------+\n");
+		printf( " -->Total Comportamientos BUENOS: %d", compBuenos );
+		printf("\n+-----------------------------------------+\n");
+		printf( " -->Total Comportamientos MALOS: %d", compMalos );
+		printf("\n+-----------------------------------------+\n");
+		
+	}else{
+		printf( "\n***No se han encontrado Comportamientos registrados***");
+	}
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -2580,6 +2633,73 @@ void cartasPorAyudante(struct ListaCartas *LCartas){
 	printf("*********************************\n");
 	printf(" Cartas procesadas según Ayudante\n" );
 	printf("*********************************\n");
+		
+	struct Carta *iCarta = LCartas->inicio;
+	struct CartaProcesada *iCartaProc, *nCartaProc;
+	struct PilaCartasProcesadas *CProc;
+	CProc = (struct PilaCartasProcesadas *) malloc(sizeof(struct PilaCartasProcesadas));
+	CProc->tope = NULL;
+		
+	//Conteo de las Cartas Procesadas	
+	if(LCartas->inicio!=NULL)
+	{
+        iCarta = LCartas->inicio;
+		while( iCarta!= NULL){
+		
+			if(CProc->tope==NULL)
+			{
+				nCartaProc =(struct CartaProcesada *) malloc (sizeof(struct CartaProcesada));
+						
+				strcpy(nCartaProc->procesada_por, iCarta->procesada_por);
+				nCartaProc->cantidad = 1;
+				
+				nCartaProc->siguiente = CProc->tope;
+				CProc->tope = nCartaProc;
+				
+			}else{	
+				for(iCartaProc = CProc->tope; iCartaProc!= NULL; iCartaProc = iCartaProc->siguiente){
+					
+					if(strcmp(iCarta->procesada_por,iCartaProc->procesada_por)==0){
+						iCartaProc->cantidad = iCartaProc->cantidad+1;
+						break;
+					}else{
+						nCartaProc =(struct CartaProcesada *) malloc (sizeof(struct CartaProcesada));
+						
+						strcpy(nCartaProc->procesada_por, iCarta->procesada_por);
+						nCartaProc->cantidad = 1;
+						
+						nCartaProc->siguiente = CProc->tope;
+						CProc->tope = nCartaProc;
+						break;
+					}
+					
+				}
+			}
+			iCarta = iCarta->siguiente;
+		}
+		
+		//Mostrar cantidades contadas
+		printf("\n+----------------------------------------+\n");
+		printf( "  Identificación    -   Cartas Procesadas" );
+		printf("\n+----------------------------------------+\n");
+		
+		iCartaProc = CProc->tope;
+			
+		if(CProc->tope!=NULL)
+		{
+	        while(iCartaProc!=NULL){
+	            printf("\n %s   -   %d", iCartaProc->procesada_por, iCartaProc->cantidad);
+	            iCartaProc = iCartaProc->siguiente;
+	        }		
+			
+		}else{
+			printf( "\n***No se han encontrado Cartas para Santa procesadas***");
+		}
+				
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -2598,6 +2718,75 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 	printf(" Top de Juguetes mas solicitados\n" );
 	printf("*********************************\n");
 	
+	struct JuguetesCarta *iJugCarta;
+	struct JugSolicitado *iJugSolicitado, *nJugSolicitado;
+	
+	struct PilaJugSolicitados *JugSolic;
+	JugSolic = (struct PilaJugSolicitados *) malloc(sizeof(struct PilaJugSolicitados));
+	JugSolic->tope = NULL;
+
+    //Conteo de las Juguetes Solicitados	
+	if(LJugCarta->inicio!=NULL)
+	{
+        iJugCarta = LJugCarta->inicio;
+		while( iJugCarta!= NULL){
+			
+			if(JugSolic->tope==NULL)
+			{
+				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+					
+				strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
+				nJugSolicitado->cantidad = 1;
+				
+				nJugSolicitado->siguiente = JugSolic->tope;
+				JugSolic->tope = nJugSolicitado;
+			}else{
+				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
+				
+					if(strcmp(iJugCarta->nombre_juguete,iJugSolicitado->nombre_juguete)==0){
+						iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
+						break;
+					}else{
+						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+						
+						strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
+						nJugSolicitado->cantidad = 1;
+						
+						nJugSolicitado->siguiente = JugSolic->tope;
+						JugSolic->tope = nJugSolicitado;
+						break;
+					}
+					
+				}
+			}
+						
+			iJugCarta = iJugCarta->siguiente;
+		}
+		
+		//Mostrar cantidades contadas
+		printf("\n+----------------------------------------+\n");
+		printf( "  Nombre del Juguete    -   Cant. Solicitudes" );
+		printf("\n+----------------------------------------+\n");
+		
+		iJugSolicitado = JugSolic->tope;
+			
+		if(JugSolic->tope!=NULL)
+		{
+	        while(iJugSolicitado!=NULL){
+	            printf("\n %s   -   %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
+	            iJugSolicitado = iJugSolicitado->siguiente;
+	        }		
+			
+		}else{
+			printf( "\n***No se han encontrado juguetes solicitados 1***");
+		}
+				
+		
+	}else{
+		printf( "\n***No se han encontrado juguetes solicitados 2***");
+	}
+	
+
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
