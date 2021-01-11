@@ -35,6 +35,9 @@ typedef struct PilaCartasProcesadas PilaCartasProcesadas;
 typedef struct JugSolicitado JugSolicitado;
 typedef struct PilaJugSolicitados PilaJugSolicitados;
 
+typedef struct Domicilio Domicilio;
+typedef struct Ruta Ruta;
+
 //Procedimientos para Menus de Opciones
 void MenuPrincipal();
 void GestionNinos();
@@ -44,7 +47,7 @@ void GestionAyudantes();
 void GestionCartas();
 void AnalisisDeDatos();
 
-//Procedimientos para gestion de Ninos/as
+//Procedimientos para Gestion de Ninos/as
 void registrarNinos(struct ListaNinos *LNinos);
 void mostrarNinos(struct ListaNinos *LNinos);
 void modificarNino(struct ListaNinos *LNinos);
@@ -54,13 +57,13 @@ void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LCo
 void mostrarComp(struct ListaComport *LComp);
 int validarComp(struct ListaComport *LComp, const char identificacion []);
 
-//Procedimientos para gestion de de Ayudantes de santa
+//Procedimientos para Gestion de de Ayudantes de santa
 void registrarAyudante(struct ListaAyudantes *LAyudantes);
 int validarIdentificacion(struct ListaAyudantes *LAyudantes, const char identificacion []);
 void modificarAyudante(struct ListaAyudantes *LAyudantes);
 void eliminarAyudante(struct ListaAyudantes *LAyudantes);
 
-//Procedimientos para gestion de Juguetes
+//Procedimientos para Gestion de Juguetes
 void registrarJuguetes();
 void mostrarJuguetes(struct Juguete *recorrer);
 void modificarJuguetes();
@@ -68,15 +71,15 @@ struct Juguete* buscarJuguete(struct Juguete *arbol, char jugueteBuscado[]);
 struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]);
 void eliminarJuguete();
 
-//Procedimientos para gestion de Cartas para Santa
+//Procedimientos para Gestion de Cartas para Santa
 
-	//  Funciones para registro de cartas
+	//  Funciones para Registro de cartas
 void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaCartas *LCartas, struct ListaDeseos *LDeseos);
 int validarCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno []);
 int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
 
 
-	//  Funciones para modificar las cartas
+	//  Funciones para Modificar las cartas
 void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, struct ListaDeseos *LDeseos);
 void agregarJuguete(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
 int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno [], const char nombreJuguete []);
@@ -84,13 +87,13 @@ void agregarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], con
 int eliminarDeseo(struct ListaDeseos *LDeseos, const char identificacion [], const char anno [], const char nombreJuguete []);
 
 
-	//  Funciones para mostrar/conultar lascartas
+	//  Funciones para Mostrar/Consultar lascartas
 void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, struct ListaJugCarta *LJugCarta);
 void mostrarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []);
 void mostrarListaDeDeseos(struct ListaDeseos *LDeseos, const char identificacion [], const char anno []);
 void mostrarListaCartas(struct ListaCartas *LCartas);
 
-	//  Funciones para procesar las cartas
+	//  Funciones para Procesar las cartas
 void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaAyudantes *LAyudantes, struct ListaComport *LComp);
 void mostrarCartasPorAnno(struct ListaCartas *LCartas, struct ListaNinos *LNinos, const char anno []);
 void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre);
@@ -105,6 +108,14 @@ void rechazadasPorAnno(struct ListaCartas *LCartas);
 void comportRegistrados(struct ListaComport *LComp);
 void cartasPorAyudante(struct ListaCartas *LCartas);
 void juguetesMasPedidos(struct ListaJugCarta *LJugCarta);
+
+//Procedimientos para Gestion de Domicilios y Rutas
+void registrarDomicilio();
+void registrarRuta();
+void modificarDomicilio();
+void modificarRuta();
+void eliminarDomicilio();
+void eliminarRuta(); 
 
 struct Nino{
     char cedula[12];
@@ -222,7 +233,6 @@ struct PilaCartasProcesadas{
 	CartaProcesada *tope;
 };
 
-
 struct JugSolicitado{
     char nombre_juguete[50];
     char anno[50];
@@ -233,6 +243,23 @@ struct JugSolicitado{
 struct PilaJugSolicitados{
 	JugSolicitado *tope;
 };
+
+struct Domicilio{
+    char codigo[20];
+	char nombre_lugar[50];
+    char codigo_postal[50];
+    
+};
+
+struct Ruta{
+    char lugar_origen[50];
+	char lugar_destino[50];
+    char tiempo_estimado[20];
+    char distancia[20];
+    char tipo_ruta[20];
+    
+};
+
 
 /****************************************************************Menús de Opciones***********************************************************************************************/
 
@@ -445,17 +472,17 @@ void GestionDomicilios(){
 		
 		while((ch = getchar()) != EOF && ch != '\n');
 			switch(opcion){
-				case '1': MenuPrincipal();
+				case '1': registrarDomicilio();
 					break;
-				case '2': MenuPrincipal();
+				case '2': registrarRuta();
 					break;
-				case '3': MenuPrincipal();
+				case '3': modificarDomicilio();
 					break;
-				case '4': MenuPrincipal();
+				case '4': modificarRuta();
 					break;
-				case '5': MenuPrincipal();
+				case '5': eliminarDomicilio();
 					break;
-				case '6': MenuPrincipal();
+				case '6': eliminarRuta();
 					break;
 				case '0': 
 					break;
@@ -1823,6 +1850,7 @@ void mostrarJuguetes(struct Juguete *recorrer){
 }
 
 
+
 /****************************************************************Gestion de Cartas***********************************************************************************************/
 /*
 	Entradas: Una lista de tipo ListaCarta para almacenar los datos de una Carta para Santa
@@ -2841,6 +2869,439 @@ void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [
 		printf( "\n***No se han encontrado Cartas para Santa registradas***");
 	}
 	
+}
+
+
+/****************************************************************Gestion de Domicilios y Rutas ************************************************************************************/
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void registrarDomicilio(){
+	system( "CLS" );
+    printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("     Registro de Domicilios\n" );
+	printf("*********************************\n");
+
+    struct Domicilio *domicilio;
+
+    domicilio=(struct Domicilio *) malloc (sizeof(struct Domicilio));
+
+//    do{
+        printf("\n-->Ingrese el Nombre del Domicilio:\n");
+        gets(domicilio->nombre_lugar);
+	
+//        if(validarCodigo(**Domicilios***, domicilio->nombre_lugar)==1){
+            printf("\n**Este Domicilio ya ha sido registrado**\n ");
+//        }else{
+//            break;
+//        }
+//    }while(1);
+    
+//    printf("\n-->Ingrese el Código para el Domicilio: \n");
+//    gets(domicilio->codigo);
+//    printf("\n-->Ingrese el Codigo Postal: \n");
+//    gets(domicilio->codigo_postal);
+//    
+//    
+////	mostrarDomicilios(LNinos);
+//	
+//	printf("\n+++ Informacion registrada correctamente +++" );
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void registrarRuta(){
+	system( "CLS" );
+    printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("       Registro de Rutas\n" );
+	printf("*********************************\n");
+	
+//	if(***Lugares***!=NULL)
+//	{
+	    struct Ruta *ruta;
+	
+	    ruta=(struct Ruta *) malloc (sizeof(struct Ruta));
+	
+		//    do{
+        printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
+	    gets(ruta->lugar_origen);
+	    printf("\n-->Ingrese el Lugar de DESTINO \n");
+	    gets(ruta->lugar_destino);
+	    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
+	    gets(ruta->tipo_ruta);
+	
+//        if(validarRuta(**Rutas***, ruta->lugar_origen, ruta->lugar_destino, ruta->tipo_ruta)==1){
+            printf("\n**Esta ruta ya ha sido registrada**\n ");
+//        }else{
+//            break;
+//        }
+//    }while(1);
+	
+	    
+//	    printf("\n-->Ingrese el tiempo estimado (en minutos) del recorrido :\n");
+//	    gets(ruta->tiempo_estimado);
+//	    printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
+//	    gets(ruta->distancia);
+//	    
+////		mostrarRutas();
+//
+//		printf("\n+++ Informacion registrada correctamente +++" );
+	
+//	}else{
+//		printf( "\n***No se han encontrado Lugares registrados***");
+//	}
+//	
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
+}
+
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void modificarDomicilio(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("   Modificar Info. Domicilios\n" );
+	printf("*********************************\n");
+	
+	struct Domicilio *domicilio;
+	char lugar[50], codigo[30], postal[30], respuesta[2];
+	int resp=0, hallado=0; 
+		
+//    if(LNinos->inicio!=NULL)
+//	{
+		
+		printf("\n Ingrese el nombre del lugar: \n ");
+    	gets(lugar);
+		
+////        iNino = LNinos->inicio;
+////        while(iNino!=NULL){
+////            
+////            comp=strcmp(id,iNino->cedula);
+////            if(comp==0){
+//            	printf("\n+------------------------------------+");
+//				printf("\n      Datos del Lugar " );
+//            	printf("\n+------------------------------------+");
+//                printf("\n  Codigo: DOM-001 \n");
+//                printf("  Nombre del Lugar:  Pocosol, San Carlos\n");
+//                printf("  Codigo Postal: 21013\n");
+//                printf("+-------------------------------------+\n");
+//                
+//                do{
+//			        printf("\nDesea modificar el Codigo del Lugar? (1-Si 2-No)\n" );
+//                	gets(respuesta);
+//					resp=atoi(respuesta);
+//                
+//			        if(resp==1 || resp==2){
+//			            break;
+//			        }
+//			    }while(1);
+//                
+//                if(resp==1){
+//                	printf("\n-->Ingrese el valor para el Codigo: (Ej. DOM-001) \n");
+//			    	gets(codigo);	
+//					strcpy(domicilio->codigo,codigo);
+//				}
+//				
+//				do{
+//			        printf("\nDesea modificar el Codigo Postal? (1-Si 2-No)\n" );
+//                	gets(respuesta);
+//					resp=atoi(respuesta);
+//                
+//			        if(resp==1 || resp==2){
+//			            break;
+//			        }
+//			    }while(1);
+//                
+//                if(resp==1){
+//                	printf("\n-->Ingrese el valor para el Codigo Postal: \n");
+//			    	gets(postal);	
+//					strcpy(domicilio->codigo,postal);
+//				}
+//				
+//			
+//                      
+//                hallado=1;
+//				break;
+//			}
+//			iNino = iNino->siguiente;
+//
+//        }
+//        
+//		if(hallado==0){
+			printf( "\n***No se ha encontrado un Lugar para el nombre ingresado***");
+//		}
+//		
+//	}else{
+//		printf( "\n***No se han encontrado Domicilios registrados***");
+//	}
+//	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void modificarRuta(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("     Modificar Info. Rutas\n" );
+	printf("*********************************\n");
+	
+	struct Ruta *ruta;
+	char lugar_origen[50], lugar_destino[50], tipo_ruta[30], tiempo_estimado[30], distancia[30], respuesta[2];
+	int resp=0, hallado=0; 
+		
+//    if(LNinos->inicio!=NULL)
+//	{
+		
+		printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
+	    gets(lugar_origen);
+	    printf("\n-->Ingrese el Lugar de DESTINO \n");
+	    gets(lugar_destino);
+	    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
+	    gets(tipo_ruta);
+		
+//        iNino = LNinos->inicio;
+//        while(iNino!=NULL){
+//            
+//            comp=strcmp(id,iNino->cedula);
+//            if(comp==0){
+//            	printf("\n+------------------------------------+");
+//				printf("\n      Datos del Lugar " );
+//            	printf("\n+------------------------------------+");
+//                printf("\n  Origen:  Pocosol, San Carlos\n");
+//                printf("  Destino:  San Pedro, San Jose\n");
+//                printf("  Duracion: 142  min\n");
+//                printf("  Distancia: 134  km\n");
+//                printf("  Tipo de Ruta: Terrestre\n");
+//                printf("+-------------------------------------+\n");
+//                
+//                do{
+//			        printf("\nDesea modificar el Tiempo Estimado? (1-Si 2-No)\n" );
+//                	gets(respuesta);
+//					resp=atoi(respuesta);
+//                
+//			        if(resp==1 || resp==2){
+//			            break;
+//			        }
+//			    }while(1);
+//                
+//                if(resp==1){
+//                	printf("\n-->Ingrese el tiempo estimado (en minutos) del recorrido :\n");
+//	    			gets(ruta->tiempo_estimado);	
+//					strcpy(ruta->tiempo_estimado,tiempo_estimado);
+//				}
+//				
+//				do{
+//			        printf("\nDesea modificar la Distancia? (1-Si 2-No)\n" );
+//                	gets(respuesta);
+//					resp=atoi(respuesta);
+//                
+//			        if(resp==1 || resp==2){
+//			            break;
+//			        }
+//			    }while(1);
+//                
+//                if(resp==1){
+//                	printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
+//	    			gets(ruta->distancia);	
+//					strcpy(ruta->distancia,distancia);
+//				}
+//				
+//			
+//                      
+//                hallado=1;
+//				break;
+//			}
+//			iNino = iNino->siguiente;
+//
+//        }
+//        
+//		if(hallado==0){
+			printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
+//		}
+//		
+//	}else{
+//		printf( "\n***No se han encontrado Rutas registrados***");
+//	}
+//	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void eliminarDomicilio(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("  Eliminar Info. de un Domiclio\n" );
+	printf("*********************************\n");
+	
+	struct Domicilio *aux;
+	int hallado=0, comp=3;
+	char lugar[50], opcion[3]; 
+	
+//    if(LNinos->inicio!=NULL)
+//	{
+		
+		printf("\n Ingrese el nombre del lugar: \n ");
+    	gets(lugar);
+		
+//        iNino = LNinos->inicio;
+//        while(iNino!=NULL){
+//            
+//            comp=strcmp(id,iNino->cedula);
+//            if(comp==0){
+//              	printf("\n+------------------------------------+");
+//				printf("\n      Datos del Lugar " );
+//            	printf("\n+------------------------------------+");
+//                printf("\n  Codigo: DOM-001 \n");
+//                printf("  Nombre del Lugar:  Pocosol, San Carlos\n");
+//                printf("  Codigo Postal: 21013\n");
+//                printf("+-------------------------------------+\n");
+//                
+//                printf("\n-->Desea eliminar este domicilio?:\n");
+//		    	printf("<--Digite 1-SI, 2-NO: \n");
+//				gets(opcion);
+//				
+				//**Eliminar Domicilio y Rutas***
+		
+//		if(hallado==0){
+			printf( "\n***No se ha encontrado un Domicilio para el nombre ingresado***");
+//		}
+		
+//		if(aux != NULL)
+//		{
+//			printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
+//			free(aux);
+//		}			
+	
+//	}else{
+//		printf( "\n***No se han encontrado registrados***");
+//	}
+//	
+
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void eliminarRuta(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf(" Eliminar Info. de una Ruta\n" );
+	printf("*********************************\n");
+	
+	struct Domicilio *aux;
+	int hallado=0, comp=3;
+	char opcion[3], lugar_origen[50], lugar_destino[50], tipo_ruta[30];
+
+
+	
+//    if(LNinos->inicio!=NULL)
+//	{
+		
+		printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
+	    gets(lugar_origen);
+	    printf("\n-->Ingrese el Lugar de DESTINO \n");
+	    gets(lugar_destino);
+	    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
+	    gets(tipo_ruta);
+		
+//        iNino = LNinos->inicio;
+//        while(iNino!=NULL){
+//            
+//            comp=strcmp(id,iNino->cedula);
+//            if(comp==0){
+//            	printf("\n+------------------------------------+");
+//				printf("\n      Datos del Lugar " );
+//            	printf("\n+------------------------------------+");
+//                printf("\n  Origen:  Pocosol, San Carlos\n");
+//                printf("  Destino:  San Pedro, San Jose\n");
+//                printf("  Duracion: 142  min\n");
+//                printf("  Distancia: 134  km\n");
+//                printf("  Tipo de Ruta: \n");
+//                printf("+-------------------------------------+\n");
+//                
+//                printf("\n-->Desea eliminar esta Ruta?:\n");
+//		    	printf("<--Digite 1-SI, 2-NO: \n");
+//				gets(opcion);
+//				
+//				//**Eliminar Domicilio y Rutas***
+//		
+//		if(hallado==0){
+			printf( "\n***No se ha encontrado una Ruta para los datos ingresados***");
+//		}
+//		
+//		if(aux != NULL)
+//		{
+//			printf("\n-->Se ha eliminado la Ruta con los datos ingresados");
+//			free(aux);
+//		}			
+//	
+//	}else{
+//		printf( "\n***No se han encontrado registrados***");
+//	}
+//	
+
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void mostrarDomicilios(){
+
+	printf("\n+---------------------------------------------+\n");
+	printf( "       Lista de Domicilios" );
+	printf("\n+---------------------------------------------+\n");
+	printf("\n Codigo          Lugar        Codigo Postal ");
+	printf("\n+---------------------------------------------+\n");
+	printf("\n DOM-001   El Carmen, Cartago		  30103 ");
+	printf("\n DOM-002   Pocosol, San Carlos      21013");
+	printf("\n DOM-003   San Pedro, San Jose      11501 ");
+	printf("\n DOM-004   La Cruz, Guanacaste      51001");
+	printf("\n+---------------------------------------------+\n");
+
 }
 
 
