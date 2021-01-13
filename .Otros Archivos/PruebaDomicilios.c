@@ -64,9 +64,8 @@ int main(){
         printf(" 1. Insertar Domicilio               \n");
         printf(" 2. Insertar Ruta                    \n");
         printf(" 3. Mostrar Domicilios y Rutas       \n");
-        printf(" 4. Recorrer Grafo                   \n");
-        printf(" 5. Dijkstra                         \n");
-        printf(" 6. Salir                            \n");
+        printf(" 4. Dijkstra                         \n");
+        printf(" 5. Salir                            \n");
         printf("*********************************\n");
         printf("<--Opcion: ");
         scanf("%i",&opcion);
@@ -81,19 +80,16 @@ int main(){
     			visualizarGrafo();
     		   	break;
     		case 4: 	
-    			recorridos();
-    		    break;
-    		case 5:
 			 	dijkstra();
 		    	break;
-			case 6:
+			case 5:
 			 	break;
             default: printf("***Opcion no valida***\n");
                      break;
         }
         system("pause");
         system("cls");
-    }while(opcion!=6);
+    }while(opcion!=5);
     return 1;
 }
 
@@ -271,95 +267,6 @@ void visualizarGrafo(){
     }
     printf("\n");
 }
-
-void recorridos(){
-	char domicilio [50];
-	Domicilio * aux=inicio,*aux2=inicio;
-	
-	if(inicio!=NULL){
-		fflush(stdin);
-		printf("\n-->Ingrese el Domicilio de partida:  \n");
-	    gets(domicilio);
-			
-		while(aux!=NULL){
-			if(strcmp(aux->nombre_lugar, domicilio)==0){
-				break;
-			}
-				
-			aux=aux->siguiente;
-		}
-		
-		if(aux==NULL){
-			printf("Error: Domicilio no encontrado\n");
-		}else{
-			
-			printf("Recorrido por anchura: ");
-			aux->visitado=1;
-			insertarCola(aux);
-			recorridoAnchura();
-			
-			reiniciar();
-			
-			printf("\nRecorrido por profundidad: ");
-			recorridoProfundidad(aux);
-			
-			while(aux2!=NULL){
-				if(aux2->terminado==0)
-					recorridoProfundidad(aux2);
-					aux2=aux2->siguiente;
-				}
-			while(ini!=NULL)
-				printf("%c ",desencolar()->nombre_lugar);
-				
-			reiniciar();
-			printf("\n");
-		}
-	}
-}
-
-void recorridoAnchura(){
-	Domicilio*aux=desencolar();
-	
-	if(aux==NULL)
-		return;
-		
-	printf("%c ",aux->nombre_lugar);
-	if(aux->adyacencia!=NULL){
-		
-		Ruta*a=aux->adyacencia;
-		
-		while(a!=NULL){
-			if(a->lugar->visitado==0){
-			    insertarCola(a->lugar);
-				a->lugar->visitado=1;	
-			}
-			a=a->siguiente;
-		}
-	}
-	
-	recorridoAnchura();
-	
-}
-
-void recorridoProfundidad(Domicilio* aux){
-	Ruta*a;
-	
-	aux->visitado=1;
-	
-    if(aux->adyacencia!=NULL){
-        a=aux->adyacencia;
-        
-        while(a!=NULL){ 
-			if(a->lugar->visitado==0){
-				recorridoProfundidad(a->lugar);
-			}
-            a=a->siguiente;
-        }
-    }
-    aux->terminado=1;
-    insertarPila(aux);
-}
-
 void insertarPila(Domicilio* aux){
 	Lista*nuevo=(Lista*)malloc(sizeof(Lista));
 	nuevo->nombre_lugar=aux;
@@ -413,7 +320,7 @@ void reiniciar(){
 		}
 	}
 }
-//Lorem Ipsum 
+ 
 void dijkstra(){
 	
 	Domicilio*aux=inicio;

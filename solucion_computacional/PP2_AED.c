@@ -33,6 +33,7 @@ typedef struct CartaProcesada CartaProcesada;
 typedef struct PilaCartasProcesadas PilaCartasProcesadas;
 
 typedef struct JugSolicitado JugSolicitado;
+typedef struct ListaJugSolicitados ListaJugSolicitados;
 typedef struct PilaJugSolicitados PilaJugSolicitados;
 
 typedef struct Domicilio Domicilio;
@@ -107,11 +108,17 @@ void aprobadasPorAnno(struct ListaCartas *LCartas);
 void rechazadasPorAnno(struct ListaCartas *LCartas);
 void comportRegistrados(struct ListaComport *LComp);
 void cartasPorAyudante(struct ListaCartas *LCartas);
+void ordenarTopJuguetes(struct ListaJugSolicitados *TopJuguetes);
 void juguetesMasPedidos(struct ListaJugCarta *LJugCarta);
 
 //Procedimientos para Gestion de Domicilios y Rutas
 void registrarDomicilio();
 void registrarRuta();
+Domicilio* validarDomicilio(const char nombre[]);
+void agregarRuta(Domicilio* origen, Domicilio* destino, Ruta* nuevaRuta);
+void visualizarGrafo();
+int mostrarDomicilios();
+
 void modificarDomicilio();
 void modificarRuta();
 void eliminarDomicilio();
@@ -244,26 +251,36 @@ struct PilaJugSolicitados{
 	JugSolicitado *tope;
 };
 
+struct ListaJugSolicitados{
+	JugSolicitado *inicio;
+	JugSolicitado *final;
+};
+
 struct Domicilio{
-    char codigo[20];
+	char codigo[20];
 	char nombre_lugar[50];
     char codigo_postal[50];
-    
+	int visitado;
+	int terminado;
+	int monto;
+	char anterior[50];
+	Domicilio *siguiente;
+	Ruta *adyacencia; 
 };
 
-struct Ruta{
-    char lugar_origen[50];
-	char lugar_destino[50];
-    char tiempo_estimado[20];
+struct Ruta{   
+	Domicilio *lugar; 
+	char tiempo_estimado[20];
     char distancia[20];
     char tipo_ruta[20];
-    
+	Ruta *siguiente;
+	int peso;
 };
-
 
 /****************************************************************Menús de Opciones***********************************************************************************************/
 
 Juguete *jugueteRaiz=NULL;
+Domicilio *lugarInicial=NULL;
 
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
@@ -311,9 +328,9 @@ void MenuPrincipal(){
 		printf("*********************************\n");
 		printf("        Menu Principal\n" );
 		printf("*********************************\n");
-		printf( "\n 1 - Gestion de NINOS(AS)" );
-		printf( "\n 2 - Gestion de JUGUETES" );
-		printf( "\n 3 - Gestion de DOMICILIOS" );
+		printf( "\n 1 - Gestion de DOMICILIOS y RUTAS" );
+		printf( "\n 2 - Gestion de NINOS(AS)" );
+		printf( "\n 3 - Gestion de JUGUETES" );
 	    printf( "\n 4 - Gestion de AYUDANTES DE SANTA" );	    
 	    printf( "\n 5 - Gestion de CARTAS PARA SANTA" );
 		printf( "\n 6 - Analisis de DATOS" );   
@@ -322,11 +339,11 @@ void MenuPrincipal(){
         opcion = getchar();
         
         switch ( opcion ){
-            case '1': GestionNinos(LNinos, LComp);
+            case '1': GestionDomicilios();
                 break;
-			case '2': GestionJuguetes();
+			case '2': GestionNinos(LNinos, LComp);
                 break;
-            case '3': GestionDomicilios();
+            case '3': GestionJuguetes(); 
                 break;
 			case '4': GestionAyudantes(LAyudantes);
                 break;
@@ -665,6 +682,7 @@ void registrarNinos(struct ListaNinos *LNinos){
     struct Nino *nino;
 
     nino=(struct Nino *) malloc (sizeof(struct Nino));
+    int resultado=0;
 
     do{
         printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
@@ -683,16 +701,14 @@ void registrarNinos(struct ListaNinos *LNinos){
     gets(nino->nombre_usuario);
     printf("\n-->Ingrese el Correo Electronico: (Ej. juanp123@correo.com) \n");
     gets(nino->correo);
-    printf("\n+---------------------------------------------+\n");
-	printf( "       Lista de Domicilios" );
-	printf("\n+---------------------------------------------+\n");
-	printf("\n Codigo          Lugar        Codigo Postal ");
-	printf("\n+---------------------------------------------+\n");
-	printf("\n DOM-001   El Carmen, Cartago		  30103 ");
-	printf("\n DOM-002   Pocosol, San Carlos      21013");
-	printf("\n DOM-003   San Pedro, San Jose      11501 ");
-	printf("\n DOM-004   La Cruz, Guanacaste      51001");
-	printf("\n+---------------------------------------------+\n");
+    
+    resultado = mostrarDomicilios();
+	if(resultado==0){
+    	printf("\n\nPresione una tecla para regresar..." );
+		getchar();
+		return;
+	}
+	
     printf("\n-->Ingrese el Codigo del Domicilio (Ej. DOM-001): \n");
     gets(nino->codigo_domicilio);
     printf("\n-->Ingrese la Fecha de Nacimiento (Ej. 12/12/2000) \n");
@@ -826,6 +842,7 @@ int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
 	Salidas: Se modifican los datos un nodo de tipo Nino de la lista recibida.
 	Restricciones: Ninguna.
 */
+
 void modificarNino(struct ListaNinos *LNinos){
 	system( "CLS" );
 	printf("\n\n*********************************\n");
@@ -835,7 +852,7 @@ void modificarNino(struct ListaNinos *LNinos){
 	printf("*********************************\n");
 	
 	struct Nino *iNino;
-	int hallado=0, comp=3, resp;
+	int hallado=0, comp=3, resp, resultado=0;
 	char id[15], respuesta[2], nombre[50], usuario[20], correo[50], domicilio[20], 
 		  nacimiento[15], edad[5], necesidades[150]; 
 	
@@ -927,15 +944,12 @@ void modificarNino(struct ListaNinos *LNinos){
 			    }while(1);
                 
                 if(resp==1){
-                	printf("\n+---------------------------------------------+\n");
-					printf( "       Lista de Domicilios" );
-					printf("\n+---------------------------------------------+\n");
-					printf("\n Codigo          Lugar        Codigo Postal ");
-					printf("\n+---------------------------------------------+\n");
-					printf("\n DOM-001   El Carmen, Cartago		  30103 ");
-					printf("\n DOM-003   San Pedro, San Jose      11501 ");
-					printf("\n DOM-004   La Cruz, Guanacaste      51001");
-					printf("\n+---------------------------------------------+\n");
+                	resultado = mostrarDomicilios();
+					if(resultado==0){
+				    	printf("\n\nPresione una tecla para regresar..." );
+						getchar();
+						return;
+					}
                 	printf("\n-->Ingrese el Codigo del Domicilio (Ej. DOM-001): \n");
 			    	gets(domicilio);	
 					strcpy(iNino->codigo_domicilio,domicilio);
@@ -1212,6 +1226,7 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
 }
+
 
 /*
 	Entradas: Una lista de tipo ListaAyudantes y una char identificacion para consultar los datos de un Ayudante de Santa
@@ -1512,14 +1527,6 @@ void registrarJuguetes(){
         
             
     }
-    
-//	printf("\n+------------------------------+\n");
-//	printf( "      Lista de Juguetes" );
-//	printf("\n+------------------------------+\n");
-//	
-//	printf(" Codigo - Nombre \n" ); 
-//	
-//	mostrarJuguetes(jugueteRaiz);
 
 	printf("\n+++ Informacion registrada correctamente +++" );
 	
@@ -1721,17 +1728,14 @@ struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]){
 	
 	if(strcmp(aux->nombre, porBorrar) < 0 )
 	{
-		printf("Dentro1");
 		aux->izq = borrarJuguete(aux->izq, porBorrar);
 	}
 	else if(strcmp(aux->nombre, porBorrar) > 0 )
 	{
-		printf("Dentro2");
 		aux->der = borrarJuguete(aux->der, porBorrar);
 	}
 	else
 	{
-		printf("Dentro3");
 		//Borrado de nodo con dos hijos	
 		if (aux->izq != NULL && aux->der!=NULL)
         {
@@ -1745,7 +1749,6 @@ struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]){
 		}
 		else
 		{
-			printf("Dentro4");
 			temporal = aux;
 			if(aux->izq != NULL)//Borrado de Nodo con un hijo (izq)
 			{
@@ -1813,7 +1816,7 @@ void eliminarJuguete(){
 				}
 		
 				if (strcmp(opcion ,"1")==0){
-//					jugueteRaiz = borrarJuguete(jugueteRaiz, nombreJuguete);
+					jugueteRaiz = borrarJuguete(jugueteRaiz, nombreJuguete);
 					printf("\n-->Se ha eliminado el Ayudante con la identificacion ingresada");
 					break;						
 				}
@@ -1840,16 +1843,14 @@ void eliminarJuguete(){
 	Restricciones: Ninguna.
 */
 void mostrarJuguetes(struct Juguete *recorrer){
-    
-	if (recorrer != NULL)//Imprime en En Orden
+	    
+	if (recorrer != NULL)
     {
         mostrarJuguetes(recorrer->izq);
-		printf("\n%s - %s",recorrer->codigo, recorrer->nombre);
+		printf("       %s - %s - %s\n",recorrer->codigo, recorrer->nombre, recorrer->categoria);
         mostrarJuguetes(recorrer->der);
     }
 }
-
-
 
 /****************************************************************Gestion de Cartas***********************************************************************************************/
 /*
@@ -1876,7 +1877,8 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
     char identificacion[20], anno[10], nombreJuguete[50], opcion[3], opcion2[3];
     
     int juguetesRegistrados=0;
-
+	
+	//Validar si ya fue registrada
     do{
        do{
 	        printf("\n-->Ingrese el numero de Identificacion: (Ej. 105450656) \n");
@@ -1900,8 +1902,6 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
         
     }while(1);
     
-    
-	
     if(jugueteRaiz!=NULL)
 	{
 		strcpy(carta->identificacion, identificacion);
@@ -1934,6 +1934,14 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 	    do{
 	    	
 			if (strcmp(opcion ,"1")==0){
+				
+				printf("\n+---------------------------------------------+\n");
+				printf( "              Lista de Juguetes" );
+				printf("\n+---------------------------------------------+\n");
+				printf("        Codigo - Nombre  - Categoria ");
+				printf("\n+---------------------------------------------+\n");
+				mostrarJuguetes(jugueteRaiz);
+				printf("\n+---------------------------------------------+\n");
 						
 				printf("\n-->Ingrese el nombre del juguete que desea agregar:\n");
 	        	gets(nombreJuguete);
@@ -2005,7 +2013,8 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 	}else{
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
-       
+     
+	//Mostrar Carta y Lista de Desos resultante  
 	mostrarCarta(LCartas, LJugCarta, carta->identificacion, carta->anno);
 	mostrarListaDeDeseos(LDeseos, carta->identificacion, carta->anno);
 	
@@ -2297,6 +2306,13 @@ void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta
 						printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
 						break;
 					}else{
+						printf("\n+---------------------------------------------+\n");
+						printf( "              Lista de Juguetes" );
+						printf("\n+---------------------------------------------+\n");
+						printf("        Codigo - Nombre  - Categoria ");
+						printf("\n+---------------------------------------------+\n");
+						mostrarJuguetes(jugueteRaiz);
+						printf("\n+---------------------------------------------+\n");
 														
 						printf("\n-->Ingrese el nombre del juguete que desea agregar:\n");
 			        	gets(nombreJuguete);
@@ -2885,32 +2901,47 @@ void registrarDomicilio(){
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
 	printf("     Registro de Domicilios\n" );
-	printf("*********************************\n");
-
-    struct Domicilio *domicilio;
-
-    domicilio=(struct Domicilio *) malloc (sizeof(struct Domicilio));
-
-//    do{
-        printf("\n-->Ingrese el Nombre del Domicilio:\n");
-        gets(domicilio->nombre_lugar);
+	printf("*********************************\n");	
 	
-//        if(validarCodigo(**Domicilios***, domicilio->nombre_lugar)==1){
-            printf("\n**Este Domicilio ya ha sido registrado**\n ");
-//        }else{
-//            break;
-//        }
-//    }while(1);
+	Domicilio* aux;
+	Domicilio* nuevo=(Domicilio*)malloc(sizeof(Domicilio));
+	fflush(stdin);
+
+    do{
+		printf("\n-->Ingrese el Nombre del Domicilio: \n");
+	    gets(nuevo->nombre_lugar);
+
+	    if(validarDomicilio(nuevo->nombre_lugar)!=NULL){
+	    	printf("\n**Este Domicilio ya ha sido registrado**\n ");
+		}else{
+			break;
+        }
+        
+    }while(1);
+
+    printf("\n-->Ingrese el Codigo para el Domicilio: \n");
+    gets(nuevo->codigo);
     
-//    printf("\n-->Ingrese el Código para el Domicilio: \n");
-//    gets(domicilio->codigo);
-//    printf("\n-->Ingrese el Codigo Postal: \n");
-//    gets(domicilio->codigo_postal);
-//    
-//    
-////	mostrarDomicilios(LNinos);
-//	
-//	printf("\n+++ Informacion registrada correctamente +++" );
+    printf("\n-->Ingrese el Codigo Postal: \n");
+    gets(nuevo->codigo_postal);
+	
+	nuevo->siguiente=NULL;
+    nuevo->adyacencia=NULL;
+    nuevo->visitado=nuevo->terminado=0;
+    nuevo->monto=-1;
+    strcpy(nuevo->anterior, "0");
+    
+	if(lugarInicial==NULL){
+        lugarInicial=nuevo;
+    }else{
+        aux=lugarInicial;
+        while(aux->siguiente!=NULL){
+            aux=aux->siguiente;
+        }
+        aux->siguiente=nuevo;
+    }
+    
+    printf("\n+++ Informacion registrada correctamente +++\n" );
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -2921,54 +2952,118 @@ void registrarDomicilio(){
 	Salidas: 
 	Restricciones: Ninguna.
 */
-void registrarRuta(){
-	system( "CLS" );
-    printf("\n\n*********************************\n");
+Domicilio* validarDomicilio(const char nombre[]){
+	
+	Domicilio* iDomicilio=lugarInicial;
+
+    while(iDomicilio!=NULL){
+        if(strcmp(iDomicilio->nombre_lugar,nombre)==0){
+            break;
+        }
+        iDomicilio = iDomicilio->siguiente;
+    }
+    
+    return iDomicilio;
+} 
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/ 
+void registrarRuta(){   
+    system( "CLS" );
+	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
 	printf("       Registro de Rutas\n" );
 	printf("*********************************\n");
 	
-//	if(***Lugares***!=NULL)
-//	{
-	    struct Ruta *ruta;
+    char lugar_origen[50], lugar_destino[50], tiempo_estimado[20], distancia[20], tipo_ruta[20], peso[10];
+    
+    Ruta* nuevaRuta=(Ruta*)malloc(sizeof(Ruta));
+    
+    nuevaRuta->siguiente=NULL;
+    
+    Domicilio *origen;
+	Domicilio *destino;
 	
-	    ruta=(struct Ruta *) malloc (sizeof(struct Ruta));
-	
-		//    do{
-        printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
-	    gets(ruta->lugar_origen);
-	    printf("\n-->Ingrese el Lugar de DESTINO \n");
-	    gets(ruta->lugar_destino);
-	    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
-	    gets(ruta->tipo_ruta);
-	
-//        if(validarRuta(**Rutas***, ruta->lugar_origen, ruta->lugar_destino, ruta->tipo_ruta)==1){
-            printf("\n**Esta ruta ya ha sido registrada**\n ");
-//        }else{
-//            break;
-//        }
-//    }while(1);
-	
+    if(lugarInicial==NULL){
+         printf( "\n***No se han encontrado Domicilios registrados***");
+         return;
+    }
+    
+    fflush(stdin);
+    
+	//Agregar Origen
+    do{
+    	printf("\n-->Ingrese el Domicilio de ORIGEN:  \n");
+	    gets(lugar_origen);
 	    
-//	    printf("\n-->Ingrese el tiempo estimado (en minutos) del recorrido :\n");
-//	    gets(ruta->tiempo_estimado);
-//	    printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
-//	    gets(ruta->distancia);
-//	    
-////		mostrarRutas();
-//
-//		printf("\n+++ Informacion registrada correctamente +++" );
+	    origen = validarDomicilio(lugar_origen);
+
+	    if(origen==NULL){
+	    	printf( "\n***No se ha encontrado un Domicilio que coincida con el ORIGEN ingresado***");
+		}else{
+			break;
+        }
+        
+    }while(1);
+    
+    //Agregar Destino
+    do{
+    	    
+	    printf("\n-->Ingrese el Lugar de DESTINO \n");
+	    gets(lugar_destino);
+	    
+	    destino = validarDomicilio(lugar_destino);
+
+	    if(destino==NULL){
+	    	printf( "\n***No se ha encontrado un Domicilio que coincida con el DESTINO ingresado***");	
+		}else{
+			break;
+        }
+
+        
+    }while(1);
 	
-//	}else{
-//		printf( "\n***No se han encontrado Lugares registrados***");
-//	}
-//	
+    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
+    gets(nuevaRuta->tipo_ruta);  
+    printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
+    gets(nuevaRuta->distancia);  
+    printf("\n-->Ingresar PESO de la Ruta: ");
+    gets(peso);  
+    
+    nuevaRuta->peso = atoi(peso);
 	
+    agregarRuta(origen,destino,nuevaRuta);
+    	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
 }
 
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void agregarRuta(Domicilio* origen, Domicilio* destino, Ruta* nuevaRuta){
+    Ruta* iRuta;
+    
+    if(origen->adyacencia==NULL){   
+	    origen->adyacencia=nuevaRuta;
+        nuevaRuta->lugar=destino;
+    }else{   
+	    iRuta=origen->adyacencia;
+	    
+        while(iRuta->siguiente!=NULL)
+            iRuta=iRuta->siguiente;
+            
+        nuevaRuta->lugar=destino;
+        iRuta->siguiente=nuevaRuta;
+    }
+}
 
 /*
 	Entradas: 
@@ -2983,78 +3078,71 @@ void modificarDomicilio(){
 	printf("   Modificar Info. Domicilios\n" );
 	printf("*********************************\n");
 	
-	struct Domicilio *domicilio;
+	Domicilio* domicilio=lugarInicial;
 	char lugar[50], codigo[30], postal[30], respuesta[2];
 	int resp=0, hallado=0; 
-		
-//    if(LNinos->inicio!=NULL)
-//	{
-		
+	
+	if(domicilio!=NULL){
 		printf("\n Ingrese el nombre del lugar: \n ");
     	gets(lugar);
-		
-////        iNino = LNinos->inicio;
-////        while(iNino!=NULL){
-////            
-////            comp=strcmp(id,iNino->cedula);
-////            if(comp==0){
-//            	printf("\n+------------------------------------+");
-//				printf("\n      Datos del Lugar " );
-//            	printf("\n+------------------------------------+");
-//                printf("\n  Codigo: DOM-001 \n");
-//                printf("  Nombre del Lugar:  Pocosol, San Carlos\n");
-//                printf("  Codigo Postal: 21013\n");
-//                printf("+-------------------------------------+\n");
-//                
-//                do{
-//			        printf("\nDesea modificar el Codigo del Lugar? (1-Si 2-No)\n" );
-//                	gets(respuesta);
-//					resp=atoi(respuesta);
-//                
-//			        if(resp==1 || resp==2){
-//			            break;
-//			        }
-//			    }while(1);
-//                
-//                if(resp==1){
-//                	printf("\n-->Ingrese el valor para el Codigo: (Ej. DOM-001) \n");
-//			    	gets(codigo);	
-//					strcpy(domicilio->codigo,codigo);
-//				}
-//				
-//				do{
-//			        printf("\nDesea modificar el Codigo Postal? (1-Si 2-No)\n" );
-//                	gets(respuesta);
-//					resp=atoi(respuesta);
-//                
-//			        if(resp==1 || resp==2){
-//			            break;
-//			        }
-//			    }while(1);
-//                
-//                if(resp==1){
-//                	printf("\n-->Ingrese el valor para el Codigo Postal: \n");
-//			    	gets(postal);	
-//					strcpy(domicilio->codigo,postal);
-//				}
-//				
-//			
-//                      
-//                hallado=1;
-//				break;
-//			}
-//			iNino = iNino->siguiente;
-//
-//        }
-//        
-//		if(hallado==0){
+    	
+		while(domicilio!=NULL){   
+
+	        if(strcmp(lugar,domicilio->nombre_lugar)==0){
+            	printf("\n+------------------------------------+");
+				printf("\n      Datos del Lugar " );
+            	printf("\n+------------------------------------+");
+                printf("\n  Codigo: %s \n", domicilio->codigo);
+                printf("  Nombre del Lugar:  %s \n", domicilio->nombre_lugar);
+                printf("  Codigo Postal: %s \n", domicilio->codigo_postal);
+                printf("+-------------------------------------+\n");
+                
+                do{
+			        printf("\nDesea modificar el Codigo del Lugar? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el valor para el Codigo: (Ej. DOM-001) \n");
+			    	gets(codigo);	
+					strcpy(domicilio->codigo,codigo);
+				}
+				
+				do{
+			        printf("\nDesea modificar el Codigo Postal? (1-Si 2-No)\n" );
+                	gets(respuesta);
+					resp=atoi(respuesta);
+                
+			        if(resp==1 || resp==2){
+			            break;
+			        }
+			    }while(1);
+                
+                if(resp==1){
+                	printf("\n-->Ingrese el valor para el Codigo Postal: \n");
+			    	gets(postal);	
+					strcpy(domicilio->codigo_postal,postal);
+				}
+   
+                hallado=1;
+				break;
+			}
+			
+			domicilio=domicilio->siguiente;
+	    }
+	    
+	    if(hallado==0){
 			printf( "\n***No se ha encontrado un Lugar para el nombre ingresado***");
-//		}
-//		
-//	}else{
-//		printf( "\n***No se han encontrado Domicilios registrados***");
-//	}
-//	
+		}
+	}else{
+		printf("\n ***No se han encontrado Domicilios registrados***");
+	}
+		
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -3167,52 +3255,84 @@ void eliminarDomicilio(){
 	printf("  Eliminar Info. de un Domiclio\n" );
 	printf("*********************************\n");
 	
-	struct Domicilio *aux;
+	struct Domicilio *domicilio=lugarInicial, *anterior;
 	int hallado=0, comp=3;
 	char lugar[50], opcion[3]; 
 	
-//    if(LNinos->inicio!=NULL)
-//	{
-		
+	if(domicilio!=NULL){
 		printf("\n Ingrese el nombre del lugar: \n ");
     	gets(lugar);
-		
-//        iNino = LNinos->inicio;
-//        while(iNino!=NULL){
-//            
-//            comp=strcmp(id,iNino->cedula);
-//            if(comp==0){
-//              	printf("\n+------------------------------------+");
-//				printf("\n      Datos del Lugar " );
-//            	printf("\n+------------------------------------+");
-//                printf("\n  Codigo: DOM-001 \n");
-//                printf("  Nombre del Lugar:  Pocosol, San Carlos\n");
-//                printf("  Codigo Postal: 21013\n");
-//                printf("+-------------------------------------+\n");
-//                
-//                printf("\n-->Desea eliminar este domicilio?:\n");
-//		    	printf("<--Digite 1-SI, 2-NO: \n");
-//				gets(opcion);
-//				
-				//**Eliminar Domicilio y Rutas***
-		
-//		if(hallado==0){
-			printf( "\n***No se ha encontrado un Domicilio para el nombre ingresado***");
-//		}
-		
-//		if(aux != NULL)
-//		{
-//			printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
-//			free(aux);
-//		}			
-	
-//	}else{
-//		printf( "\n***No se han encontrado registrados***");
-//	}
-//	
+    	
+		while(domicilio!=NULL){   
 
+	        if(strcmp(lugar,domicilio->nombre_lugar)==0){
+            	printf("\n+------------------------------------+");
+				printf("\n      Datos del Lugar " );
+            	printf("\n+------------------------------------+");
+                printf("\n  Codigo: %s \n", domicilio->codigo);
+                printf("  Nombre del Lugar:  %s \n", domicilio->nombre_lugar);
+                printf("  Codigo Postal: %s \n", domicilio->codigo_postal);
+                printf("+-------------------------------------+\n");
+                
+                printf("\n-->Desea eliminar este domicilio?:\n");
+		    	printf("<--Digite 1-SI, 2-NO: \n");
+				gets(opcion);
+				
+				//Cancelar Eliminado
+				if (strcmp(opcion ,"2")==0){
+					hallado=1;
+					break;			
+				}
+		
+				//**Eliminar Domicilio** 
+				if (strcmp(opcion ,"1")==0){
+			        if(domicilio==lugarInicial)
+					{
+						if(domicilio->siguiente==NULL)
+						{
+							free(domicilio);
+							lugarInicial=NULL;
+						}else{
+							lugarInicial=domicilio->siguiente;
+							free(domicilio);
+						}
+
+						printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
+						hallado=1;
+						break;				
+					}
+					else 
+					{
+						
+						anterior->siguiente = domicilio->siguiente;
+						free(domicilio);
+						printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
+						hallado=1;
+						break;
+			
+					}
+				}
+				//**Eliminar Rutas***
+				
+   
+			}
+			
+			anterior=domicilio;
+			domicilio=domicilio->siguiente;
+	    }
+	    
+	    if(hallado==0){
+			printf( "\n***No se ha encontrado un Domicilio para el nombre ingresado***");
+		}
+
+		
+	}else{
+		printf("\n ***No se han encontrado Domicilios registrados***");
+	}
+		
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
+
 }
 
 /*
@@ -3289,18 +3409,29 @@ void eliminarRuta(){
 	Salidas: 
 	Restricciones: Ninguna.
 */
-void mostrarDomicilios(){
+int mostrarDomicilios(){
 
+	Domicilio* iDomicilio=lugarInicial;
+
+    printf("\n+---------------------------------------------+\n");
+	printf( "              Lista de Domicilios" );
 	printf("\n+---------------------------------------------+\n");
-	printf( "       Lista de Domicilios" );
+	printf("        Codigo - Lugar  - Codigo Postal ");
 	printf("\n+---------------------------------------------+\n");
-	printf("\n Codigo          Lugar        Codigo Postal ");
+	
+	if(iDomicilio!=NULL){
+		while(iDomicilio!=NULL){   
+		    printf("        %s - %s - %s \n",iDomicilio->codigo, iDomicilio->nombre_lugar, iDomicilio->codigo_postal);
+	        iDomicilio=iDomicilio->siguiente;
+	    }
+	}else{
+		printf("\n ***No se han encontrado Domicilios registrados***");
+		printf("\n+---------------------------------------------+\n");
+		return 0;
+	}
+	
 	printf("\n+---------------------------------------------+\n");
-	printf("\n DOM-001   El Carmen, Cartago		  30103 ");
-	printf("\n DOM-002   Pocosol, San Carlos      21013");
-	printf("\n DOM-003   San Pedro, San Jose      11501 ");
-	printf("\n DOM-004   La Cruz, Guanacaste      51001");
-	printf("\n+---------------------------------------------+\n");
+	return 1;
 
 }
 
@@ -3723,71 +3854,127 @@ void cartasPorAyudante(struct ListaCartas *LCartas){
 	Salidas: 
 	Restricciones: 
 */
+void ordenarTopJuguetes(struct ListaJugSolicitados *TopJuguetes){
+
+	struct JugSolicitado *i, *j, *temp;
+
+	i = TopJuguetes->inicio;
+	while( i->siguiente!= NULL){
+		j = i->siguiente;
+		while( j!= NULL){
+			
+			if(i->cantidad < j->cantidad){
+				
+				//Guardar los valores del nodo i
+				temp->cantidad = i->cantidad;
+				strcpy(temp->nombre_juguete,i->nombre_juguete);
+				
+				//Asignar los valores del nodo j al nodo i
+				i->cantidad = j->cantidad;			
+				strcpy(temp->nombre_juguete,i->nombre_juguete);
+				
+				//Asignar los valores guardados del nodo i al nodo j
+				j->cantidad = temp->cantidad;
+				strcpy(temp->nombre_juguete,i->nombre_juguete);
+				
+			}			
+			j = j->siguiente;
+		}
+		i = i->siguiente;
+	}
+	
+} 
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: 
+*/
 void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 	system( "CLS" );
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("*********************************\n");
-	printf(" Top de Juguetes mas solicitados\n" );
+	printf(" Top 10 Juguetes mas solicitados\n" );
 	printf("*********************************\n");
 	
 	struct JuguetesCarta *iJugCarta;
 	struct JugSolicitado *iJugSolicitado, *nJugSolicitado;
 	
-	struct PilaJugSolicitados *JugSolic;
-	JugSolic = (struct PilaJugSolicitados *) malloc(sizeof(struct PilaJugSolicitados));
-	JugSolic->tope = NULL;
+	struct ListaJugSolicitados *TopJuguetes;
+	TopJuguetes = (struct ListaJugSolicitados *) malloc(sizeof(struct ListaJugSolicitados));
+	TopJuguetes->inicio = NULL;
+	TopJuguetes->final = NULL;
+	int hallado=0;
 
     //Conteo de las Juguetes Solicitados	
 	if(LJugCarta->inicio!=NULL)
 	{
         iJugCarta = LJugCarta->inicio;
 		while( iJugCarta!= NULL){
-			
-			if(JugSolic->tope==NULL)
+			if(TopJuguetes->inicio==NULL)
 			{
-				nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
+				nJugSolicitado = (struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 					
 				strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
 				nJugSolicitado->cantidad = 1;
 				
-				nJugSolicitado->siguiente = JugSolic->tope;
-				JugSolic->tope = nJugSolicitado;
+				TopJuguetes->inicio = nJugSolicitado;
+				TopJuguetes->final = nJugSolicitado;
 			}else{
-				for(iJugSolicitado = JugSolic->tope; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
-				
+
+				for(iJugSolicitado = TopJuguetes->inicio; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
+
 					if(strcmp(iJugCarta->nombre_juguete,iJugSolicitado->nombre_juguete)==0){
-						iJugSolicitado->cantidad = iJugSolicitado->cantidad+1;
+						iJugSolicitado->cantidad = (iJugSolicitado->cantidad)+1;
+						hallado=1;
 						break;
-					}else{
-						nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
-						
-						strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
-						nJugSolicitado->cantidad = 1;
-						
-						nJugSolicitado->siguiente = JugSolic->tope;
-						JugSolic->tope = nJugSolicitado;
-						break;
-					}
+					}	
+				}
+				
+				if(hallado==0){
+					nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 					
+					strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
+					nJugSolicitado->cantidad = 1;
+					
+					if(TopJuguetes->inicio == NULL) 
+					{
+						TopJuguetes->inicio = nJugSolicitado;
+						TopJuguetes->final = nJugSolicitado;
+					}else{
+						TopJuguetes->final->siguiente = nJugSolicitado;
+						TopJuguetes->final = TopJuguetes->final->siguiente;
+					}
+
+				}else{
+					hallado=0;
 				}
 			}
-						
+			
+			
 			iJugCarta = iJugCarta->siguiente;
 		}
+				
+		ordenarTopJuguetes(TopJuguetes);
 		
 		//Mostrar cantidades contadas
-		printf("\n+----------------------------------------+\n");
-		printf( "  Nombre del Juguete    -   Cant. Solicitudes" );
-		printf("\n+----------------------------------------+\n");
+		printf("\n+------------------------------------------+\n");
+		printf( "  Nombre del Juguete   -  Cant. Solicitudes" );
+		printf("\n+------------------------------------------+\n");
 		
-		iJugSolicitado = JugSolic->tope;
-			
-		if(JugSolic->tope!=NULL)
+		iJugSolicitado = TopJuguetes->inicio;
+		int cont=0;
+		if(TopJuguetes->inicio!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
 	            printf("\n     %s   -   %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
 	            iJugSolicitado = iJugSolicitado->siguiente;
+	            cont++;
+	            
+	            if(cont==10){
+	            	break;
+				}
 	        }		
 			
 		}else{
