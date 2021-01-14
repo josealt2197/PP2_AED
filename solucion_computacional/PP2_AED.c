@@ -38,6 +38,7 @@ typedef struct PilaJugSolicitados PilaJugSolicitados;
 
 typedef struct Domicilio Domicilio;
 typedef struct Ruta Ruta;
+typedef struct Recorrido Recorrido;
 
 //Procedimientos para Menus de Opciones
 void MenuPrincipal();
@@ -46,6 +47,7 @@ void GestionJuguetes();
 void GestionDomicilios();
 void GestionAyudantes();
 void GestionCartas();
+void GestionEntregas();
 void AnalisisDeDatos();
 
 //Procedimientos para Gestion de Ninos/as
@@ -119,12 +121,19 @@ Domicilio* validarDomicilio(const char nombre[]);
 void agregarRuta(Domicilio* origen, Domicilio* destino, Ruta* nuevaRuta);
 void visualizarGrafo();
 int mostrarDomicilios();
-
 void modificarDomicilio();
 void modificarRuta();
 void eliminarDomicilio();
 void borrarRutas(const char lugar_Destino[]);
 void eliminarRuta(); 
+void insertarEnRecorrido(Domicilio* domicilio);
+Domicilio *extraerLugar();
+void reiniciarDomicilios();
+void algoritmoDijkstra();
+
+//Procedimientos para la Gestion de Entregas
+void entregaTodos();
+void entregaPorTipo();
 
 struct Nino{
     char cedula[12];
@@ -280,11 +289,17 @@ struct Ruta{
 	int peso;
 };
 
+struct Recorrido{
+	Domicilio *nombre_lugar;
+	Recorrido *siguiente;
+};
+
 /****************************************************************Menús de Opciones***********************************************************************************************/
 
 Juguete *jugueteRaiz=NULL;
 Domicilio *lugarInicial=NULL;
-
+Recorrido *lugarPartida=NULL;
+Recorrido *lugarLlegada=NULL;
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
 	Salidas: Llamada a las demás funciones de menús.
@@ -336,9 +351,10 @@ void MenuPrincipal(){
 		printf( "\n 3 - Gestion de JUGUETES" );
 	    printf( "\n 4 - Gestion de AYUDANTES DE SANTA" );	    
 	    printf( "\n 5 - Gestion de CARTAS PARA SANTA" );
-		printf( "\n 6 - Analisis de DATOS" );   
-	    printf( "\n 7 - Salir" );
-	    printf("\n\n<--Digite una opcion (1-7): ");
+		printf( "\n 6 - ENTREGA de Juguetes" ); 
+		printf( "\n 7 - Analisis de DATOS" );   
+	    printf( "\n 8 - Salir" );
+	    printf("\n\n<--Digite una opcion (1-8): ");
         opcion = getchar();
         
         switch ( opcion ){
@@ -352,9 +368,11 @@ void MenuPrincipal(){
                 break;
             case '5': GestionCartas(LNinos, LJugCartas, LCartas, LDeseos, LAyudantes, LComp);
 				break;
-			case '6': AnalisisDeDatos(LJugCartas, LCartas, LComp, LNinos);
+			case '6': GestionEntregas();
 				break;
-			case '7': exit(1);
+			case '7': AnalisisDeDatos(LJugCartas, LCartas, LComp, LNinos);
+				break;
+			case '8': exit(1);
 				break;
             default:
             	fflush(stdin);
@@ -362,7 +380,7 @@ void MenuPrincipal(){
 				getchar();
                 break;
         }
-    } while (opcion!='7');    
+    } while (opcion!='8');    
     fflush(stdin);
 	getchar();	
 }
@@ -436,7 +454,6 @@ void GestionJuguetes(){
 		printf("\n 1. REGISTRAR informacion de un Juguete.");
 		printf("\n 2. ELIMINAR informacion de un Juguete.");
 		printf("\n 3. MODIFICAR informacion de un Juguete.");
-		printf("\n 4. ENTREGAR Juguetes de Cartas registradas.");
 		printf("\n\n<--Digite una opcion (0-3): ");	
 		opcion=getchar();
 		
@@ -447,8 +464,6 @@ void GestionJuguetes(){
 				case '2': eliminarJuguete();
 					break;
 				case '3': modificarJuguetes();
-					break;
-				case '4': MenuPrincipal();
 					break;
 				case '0': 
 					break;
@@ -612,6 +627,46 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 	fflush(stdin);
 }
 
+
+/*
+	Entradas: Un número (tipo char) en un rango de 0 a 3 para escoger una de las opciones disponibles en el menú. 
+	Salidas: 
+	Restricciones: Solo se deben ingresar números en un rango de 0 a 3.
+*/
+void GestionEntregas(){
+	char opcion, ch;	
+
+	do{
+		system( "CLS" );
+		fflush(stdin);
+		printf("\n\n*********************************\n");
+		printf("        Sistema NaviTEC \n");
+		printf("*********************************\n");
+		printf("     Gestion de Entregas\n");
+		printf("*********************************\n");
+		printf("\n 0. REGRESAR al Menu Principal.");
+		printf("\n 1. Entrega para TODOS las Rutas.");
+		printf("\n 2. Entrega para un TIPO de Ruta.");
+		printf("\n\n<--Digite una opcion (0-2): ");	
+		opcion=getchar();
+		
+		while((ch = getchar()) != EOF && ch != '\n');
+			switch(opcion){
+				case '1': entregaTodos();
+					break;
+				case '2': entregaPorTipo();
+					break;
+				case '0':
+					break;
+				default:
+					fflush(stdin);
+					printf("**Opcion no valida. Intente de nuevo.**\n");
+					getchar();
+					break;		
+		}	
+	}while(opcion!='0');			
+	fflush(stdin);
+}
 
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
@@ -3585,6 +3640,192 @@ void visualizarGrafo(){
     printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
+
+/**************************************************************** Gestion de Entregas  ***********************************************************************************************/
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void entregaTodos(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("   Entrega a Todas las Rutas\n" );
+	printf("*********************************\n");
+	
+	algoritmoDijkstra();
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void entregaPorTipo(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("   Entrega a Por Tipo de Ruta\n" );
+	printf("*********************************\n");
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void insertarEnRecorrido(Domicilio* domicilio){
+	Recorrido *nuevo=(Recorrido*)malloc(sizeof(Recorrido));
+	nuevo->nombre_lugar=domicilio;
+	nuevo->siguiente=NULL;
+	if(lugarPartida==NULL){
+		lugarPartida=nuevo;
+		lugarLlegada=nuevo;
+	}else{
+	   nuevo->siguiente=lugarPartida;
+	   lugarPartida=nuevo;    	
+	}
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+Domicilio *extraerLugar(){
+	Recorrido *aux;
+	
+	if(lugarPartida==NULL){
+		return NULL;
+	}else{
+		aux=lugarPartida;
+		lugarPartida=lugarPartida->siguiente;
+		aux->siguiente=NULL;
+		if(lugarPartida==NULL)
+			lugarLlegada=NULL;
+	}
+	
+	Domicilio *resultado=aux->nombre_lugar;
+	free(aux);
+	
+	return resultado;
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void reiniciarDomicilios(){
+	if(lugarInicial!=NULL){
+		Domicilio *aux= lugarInicial;
+		while(aux!=NULL){
+			aux->visitado=aux->terminado=0;
+		    aux=aux->siguiente;
+		}
+	}
+}
+ 
+ /*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void algoritmoDijkstra(){
+	
+	Domicilio *iDomicilio = lugarInicial;
+	char origen[50], destino[50];
+	
+	fflush(stdin);
+
+	printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
+    gets(origen);
+    
+   	printf("\n-->Ingrese el Lugar de DESTINO \n");
+	gets(destino);
+
+	while(iDomicilio!=NULL){
+
+		if(strcmp(iDomicilio->nombre_lugar, origen)==0){
+			iDomicilio->terminado=1;
+			iDomicilio->monto=0;
+			break;
+		}
+		iDomicilio=iDomicilio->siguiente;
+	}
+	if(iDomicilio==NULL){
+		printf("***Domicilio no encontrado***\n");
+		return;
+	}
+	while(iDomicilio!=NULL){
+
+		Ruta *iRuta=iDomicilio->adyacencia;
+	    
+		while(iRuta!=NULL){
+
+		    if(iRuta->lugar->monto==-1 || (iDomicilio->monto+atoi(iRuta->tiempo_estimado))<iRuta->lugar->monto){
+		    	iRuta->lugar->monto=iDomicilio->monto+atoi(iRuta->tiempo_estimado);
+		    	strcpy(iRuta->lugar->anterior, iDomicilio->nombre_lugar);
+			}
+		    iRuta=iRuta->siguiente;
+	    }
+	    
+	    iDomicilio=lugarInicial;
+	    
+	    Domicilio *masCorto = lugarInicial;
+	    
+	    while(masCorto->anterior==0 || masCorto->terminado ==1){
+	 
+	    	masCorto=masCorto->siguiente;
+		}
+	    	
+	    
+		while(iDomicilio!=NULL){
+		
+	    	if(iDomicilio->monto<masCorto->monto && iDomicilio->terminado==0 && strcmp(iDomicilio->anterior, "0")!=0)
+	    		masCorto=iDomicilio;
+	    	iDomicilio=iDomicilio->siguiente;
+		}
+		
+		iDomicilio=masCorto;
+		iDomicilio->terminado=1;
+		
+		if(strcmp(iDomicilio->nombre_lugar,destino)==0)
+			break;
+	}
+	while(strcmp(iDomicilio->anterior, "0")!=0){
+
+		
+		insertarEnRecorrido(iDomicilio);
+		
+		char temp[50];
+		strcpy(temp, iDomicilio->anterior);
+
+		iDomicilio=lugarInicial;
+		while(strcmp(iDomicilio->nombre_lugar, temp)!=0){
+
+		   iDomicilio=iDomicilio->siguiente;	
+		}
+	}
+	
+	printf("\n---Recorrido de '%s' a '%s'---\n-->", origen, destino);
+	insertarEnRecorrido(iDomicilio);
+	while(lugarLlegada!=NULL){
+
+		printf("%s ",extraerLugar()->nombre_lugar);
+	}
+	printf("\n");
+		
+	reiniciarDomicilios();
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
+}
+
 
 /****************************************************************Analisis de Datos***********************************************************************************************/
 /*
