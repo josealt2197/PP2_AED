@@ -123,6 +123,7 @@ int mostrarDomicilios();
 void modificarDomicilio();
 void modificarRuta();
 void eliminarDomicilio();
+void borrarRutas(const char lugar_Destino[]);
 void eliminarRuta(); 
 
 struct Nino{
@@ -3324,26 +3325,23 @@ void eliminarDomicilio(){
 						}else{
 							lugarInicial=domicilio->siguiente;
 							free(domicilio);
-						}
-
-						printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
-						hallado=1;
-						break;				
+						}				
 					}
 					else 
 					{
 						
 						anterior->siguiente = domicilio->siguiente;
 						free(domicilio);
-						printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
-						hallado=1;
-						break;
+						
+						
 			
 					}
+					printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
 				}
-				//**Eliminar Rutas***
-				
-   
+
+				borrarRutas(lugar);
+				hallado=1;
+				break;
 			}
 			
 			anterior=domicilio;
@@ -3362,6 +3360,47 @@ void eliminarDomicilio(){
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 
+}
+
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void borrarRutas(const char lugar_Destino[]){
+	struct Ruta *iRuta, *rutaAnterior;;
+	Domicilio* iDomicilio = lugarInicial;
+	while(iDomicilio!=NULL){  
+		if(iDomicilio->adyacencia!=NULL){
+			iRuta = iDomicilio->adyacencia;
+			while(iRuta!=NULL){
+				if(strcmp(iRuta->lugar->nombre_lugar,lugar_Destino)==0){
+					if(iRuta==iDomicilio->adyacencia)
+					{
+						if(iRuta->siguiente==NULL)
+						{
+							free(iRuta);
+							iDomicilio->adyacencia=NULL;
+						}else{
+							iDomicilio->adyacencia=iRuta->siguiente;
+							free(iRuta);
+						}				
+					}
+					else 
+					{
+						rutaAnterior->siguiente = iRuta->siguiente;
+						free(iRuta);
+			
+					}
+				}   	
+			rutaAnterior=iRuta;
+			iRuta=iRuta->siguiente;
+	        }
+		}
+	iDomicilio=iDomicilio->siguiente;
+	}
+	
+	
 }
 
 /*
@@ -3519,7 +3558,8 @@ void visualizarGrafo(){
     
     Ruta* iRuta;
     
-    printf("Origen  ->  Destino ( tipo , duracion)\n");  
+    if (iDomicilio != NULL){
+    	printf("Origen  ->  Destino ( tipo , duracion)\n");  
     while(iDomicilio!=NULL){   
 	    printf("%s-> ",iDomicilio->nombre_lugar);
        
@@ -3536,6 +3576,11 @@ void visualizarGrafo(){
         iDomicilio=iDomicilio->siguiente;
     }
     printf("\n");
+	}else{
+		printf("***No hay Domicilios registrados***");
+	}
+    
+    
     
     printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
