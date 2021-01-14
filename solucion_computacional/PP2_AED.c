@@ -486,6 +486,7 @@ void GestionDomicilios(){
 		printf("\n 4. MODIFICAR una Ruta entre lugares.");
 		printf("\n 5. ELIMINAR un Lugar de Domicilio.");
 		printf("\n 6. ELIMINAR una Ruta entre lugares.");
+		printf("\n 7. MOSTRAR domicilios y rutas");
 		printf("\n\n<--Digite una opcion (0-6): ");	
 		opcion=getchar();
 		
@@ -502,6 +503,8 @@ void GestionDomicilios(){
 				case '5': eliminarDomicilio();
 					break;
 				case '6': eliminarRuta();
+					break;
+				case '7': visualizarGrafo();
 					break;
 				case '0': 
 					break;
@@ -3018,7 +3021,7 @@ void registrarRuta(){
     
 	//Agregar Origen
     do{
-    	printf("\n-->Ingrese el Domicilio de ORIGEN:  \n");
+    	printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
 	    gets(lugar_origen);
 	    
 	    origen = validarDomicilio(lugar_origen);
@@ -3048,14 +3051,12 @@ void registrarRuta(){
         
     }while(1);
 	
-    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
+    printf("\n-->Ingrese el tipo de ruta (T->terrestre, A->aerea o M->maritima): \n");
     gets(nuevaRuta->tipo_ruta);  
     printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
     gets(nuevaRuta->distancia);  
-    printf("\n-->Ingresar PESO de la Ruta: ");
-    gets(peso);  
-    
-    nuevaRuta->peso = atoi(peso);
+    printf("\n-->Ingresar la Duracion de la Ruta (en minutos): \n");
+    gets(nuevaRuta->tiempo_estimado);  
 	
     agregarRuta(origen,destino,nuevaRuta);
     	
@@ -3181,84 +3182,91 @@ void modificarRuta(){
 	printf("     Modificar Info. Rutas\n" );
 	printf("*********************************\n");
 	
-	struct Ruta *ruta;
+	struct Ruta *iRuta;
 	char lugar_origen[50], lugar_destino[50], tipo_ruta[30], tiempo_estimado[30], distancia[30], respuesta[2];
-	int resp=0, hallado=0; 
+	int resp=0, domHallado=0, rutaHallado=0; 
 		
-//    if(LNinos->inicio!=NULL)
-//	{
-		
-		printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
-	    gets(lugar_origen);
-	    printf("\n-->Ingrese el Lugar de DESTINO \n");
-	    gets(lugar_destino);
-	    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
-	    gets(tipo_ruta);
-		
-//        iNino = LNinos->inicio;
-//        while(iNino!=NULL){
-//            
-//            comp=strcmp(id,iNino->cedula);
-//            if(comp==0){
-//            	printf("\n+------------------------------------+");
-//				printf("\n      Datos del Lugar " );
-//            	printf("\n+------------------------------------+");
-//                printf("\n  Origen:  Pocosol, San Carlos\n");
-//                printf("  Destino:  San Pedro, San Jose\n");
-//                printf("  Duracion: 142  min\n");
-//                printf("  Distancia: 134  km\n");
-//                printf("  Tipo de Ruta: Terrestre\n");
-//                printf("+-------------------------------------+\n");
-//                
-//                do{
-//			        printf("\nDesea modificar el Tiempo Estimado? (1-Si 2-No)\n" );
-//                	gets(respuesta);
-//					resp=atoi(respuesta);
-//                
-//			        if(resp==1 || resp==2){
-//			            break;
-//			        }
-//			    }while(1);
-//                
-//                if(resp==1){
-//                	printf("\n-->Ingrese el tiempo estimado (en minutos) del recorrido :\n");
-//	    			gets(ruta->tiempo_estimado);	
-//					strcpy(ruta->tiempo_estimado,tiempo_estimado);
-//				}
-//				
-//				do{
-//			        printf("\nDesea modificar la Distancia? (1-Si 2-No)\n" );
-//                	gets(respuesta);
-//					resp=atoi(respuesta);
-//                
-//			        if(resp==1 || resp==2){
-//			            break;
-//			        }
-//			    }while(1);
-//                
-//                if(resp==1){
-//                	printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
-//	    			gets(ruta->distancia);	
-//					strcpy(ruta->distancia,distancia);
-//				}
-//				
-//			
-//                      
-//                hallado=1;
-//				break;
-//			}
-//			iNino = iNino->siguiente;
-//
-//        }
-//        
-//		if(hallado==0){
-			printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
-//		}
-//		
-//	}else{
-//		printf( "\n***No se han encontrado Rutas registrados***");
-//	}
-//	
+	printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
+    gets(lugar_origen);
+    printf("\n-->Ingrese el Lugar de DESTINO \n");
+    gets(lugar_destino);
+    printf("\n-->Ingrese el tipo de ruta (T->terrestre, A->aerea o M->maritima): \n");
+    gets(tipo_ruta);
+	
+    Domicilio* iDomicilio = lugarInicial;
+    
+    if(lugarInicial!=NULL){
+    	Domicilio* iDomicilio = lugarInicial;
+    	
+    	while(iDomicilio!=NULL){  
+    
+		    if(strcmp(iDomicilio->nombre_lugar,lugar_origen)==0){
+				domHallado=1;
+		    	if(iDomicilio->adyacencia!=NULL){
+					
+					iRuta = iDomicilio->adyacencia;
+
+		    		while(iRuta !=NULL){
+
+						if (strcmp(iRuta->lugar->nombre_lugar,lugar_destino)==0 && strcmp(iRuta->tipo_ruta,tipo_ruta)==0){
+							printf("\n+------------------------------------+");
+							printf("\n      Datos de la Ruta " );
+			            	printf("\n+------------------------------------+");
+			                printf("\n  Origen: %s\n", iDomicilio->nombre_lugar);
+			                printf("  Destino:  %s\n", iRuta->lugar->nombre_lugar);
+			                printf("  Duracion: %s\n",iRuta->tiempo_estimado);
+			                printf("  Distancia: %s\n",iRuta->distancia);
+			                printf("  Tipo de Ruta: %s\n", iRuta->tipo_ruta);
+			                printf("+-------------------------------------+\n");
+			                
+			                do{
+					        printf("\nDesea modificar el Tiempo Estimado? (1-Si 2-No)\n" );
+		                	gets(respuesta);
+							resp=atoi(respuesta);
+		                
+					        if(resp==1 || resp==2){
+					            break;
+					        }
+		    				}while(1);
+	        
+			                if(resp==1){
+			                	printf("\n-->Ingrese el tiempo estimado (en minutos) del recorrido :\n");
+				    			gets(iRuta->tiempo_estimado);	
+							}
+							
+							do{
+						        printf("\nDesea modificar la Distancia? (1-Si 2-No)\n" );
+			                	gets(respuesta);
+								resp=atoi(respuesta);
+			                
+						        if(resp==1 || resp==2){
+						            break;
+						        }
+						    }while(1);
+			                
+			                if(resp==1){
+			                	printf("\n-->Ingrese la Distancia entre ambos lugares (en km): \n");
+				    			gets(iRuta->distancia);	
+							}     
+			                rutaHallado=1;
+							break;
+						}
+					iRuta=iRuta->siguiente;
+			        }
+					if(rutaHallado==0){
+						printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
+					}
+				}
+			}
+    	iDomicilio=iDomicilio->siguiente;
+		}
+	}else{
+		printf("*** NO hay Domicilios registrados***");
+	}
+	if(domHallado==0){
+		printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
+	}	
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -3369,60 +3377,99 @@ void eliminarRuta(){
 	printf(" Eliminar Info. de una Ruta\n" );
 	printf("*********************************\n");
 	
-	struct Domicilio *aux;
-	int hallado=0, comp=3;
-	char opcion[3], lugar_origen[50], lugar_destino[50], tipo_ruta[30];
-
-
+	struct Ruta *iRuta, *rutaAnterior;
+	char lugar_origen[50], lugar_destino[50], tipo_ruta[30], tiempo_estimado[30], distancia[30], respuesta[2];
+	int resp=0, domHallado=0, rutaHallado=0; 
+		
+	printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
+    gets(lugar_origen);
+    printf("\n-->Ingrese el Lugar de DESTINO \n");
+    gets(lugar_destino);
+    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
+    gets(tipo_ruta);
 	
-//    if(LNinos->inicio!=NULL)
-//	{
-		
-		printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
-	    gets(lugar_origen);
-	    printf("\n-->Ingrese el Lugar de DESTINO \n");
-	    gets(lugar_destino);
-	    printf("\n-->Ingrese el tipo de ruta (terrestre, aerea o maritima): \n");
-	    gets(tipo_ruta);
-		
-//        iNino = LNinos->inicio;
-//        while(iNino!=NULL){
-//            
-//            comp=strcmp(id,iNino->cedula);
-//            if(comp==0){
-//            	printf("\n+------------------------------------+");
-//				printf("\n      Datos del Lugar " );
-//            	printf("\n+------------------------------------+");
-//                printf("\n  Origen:  Pocosol, San Carlos\n");
-//                printf("  Destino:  San Pedro, San Jose\n");
-//                printf("  Duracion: 142  min\n");
-//                printf("  Distancia: 134  km\n");
-//                printf("  Tipo de Ruta: \n");
-//                printf("+-------------------------------------+\n");
-//                
-//                printf("\n-->Desea eliminar esta Ruta?:\n");
-//		    	printf("<--Digite 1-SI, 2-NO: \n");
-//				gets(opcion);
-//				
-//				//**Eliminar Domicilio y Rutas***
-//		
-//		if(hallado==0){
-			printf( "\n***No se ha encontrado una Ruta para los datos ingresados***");
-//		}
-//		
-//		if(aux != NULL)
-//		{
-//			printf("\n-->Se ha eliminado la Ruta con los datos ingresados");
-//			free(aux);
-//		}			
-//	
-//	}else{
-//		printf( "\n***No se han encontrado registrados***");
-//	}
-//	
+    Domicilio* iDomicilio = lugarInicial;
+    
+    if(lugarInicial!=NULL){
+    	Domicilio* iDomicilio = lugarInicial;
+    	
+    	while(iDomicilio!=NULL){  
+    
+		    if(strcmp(iDomicilio->nombre_lugar,lugar_origen)==0){
+				domHallado=1;
+		    	if(iDomicilio->adyacencia!=NULL){
+					
+					iRuta = iDomicilio->adyacencia;
 
+		    		while(iRuta !=NULL){
+
+						if (strcmp(iRuta->lugar->nombre_lugar,lugar_destino)==0 && strcmp(iRuta->tipo_ruta,tipo_ruta)==0){
+							printf("\n+------------------------------------+");
+							printf("\n      Datos de la Ruta " );
+			            	printf("\n+------------------------------------+");
+			                printf("\n  Origen: %s\n", iDomicilio->nombre_lugar);
+			                printf("  Destino:  %s\n", iRuta->lugar->nombre_lugar);
+			                printf("  Duracion: %s\n",iRuta->tiempo_estimado);
+			                printf("  Distancia: %s\n",iRuta->distancia);
+			                printf("  Tipo de Ruta: %s\n", iRuta->tipo_ruta);
+			                printf("+-------------------------------------+\n");
+			                
+			                do{
+					        printf("\nDesea Eliminar esta ruta? (1-Si 2-No)\n" );
+		                	gets(respuesta);
+							resp=atoi(respuesta);
+		                
+					        if(resp==1 || resp==2){
+					            break;
+					        }
+		    				}while(1);
+	        
+			                if(resp==1){              	
+						        if(iRuta==iDomicilio->adyacencia)
+								{
+									if(iRuta->siguiente==NULL)
+									{
+										free(iRuta);
+										iDomicilio->adyacencia=NULL;
+									}else{
+										iDomicilio->adyacencia=iRuta->siguiente;
+										free(iRuta);
+									}				
+								}
+								else 
+								{
+									
+									rutaAnterior->siguiente = iRuta->siguiente;
+									free(iRuta);
+						
+								}
+								printf("\n-->Se ha eliminado la Ruta con los datos ingresados");	
+							}
+
+			                rutaHallado=1;
+							break;
+						}
+					rutaAnterior=iRuta;
+					iRuta=iRuta->siguiente;
+			        }
+					if(rutaHallado==0){
+						printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
+					}
+				}
+			}
+    	iDomicilio=iDomicilio->siguiente;
+		}
+	}else{
+		printf("*** NO hay Domicilios registrados***");
+	}
+	if(domHallado==0){
+		printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
+	}	
+	
 	printf("\n\nPresione una tecla para regresar..." );
-	getchar();	
+	getchar();
+		
+	
 }
 
 /*
@@ -3437,12 +3484,12 @@ int mostrarDomicilios(){
     printf("\n+---------------------------------------------+\n");
 	printf( "              Lista de Domicilios" );
 	printf("\n+---------------------------------------------+\n");
-	printf(" Nombre del Lugar - Codigo  - Codigo Postal ");
+	printf("        Codigo - Lugar  - Codigo Postal ");
 	printf("\n+---------------------------------------------+\n");
 	
 	if(iDomicilio!=NULL){
 		while(iDomicilio!=NULL){   
-		    printf("        %s - %s - %s \n",iDomicilio->nombre_lugar, iDomicilio->codigo, iDomicilio->codigo_postal);
+		    printf("        %s - %s - %s \n",iDomicilio->codigo, iDomicilio->nombre_lugar, iDomicilio->codigo_postal);
 	        iDomicilio=iDomicilio->siguiente;
 	    }
 	}else{
@@ -3456,6 +3503,43 @@ int mostrarDomicilios(){
 
 }
 
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void visualizarGrafo(){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("***********************************\n");
+	printf("  Lista de Rutas entre Domicilios\n" );
+	printf("***********************************\n");
+    Domicilio* iDomicilio=lugarInicial;
+    
+    Ruta* iRuta;
+    
+    printf("Origen  ->  Destino ( tipo , duracion)\n");  
+    while(iDomicilio!=NULL){   
+	    printf("%s-> ",iDomicilio->nombre_lugar);
+       
+	    if(iDomicilio->adyacencia!=NULL){
+            iRuta=iDomicilio->adyacencia;
+            
+			while(iRuta!=NULL){ 
+			    printf(" %s( %s, %s )",iRuta->lugar->nombre_lugar, iRuta->tipo_ruta, iRuta->tiempo_estimado);
+                iRuta=iRuta->siguiente;
+            }
+        }
+
+        printf("\n");
+        iDomicilio=iDomicilio->siguiente;
+    }
+    printf("\n");
+    
+    printf("\n\nPresione una tecla para regresar..." );
+	getchar();	
+}
 
 /****************************************************************Analisis de Datos***********************************************************************************************/
 /*
