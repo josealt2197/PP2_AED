@@ -129,7 +129,8 @@ void eliminarRuta();
 void insertarEnRecorrido(Domicilio* domicilio);
 Domicilio *extraerLugar();
 void reiniciarDomicilios();
-void algoritmoDijkstra();
+void dijkstraTodos();
+void registrarPoloNorte();
 
 //Procedimientos para la Gestion de Entregas
 void entregaTodos();
@@ -337,6 +338,8 @@ void MenuPrincipal(){
 	LDeseos = (struct ListaDeseos *) malloc(sizeof(struct ListaDeseos));
 	LDeseos->inicio = NULL;
 	LDeseos->final = NULL;
+	
+	registrarPoloNorte();
 	
 	do{
         system( "CLS" );
@@ -3156,7 +3159,7 @@ void modificarDomicilio(){
 	printf("   Modificar Info. Domicilios\n" );
 	printf("*********************************\n");
 	
-	Domicilio* domicilio=lugarInicial;
+	Domicilio* domicilio=lugarInicial->siguiente;
 	char lugar[50], codigo[30], postal[30], respuesta[2];
 	int resp=0, hallado=0; 
 	
@@ -3340,7 +3343,7 @@ void eliminarDomicilio(){
 	printf("  Eliminar Info. de un Domiclio\n" );
 	printf("*********************************\n");
 	
-	struct Domicilio *domicilio=lugarInicial, *anterior;
+	struct Domicilio *domicilio=lugarInicial->siguiente, *anterior;
 	int hallado=0, comp=3;
 	char lugar[50], opcion[3]; 
 	
@@ -3573,7 +3576,7 @@ void eliminarRuta(){
 */
 int mostrarDomicilios(){
 
-	Domicilio* iDomicilio=lugarInicial;
+	Domicilio* iDomicilio=lugarInicial->siguiente;
 
     printf("\n+---------------------------------------------+\n");
 	printf( "              Lista de Domicilios" );
@@ -3641,6 +3644,28 @@ void visualizarGrafo(){
 	getchar();	
 }
 
+/*
+	Entradas: 
+	Salidas: 
+	Restricciones: Ninguna.
+*/
+void registrarPoloNorte(){
+	Domicilio* poloNorte=(Domicilio*)malloc(sizeof(Domicilio));
+
+    strcpy(poloNorte->codigo, "001");
+    strcpy(poloNorte->codigo_postal, "H0H0H0");
+	strcpy(poloNorte->nombre_lugar, "Polo Norte");
+	poloNorte->siguiente=NULL;
+    poloNorte->adyacencia=NULL;
+    poloNorte->visitado=0;
+	poloNorte->terminado=0;
+    poloNorte->monto=-1;
+    strcpy(poloNorte->anterior, "0");
+    
+	lugarInicial=poloNorte;
+	
+}
+
 /**************************************************************** Gestion de Entregas  ***********************************************************************************************/
 
 /*
@@ -3656,7 +3681,14 @@ void entregaTodos(){
 	printf("   Entrega a Todas las Rutas\n" );
 	printf("*********************************\n");
 	
-	algoritmoDijkstra();
+	while(lugarLlegada!=NULL){
+
+		dijkstraTodos();
+		iDomicilio=iDomicilio->siguiente;
+	}
+	
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
 }
 
 /*
@@ -3735,18 +3767,10 @@ void reiniciarDomicilios(){
 	Salidas: 
 	Restricciones: Ninguna.
 */
-void algoritmoDijkstra(){
+void dijkstraTodos(char destino[50]){
 	
 	Domicilio *iDomicilio = lugarInicial;
-	char origen[50], destino[50];
-	
-	fflush(stdin);
-
-	printf("\n-->Ingrese el Lugar de ORIGEN:  \n");
-    gets(origen);
-    
-   	printf("\n-->Ingrese el Lugar de DESTINO \n");
-	gets(destino);
+	char origen[50] = "Polo Norte";
 
 	while(iDomicilio!=NULL){
 
@@ -3812,18 +3836,25 @@ void algoritmoDijkstra(){
 		}
 	}
 	
-	printf("\n---Recorrido de '%s' a '%s'---\n-->", origen, destino);
+	
+	printf("\n-->Entregando Juguetes en... %s", destino);
+
+	printf("\n-->Recorrido:-->", origen, destino);
 	insertarEnRecorrido(iDomicilio);
 	while(lugarLlegada!=NULL){
 
 		printf("%s ",extraerLugar()->nombre_lugar);
 	}
 	printf("\n");
+	
+	printf("\nIdentificación del Nino(a):");
+	while(lugarLlegada!=NULL){
+
+		printf("\n %s ", ->identficacion);
+		iDomicilio=iDomicilio->siguiente;
+	}
 		
 	reiniciarDomicilios();
-	
-	printf("\n\nPresione una tecla para regresar..." );
-	getchar();
 }
 
 
