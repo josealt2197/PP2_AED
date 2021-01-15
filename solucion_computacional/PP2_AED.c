@@ -3753,7 +3753,7 @@ void entregaTodos(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct
 				
 				//Llamar a la función con el Algoritmo de Dijkstra
 				while(iLugarPorVisitar!=NULL){
-					printf("\n entregaTodos4");
+
 					dijkstraTodos(LEntregables, iLugarPorVisitar->nombre_Lugar);
 					
 					iLugarPorVisitar=iLugarPorVisitar->siguiente;
@@ -3853,16 +3853,14 @@ void reiniciarDomicilios(){
 	Restricciones: Ninguna.
 */
 void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]){
-	
-	printf("\n dijkstraTodos1");
-	
+		
 	Domicilio *iDomicilio = lugarInicial;
 	char origen[50];
 	
 	strcpy(origen, "Polo Norte");
 
 	while(iDomicilio!=NULL){
-		printf("\n dijkstraTodos2");
+
 		if(strcmp(iDomicilio->nombre_lugar, origen)==0){
 			iDomicilio->terminado=1;
 			iDomicilio->monto=0;
@@ -3877,11 +3875,11 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	}
 	
 	while(iDomicilio!=NULL){
-		printf("\n dijkstraTodos3");
+
 		Ruta *iRuta=iDomicilio->adyacencia;
 	    
 		while(iRuta!=NULL){
-			printf("\n dijkstraTodos4");
+
 		    if(iRuta->lugar->monto==-1 || (iDomicilio->monto+atoi(iRuta->tiempo_estimado))<iRuta->lugar->monto){
 		    	iRuta->lugar->monto=iDomicilio->monto+atoi(iRuta->tiempo_estimado);
 		    	strcpy(iRuta->lugar->anterior, iDomicilio->nombre_lugar);
@@ -3894,13 +3892,13 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	    Domicilio *masCorto = lugarInicial;
 	    
 	    while(masCorto->anterior==0 || masCorto->terminado ==1){
-	 		printf("\n dijkstraTodos5");
+
 	    	masCorto=masCorto->siguiente;
 		}
 	    	
 	    
 		while(iDomicilio!=NULL){
-		printf("\n dijkstraTodos6");
+
 	    	if(iDomicilio->monto<masCorto->monto && iDomicilio->terminado==0 && strcmp(iDomicilio->anterior, "0")!=0)
 	    		masCorto=iDomicilio;
 	    	iDomicilio=iDomicilio->siguiente;
@@ -3915,7 +3913,7 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	
 	while(strcmp(iDomicilio->anterior, "0")!=0){
 
-		printf("\n dijkstraTodos7");
+
 		insertarEnRecorrido(iDomicilio);
 		
 		char temp[50];
@@ -3934,17 +3932,17 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	printf("\n-->Recorrido: ");
 	insertarEnRecorrido(iDomicilio);
 	while(lugarLlegada!=NULL){
-		printf("\n dijkstraTodos8");
+
 		printf("%s ",extraerLugar()->nombre_lugar);
 	}
 	printf("\n");
 	
 	struct CartaEntregable *iEntregable = LEntregables->inicio;
 	
-	printf("\nIdentificación del Nino(a)   -  Anno ");
+	printf("\nIdentificacion del Nino(a)   -  Anno ");
 	printf("\n---------------------------------");
 	while(iEntregable!=NULL){
-		printf("\n dijkstraTodos9");
+
 		if(strcmp(iEntregable->domicilio, destino)==0){
 			printf("\n  -> %s  -  %s", iEntregable->identificacion, iEntregable->anno);
 		}
