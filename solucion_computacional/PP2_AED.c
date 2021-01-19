@@ -138,7 +138,8 @@ void entregaPorTipo();
 void insertarEnRecorrido(Domicilio* domicilio);
 Domicilio *extraerLugar();
 void reiniciarDomicilios();
-void dijkstraTodos();
+void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]);
+void dijkstraPorTipo(struct ListaEntregables *LEntregables, const char destino[50], const char tipo[10]);
 void registrarPoloNorte();
 void obtenerEntregables(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaPorVisitar *LPorVisitar, struct ListaEntregables *LEntregables );
 int validarJugParaEntregar( struct ListaJugCarta *LJugCarta,const char identificacion[],const char anno[]);
@@ -663,8 +664,9 @@ void GestionCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCartas, 
 
 
 /*
-	Entradas: Un número (tipo char) en un rango de 0 a 3 para escoger una de las opciones disponibles en el menú. 
-	Salidas: 
+	Entradas: Un número (tipo char) en un rango de 0 a 2 para escoger una de las opciones disponibles en el menú. 
+	Salidas: Llamada a las demás funciones para la entrega de juguetes (para todas las rutas, para un tipo de ruta)  
+			 consulta y procesamiento de Cartas para Santa)
 	Restricciones: Solo se deben ingresar números en un rango de 0 a 3.
 */
 void GestionEntregas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta){
@@ -2039,10 +2041,6 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 		
 //		mostrarListaCartas(LCartas);
 								
-		printf("*********************************\n");
-		printf("        Agregar Juguetes\n" );
-		printf("*********************************\n");
-		
 		strcpy(opcion, "1");
 	    
 	    do{
@@ -2566,17 +2564,48 @@ void consultarCarta(struct ListaCartas *LCartas, struct ListaDeseos *LDeseos, st
 void mostrarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, const char identificacion [], const char anno []){
 
 	struct JuguetesCarta *iJugCarta = LJugCarta->inicio;
-	int registrados=0;
+	
+	int registrados=0, encontrada=0;
 	
 	char estado[30];
 	
 	obtenerEstadoCarta(LCartas, identificacion, anno, estado);
 	
-	printf("\n\n+-------------------------------------------------------------------+\n");
-	printf( "                        CARTA PARA SANTA" );
-	printf("\n+-------------------------------------------------------------------+\n");
-	printf("\n  Identificacion: %s   -   Anno: %s   -   Estado: %s\n", identificacion, anno, estado);
-	printf("\n+-------------------------------------------------------------------+\n");
+	struct Carta *iCarta = LCartas->inicio;
+	
+	if(LCartas->inicio!=NULL)
+	{
+
+        while(iJugCarta!=NULL){
+            if(strcmp(iCarta->identificacion, identificacion)==0 && strcmp(iCarta->anno,anno)==0){
+   				
+   				printf("\n\n+-------------------------------------------------------------------+\n");
+				printf( "                        CARTA PARA SANTA" );
+				printf("\n+-------------------------------------------------------------------+\n");
+				printf("\n  Identificacion: %s   -   Anno: %s \n", iCarta->identificacion, iCarta->anno);
+				printf("\n+-------------------------------------------------------------------+\n");
+		                    	
+            	if(strcmp(iCarta->estado, "Procesada")==0 || strcmp(iCarta->estado, "Cancelada")==0){
+            		printf("\n  Estado: %s   -   Id. Ayudante: %s\n", iCarta->estado, iCarta->procesada_por);
+					printf("\n+-------------------------------------------------------------------+\n");
+				}else{
+					printf("\n  Estado: %s \n", iCarta->estado);
+					printf("\n+-------------------------------------------------------------------+\n");
+				}
+            	
+            	encontrada=1;
+            	break;
+			}	
+            iCarta = iCarta->siguiente;
+            
+        }		
+		if(encontrada==0){
+			printf( "\n***No se han encontrado una Carta para Santa con los datos ingresados***");
+		}
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");		
+	}	
+	
 	
 	if(LJugCarta->inicio!=NULL)
 	{
@@ -2601,6 +2630,7 @@ void mostrarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, 
 		
 
 }
+
 
 /*
 	Entradas: Una lista de tipo ListaDeseos, un char identificacion y otro Anno, para tomar los datos de los juguetes de una lista de deseos
@@ -2671,8 +2701,8 @@ void mostrarListaCartas(struct ListaCartas *LCartas){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaCarta, otra de tipo ListaNinos y un char que denote un anno
+	Salidas: Un lista de cartas con el Idde cada nino para un anno especifico recibido
 	Restricciones: Ninguna.
 */
 void mostrarCartasPorAnno(struct ListaCartas *LCartas, struct ListaNinos *LNinos, const char anno []){
@@ -2708,9 +2738,10 @@ void mostrarCartasPorAnno(struct ListaCartas *LCartas, struct ListaNinos *LNinos
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos, un char que denote una identificacion y un puntero a un char
+	Salidas: Se realiza un llenado del ultimo parámetro con la información que corresponda al nombre del
+			nino con la identificación recibida
+	Restricciones: Ninguna
 */
 void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre){
 
@@ -2745,9 +2776,10 @@ void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre){
 
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCartas, un char que denote una identificacion, otro un anno y un puntero a un char
+	Salidas: Se realiza un llenado del ultimo parámetro con la información que corresponda al estado de la carta
+			la identificación recibida y anno recibidos
+	Restricciones: Ninguna
 */
 void obtenerEstadoCarta(struct ListaCartas *LCartas, const char id [], const char anno [], char *estado){
 
@@ -2790,9 +2822,9 @@ int validarComp(struct ListaComport *LComp, const char identificacion []){
 	struct Comportamiento *iComp;
 	int contador=0, comp=3;
 	
-	printf("\n\n+-------------------------------------------------------------------+\n");
-	printf( "                    Validacion de Comportamiento" );
-	printf("\n\n+-------------------------------------------------------------------+\n");
+	printf("\n+------------------------------------------------+\n");
+	printf( "          Validacion de Comportamiento" );
+	printf("\n+------------------------------------------------+\n");
 	
 	if(LComp->inicio!=NULL)
 	{
@@ -2812,16 +2844,18 @@ int validarComp(struct ListaComport *LComp, const char identificacion []){
         }		
 		
 	}else{
-		printf( "\n***No se han encontrado Ninos registrados***");
+		printf( "\n***No se han encontrado Comportamientos registrados***");
+		printf("\n+------------------------------------------------+\n");
+		return 0;
 	}
 	
 	if(contador>=6){
-		printf( "\n***El nino(a) tiene 6 o MAS comportamiento MALOS***");
-		printf("\n\n+-------------------------------------------------------------------+\n");
+		printf("\n***El nino(a) tiene 6 o MAS comportamiento MALOS***");
+		printf("\n+------------------------------------------------+\n");
 		return 1;
 	}else{
-		printf( "\n-->El nino(a) tiene MENOS de 6 comportamiento MALOS");
-		printf("\n\n+-------------------------------------------------------------------+\n");
+		printf("\n-->El nino(a) tiene MENOS de 6 comportamiento MALOS");
+		printf("\n+------------------------------------------------+\n");
 		return 0;
 	}
 
@@ -2829,8 +2863,8 @@ int validarComp(struct ListaComport *LComp, const char identificacion []){
 
 
 /*
-	Entradas:  
-	Salidas: 
+	Entradas: Una lista de tipo ListaCartas, otra ListaNinos, otra ListaJugCarta, otra ListaAyudantes y una ListaAComport
+	Salidas: Se realiza el procesado de una de las cartas, y de sus juguetes, ya sea para aceptar o rechazar cada uno.
 	Restricciones: Ninguna.
 */
 void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, 
@@ -2873,7 +2907,7 @@ void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 
 		do{ //Registrar los datos de Ayudante que proceso la carta
 
-			printf("\n Ingrese la Identificacion del Ayudante de Santa: (Ejm.105450656) \n");
+			printf("\n\n-->Ingrese la Identificacion del Ayudante de Santa: (Ejm.105450656) \n");
 			gets(id_ayudante);
 		
 	        if((validarIdentificacion(LAyudantes, id_ayudante ))!=1){
@@ -2926,7 +2960,11 @@ void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 		        
 		        while(iJugCarta!=NULL){
 		            if(strcmp(iJugCarta->identificacion, identificacion)==0 && strcmp(iJugCarta->anno,anno)==0){
-		            	printf("\nNombre del juguete: %s   -   Estado del Juguete: %s\n" , iJugCarta->nombre_juguete, iJugCarta->estado ); 
+		            	printf("\n\t+------------------------------+\n");
+						printf( "\t        Procesar Juguete" );
+						printf("\n\t+------------------------------+\n");
+						
+						printf("\nNombre del juguete: %s   -   Estado del Juguete: %s\n" , iJugCarta->nombre_juguete, iJugCarta->estado ); 
 						
 						registrados=1;
 						
@@ -2975,8 +3013,8 @@ void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 }
 
 /*
-	Entradas:  
-	Salidas: 
+	Entradas: Una lista de tipo ListaCartas, un char que denote una identificacion, otro un anno, otro un estado y otro el id de un ayudante
+	Salidas: Se varia el estado de un objeto tipo Carta de la lista, según indique el parámetro del estado
 	Restricciones: Ninguna.
 */
 void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno [], const char estado [], const char id_ayudante [] ){
@@ -3005,8 +3043,8 @@ void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [
 /****************************************************************Gestion de Domicilios y Rutas ************************************************************************************/
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se agrega un nuevo domicilio a la estructura del Grafo 
 	Restricciones: Ninguna.
 */
 void registrarDomicilio(){
@@ -3062,8 +3100,8 @@ void registrarDomicilio(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Un char que denote el nombre de un lugar de domicilio
+	Salidas: Se valida que no exista un nodo con el mismo nombre dentro del Grafo 
 	Restricciones: Ninguna.
 */
 Domicilio* validarDomicilio(const char nombre[]){
@@ -3081,8 +3119,8 @@ Domicilio* validarDomicilio(const char nombre[]){
 } 
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se agrega una nueva Ruta a la estructura del Grafo 
 	Restricciones: Ninguna.
 */ 
 void registrarRuta(){   
@@ -3156,8 +3194,8 @@ void registrarRuta(){
 
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Un puntero a un domicilio de origen, otro al destino y otro a una ruta
+	Salidas: Se agrega una nueva Ruta a la lista de adyacencias de un vertice del Grafo
 	Restricciones: Ninguna.
 */
 void agregarRuta(Domicilio* origen, Domicilio* destino, Ruta* nuevaRuta){
@@ -3178,8 +3216,8 @@ void agregarRuta(Domicilio* origen, Domicilio* destino, Ruta* nuevaRuta){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se modifica un Domicilio registrado en la estructura del Grafo 
 	Restricciones: Ninguna.
 */
 void modificarDomicilio(){
@@ -3260,8 +3298,8 @@ void modificarDomicilio(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se modifica un Ruta registrada para un vertice de la estructura del Grafo 
 	Restricciones: Ninguna.
 */
 void modificarRuta(){
@@ -3362,8 +3400,8 @@ void modificarRuta(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se elimina un Domicilio registrado en la estructura del Grafo y todas sus adyacencias
 	Restricciones: Ninguna.
 */
 void eliminarDomicilio(){
@@ -3452,8 +3490,8 @@ void eliminarDomicilio(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se elimina un Ruta registrada para un vertice de la estructura del Grafo 
 	Restricciones: Ninguna.
 */
 void borrarRutas(const char lugar_Destino[]){
@@ -3493,8 +3531,8 @@ void borrarRutas(const char lugar_Destino[]){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se elimina un Ruta registrada en la estructura del Grafo 
 	Restricciones: Ninguna.
 */
 void eliminarRuta(){
@@ -3601,8 +3639,8 @@ void eliminarRuta(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se muestra una lista con los datos de los Domicilios registrados como vertices del Grafo
 	Restricciones: Ninguna.
 */
 int mostrarDomicilios(){
@@ -3632,8 +3670,9 @@ int mostrarDomicilios(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se muestra una lista con los datos de los Domicilios registrados como vertices del Grafo y de las rutas
+			 asociadas a estos
 	Restricciones: Ninguna.
 */
 void visualizarGrafo(){
@@ -3676,8 +3715,8 @@ void visualizarGrafo(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se realiza el registro del Polo Norte como lugar de domicilio inicial.
 	Restricciones: Ninguna.
 */
 void registrarPoloNorte(){
@@ -3700,8 +3739,8 @@ void registrarPoloNorte(){
 /**************************************************************** Gestion de Entregas  ***********************************************************************************************/
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaCartas, otra ListaNinos y otra ListaJugCarta
+	Salidas: Se simula el envío de los juguetes listos para entregar, para las cartas procesadas, y para todas las rutas
 	Restricciones: Ninguna.
 */
 void entregaTodos(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta){
@@ -3730,25 +3769,75 @@ void entregaTodos(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct
 		if(LEntregables->inicio!=NULL){
 			
 			if(LPorVisitar->inicio!=NULL){
-					
-				struct CartaEntregable *iEntregable = LEntregables->inicio;
-	
-				printf("\n\n    Cartas entregables ");
-				printf("\n---------------------------------");
-				while(iEntregable!=NULL){
-					printf("\n  -> %s  -  %s -  %s", iEntregable->identificacion, iEntregable->anno, iEntregable->domicilio);
-					iEntregable= iEntregable->siguiente;
-				}
-				
+						
 				struct LugPorVisitar *iLugarPorVisitar=LPorVisitar->inicio;	
-	
-				printf("\n\n     Lugares por visitar ");
-				printf("\n---------------------------------");
+		
+				iLugarPorVisitar=LPorVisitar->inicio;
+				
+				//Llamar a la función con el Algoritmo de Dijkstra
 				while(iLugarPorVisitar!=NULL){
-					printf("\n  -> %s ", iLugarPorVisitar->nombre_Lugar);
+
+					dijkstraTodos(LEntregables, iLugarPorVisitar->nombre_Lugar);
+					
 					iLugarPorVisitar=iLugarPorVisitar->siguiente;
 				}
-					
+				
+			}else{
+				printf( "\n***No se han encontrado Domicilios por visitar***");
+			}		
+			
+		}else{
+			printf( "\n***No se han encontrado Cartas listas para entregar***");
+		}
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas registradas***");
+	}
+	
+
+	printf("\n\nPresione una tecla para regresar..." );
+	getchar();
+}
+
+/*
+	Entradas: Una lista de tipo ListaCartas, otra ListaNinos y otra ListaJugCarta
+	Salidas: Se simula el envío de los juguetes listos para entregar, para las cartas procesadas, y para un tipo de ruta dado
+	Restricciones: Ninguna.
+*/
+void entregaPorTipo(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta){
+	system( "CLS" );
+	printf("\n\n*********************************\n");
+	printf("        Sistema NaviTEC \n");
+	printf("*********************************\n");
+	printf("   Entrega Por Tipo de Ruta\n" );
+	printf("*********************************\n");
+	
+	char tipo_ruta [10];
+	
+	if(LCartas->inicio!=NULL){
+		
+		printf("\n-->Ingrese el tipo de ruta (T->terrestre, A->aerea o M->maritima): \n");
+    	gets(tipo_ruta); 
+
+		struct ListaPorVisitar *LPorVisitar;
+		LPorVisitar = (struct ListaPorVisitar *) malloc(sizeof(struct ListaPorVisitar));
+		LPorVisitar->inicio = NULL;
+		LPorVisitar->final = NULL;
+		
+		struct ListaEntregables *LEntregables;
+		LEntregables = (struct ListaEntregables *) malloc(sizeof(struct ListaEntregables));
+		LEntregables->inicio = NULL;
+		LEntregables->final = NULL;
+			
+		//Obtener Cartas por Entregar y Lugares por visitar
+		obtenerEntregables(LCartas, LNinos, LJugCarta, LPorVisitar, LEntregables);
+		
+		if(LEntregables->inicio!=NULL){
+			
+			if(LPorVisitar->inicio!=NULL){
+				
+				struct LugPorVisitar *iLugarPorVisitar=LPorVisitar->inicio;	
+		
 				iLugarPorVisitar=LPorVisitar->inicio;	
 				
 				//Llamar a la función con el Algoritmo de Dijkstra
@@ -3777,22 +3866,8 @@ void entregaTodos(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: Ninguna.
-*/
-void entregaPorTipo(){
-	system( "CLS" );
-	printf("\n\n*********************************\n");
-	printf("        Sistema NaviTEC \n");
-	printf("*********************************\n");
-	printf("   Entrega a Por Tipo de Ruta\n" );
-	printf("*********************************\n");
-}
-
-/*
-	Entradas: 
-	Salidas: 
+	Entradas: Un puntero a un Domicilio
+	Salidas: Se añade e ldomicilio recibido a la Lista De Domicilios que deben ser visitados
 	Restricciones: Ninguna.
 */
 void insertarEnRecorrido(Domicilio* domicilio){
@@ -3809,8 +3884,8 @@ void insertarEnRecorrido(Domicilio* domicilio){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna
+	Salidas: Se retorna el valor del nombre del ultimo domilcio agregado al recorrido
 	Restricciones: Ninguna.
 */
 Domicilio *extraerLugar(){
@@ -3833,8 +3908,8 @@ Domicilio *extraerLugar(){
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Ninguna 
+	Salidas: Se reinician los valores de las variables "visitado" y "terminado" para todos los Domicilios registrados
 	Restricciones: Ninguna.
 */
 void reiniciarDomicilios(){
@@ -3848,8 +3923,8 @@ void reiniciarDomicilios(){
 }
  
  /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaEntregables
+	Salidas: Se muestra el recorrido para entregar los juguetes sin importar el tipo de ruta
 	Restricciones: Ninguna.
 */
 void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]){
@@ -3913,7 +3988,6 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	
 	while(strcmp(iDomicilio->anterior, "0")!=0){
 
-
 		insertarEnRecorrido(iDomicilio);
 		
 		char temp[50];
@@ -3921,8 +3995,9 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 
 		iDomicilio=lugarInicial;
 		while(strcmp(iDomicilio->nombre_lugar, temp)!=0){
-
-		   iDomicilio=iDomicilio->siguiente;	
+			
+		   iDomicilio=iDomicilio->siguiente;
+		   	
 		}
 	}
 	
@@ -3933,7 +4008,7 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	insertarEnRecorrido(iDomicilio);
 	while(lugarLlegada!=NULL){
 
-		printf("%s ",extraerLugar()->nombre_lugar);
+		printf("->%s ",extraerLugar()->nombre_lugar);
 	}
 	printf("\n");
 	
@@ -3949,13 +4024,121 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 
 		iEntregable=iEntregable->siguiente;
 	}
+	
+	printf("\n---------------------------------");	
+	reiniciarDomicilios();
+}
+
+ /*
+	Entradas: Una lista de tipo ListaEntregables
+	Salidas: Se muestra el recorrido para entregar los juguetes según un tipo de ruta
+	Restricciones: Ninguna.
+*/
+void dijkstraPorTipo(struct ListaEntregables *LEntregables, const char destino[50], const char tipo[10]){
 		
+	Domicilio *iDomicilio = lugarInicial;
+	char origen[50];
+	
+	strcpy(origen, "Polo Norte");
+
+	while(iDomicilio!=NULL){
+
+		if(strcmp(iDomicilio->nombre_lugar, origen)==0){
+			iDomicilio->terminado=1;
+			iDomicilio->monto=0;
+			break;
+		}
+		iDomicilio=iDomicilio->siguiente;
+	}
+	
+	if(iDomicilio==NULL){
+		printf("***Domicilio no encontrado***\n");
+		return;
+	}
+	
+	while(iDomicilio!=NULL){
+
+		Ruta *iRuta=iDomicilio->adyacencia;
+	    
+		while(iRuta!=NULL){
+
+		    if(iRuta->lugar->monto==-1 || (iDomicilio->monto+atoi(iRuta->tiempo_estimado))<iRuta->lugar->monto){
+		    	iRuta->lugar->monto=iDomicilio->monto+atoi(iRuta->tiempo_estimado);
+		    	strcpy(iRuta->lugar->anterior, iDomicilio->nombre_lugar);
+			}
+		    iRuta=iRuta->siguiente;
+	    }
+	    
+	    iDomicilio=lugarInicial;
+	    
+	    Domicilio *masCorto = lugarInicial;
+	    
+	    while(masCorto->anterior==0 || masCorto->terminado ==1){
+
+	    	masCorto=masCorto->siguiente;
+		}
+	    	
+	    
+		while(iDomicilio!=NULL){
+
+	    	if(iDomicilio->monto<masCorto->monto && iDomicilio->terminado==0 && strcmp(iDomicilio->anterior, "0")!=0)
+	    		masCorto=iDomicilio;
+	    	iDomicilio=iDomicilio->siguiente;
+		}
+		
+		iDomicilio=masCorto;
+		iDomicilio->terminado=1;
+		
+		if(strcmp(iDomicilio->nombre_lugar,destino)==0)
+			break;
+	}
+	
+	while(strcmp(iDomicilio->anterior, "0")!=0){
+
+		insertarEnRecorrido(iDomicilio);
+		
+		char temp[50];
+		strcpy(temp, iDomicilio->anterior);
+
+		iDomicilio=lugarInicial;
+		while(strcmp(iDomicilio->nombre_lugar, temp)!=0){
+			
+		   iDomicilio=iDomicilio->siguiente;
+		   	
+		}
+	}
+	
+	
+	printf("\n-->Entregando Juguetes en... %s", destino);
+
+	printf("\n-->Recorrido: ");
+	insertarEnRecorrido(iDomicilio);
+	while(lugarLlegada!=NULL){
+
+		printf("->%s ",extraerLugar()->nombre_lugar);
+	}
+	printf("\n");
+	
+	struct CartaEntregable *iEntregable = LEntregables->inicio;
+	
+	printf("\nIdentificacion del Nino(a)   -  Anno ");
+	printf("\n---------------------------------");
+	while(iEntregable!=NULL){
+
+		if(strcmp(iEntregable->domicilio, destino)==0){
+			printf("\n  -> %s  -  %s", iEntregable->identificacion, iEntregable->anno);
+		}
+
+		iEntregable=iEntregable->siguiente;
+	}
+	
+	printf("\n---------------------------------");	
 	reiniciarDomicilios();
 }
 
 /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaCartas, otra ListaNinos, otra ListaJugCarta, otra ListaPorVisitar y otra ListaEntregables
+	Salidas: Se agregan a la lista de entregables los datos de las cartas que hayan sido procesadas y poseean al menos un juguete con estado listo para entregar
 	Restricciones: Ninguna.
 */
 void obtenerEntregables(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta, struct ListaPorVisitar *LPorVisitar, struct ListaEntregables *LEntregables ){
@@ -4008,8 +4191,8 @@ void obtenerEntregables(struct ListaCartas *LCartas, struct ListaNinos *LNinos, 
 }
 
  /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaJugCarta, y un char que denote un identificacion y otro un anno  
+	Salidas: Se determian si se tiene un juguete asociado a una carta que posea un estado listo para entregar
 	Restricciones: Ninguna.
 */
 int validarJugParaEntregar( struct ListaJugCarta *LJugCarta,const char identificacion[],const char anno[]){
@@ -4031,8 +4214,8 @@ int validarJugParaEntregar( struct ListaJugCarta *LJugCarta,const char identific
 }
 
  /*
-	Entradas: 
-	Salidas: 
+	Entradas: Una lista de tipo ListaPorVisitar, y un char que denota el nombre de un domicilio
+	Salidas: Se agrega el lugar recibido a la lista de lugares por visitar 
 	Restricciones: Ninguna.
 */
 void agregarLugarPorVisitar(struct ListaPorVisitar *LPorVisitar, const char domicilio[]){
@@ -4074,9 +4257,9 @@ void agregarLugarPorVisitar(struct ListaPorVisitar *LPorVisitar, const char domi
 
 /****************************************************************Analisis de Datos***********************************************************************************************/
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaJugCarta
+	Salidas: Se muestra una lista de los años registrados y la cantidad de juguetes para cada uno
+	Restricciones: Ninguna
 */
 void juguetesPorAnno(struct ListaJugCarta *LJugCarta){
 	system( "CLS" );
@@ -4167,9 +4350,9 @@ void juguetesPorAnno(struct ListaJugCarta *LJugCarta){
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaNinos, un char que denote la identificacion y un puntero que apunte a un char 
+	Salidas: Se almacena en el ultimo parámetro recibido el el nombre del domicilio asociado a la identificacion del nino recibida
+	Restricciones: Ninguna
 */
 int obtenerDomicilio(struct ListaNinos *LNinos, const char identificacion [], char *domicilio){
 
@@ -4193,9 +4376,9 @@ int obtenerDomicilio(struct ListaNinos *LNinos, const char identificacion [], ch
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCartas y otra de tipo ListaNinos
+	Salidas: Se muestra la cantida
+	Restricciones: Ninguna
 */
 void masMenosCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos){
 	system( "CLS" );
@@ -4306,9 +4489,9 @@ void masMenosCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos){
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCartas
+	Salidas: Se muestra una lista de los años registrados y las cartas aprobadas para cada uno
+	Restricciones: Ninguna
 */
 void aprobadasPorAnno(struct ListaCartas *LCartas){
 	system( "CLS" );
@@ -4400,9 +4583,9 @@ void aprobadasPorAnno(struct ListaCartas *LCartas){
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCartas
+	Salidas: Se muestra una lista de los años registrados y las cartas rechazadas o canceladas para cada uno
+	Restricciones: Ninguna
 */
 void rechazadasPorAnno(struct ListaCartas *LCartas){
 	system( "CLS" );
@@ -4495,9 +4678,9 @@ void rechazadasPorAnno(struct ListaCartas *LCartas){
 
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaComport
+	Salidas: Se denotan el total de comportamientos Buenos y Malos registrados 
+	Restricciones: Ninguna
 */
 void comportRegistrados(struct ListaComport *LComp){
 	system( "CLS" );
@@ -4540,9 +4723,9 @@ void comportRegistrados(struct ListaComport *LComp){
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaCartas
+	Salidas: Se muestra una lista de los ayudantes y de la cantidad de cartas procesadas por cada uno
+	Restricciones: Ninguna
 */
 void cartasPorAyudante(struct ListaCartas *LCartas){
 	system( "CLS" );
@@ -4629,9 +4812,9 @@ void cartasPorAyudante(struct ListaCartas *LCartas){
 }
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaJugSolicitados
+	Salidas: Se ordenan  de forma descendente los elementos contenidos en la lista recibida como parametro
+	Restricciones: Ninguna
 */
 void ordenarTopJuguetes(struct ListaJugSolicitados *TopJuguetes){
 
@@ -4665,9 +4848,9 @@ void ordenarTopJuguetes(struct ListaJugSolicitados *TopJuguetes){
 } 
 
 /*
-	Entradas: 
-	Salidas: 
-	Restricciones: 
+	Entradas: Una lista de tipo ListaJugSolicitados
+	Salidas: Se muestra un a lista del los 10 jueguetes mas solictados para las cartas registradas
+	Restricciones: Ninguna
 */
 void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 	system( "CLS" );
