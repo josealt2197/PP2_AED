@@ -147,6 +147,9 @@ void obtenerEntregables(struct ListaCartas *LCartas, struct ListaNinos *LNinos, 
 int validarJugParaEntregar( struct ListaJugCarta *LJugCarta,const char identificacion[],const char anno[]);
 void agregarLugarPorVisitar(struct ListaPorVisitar *LPorVisitar, const char domicilio[]);
 
+//Funciones para persistencia de datos
+void guardarNinos(struct ListaNinos *LNinos);
+
 
 struct Nino{
     char cedula[12];
@@ -843,7 +846,7 @@ void registrarNinos(struct ListaNinos *LNinos){
 		LNinos->final = LNinos->final->siguiente;
 	}	
     
-//	mostrarNinos(LNinos);
+	guardarNinos(LNinos);
 	
 	printf("\n+++ Informacion registrada correctamente +++" );
 	
@@ -1283,6 +1286,43 @@ void mostrarComp(struct ListaComport *LComp){
 	}
 
 }
+
+
+/*
+	Entradas: Una lista de tipo ListaNinos para tomar los datos que deben guardarse en el Archivo de niños
+	Salidas: Se  guardan los valores de la lista de Niños en un archivo especifico
+	Restricciones: Ninguna.
+*/
+void guardarNinos(struct ListaNinos *LNinos){
+
+	struct Nino *iNino;
+	
+	FILE* ArchNinos;
+
+    if(LNinos->inicio!=NULL)
+	{
+		remove("Archivos\\ArchNinos.txt");
+		ArchNinos=fopen("Archivos\\ArchNinos.txt","a+");
+		
+		if(ArchNinos==NULL){
+			printf("\n Error al intentar usar el archivo de Ninos(as).\n");	
+		}else{
+			iNino = LNinos->inicio;
+	        while(iNino!=NULL){
+				fprintf(ArchNinos,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n", iNino->cedula, iNino->nombre_completo, iNino->correo, iNino->lugar_domicilio, iNino->fecha_nacimiento, iNino->edad, iNino->necesidades_esp );
+
+				iNino = iNino->siguiente;
+        	}
+        	
+		}	
+		fclose(ArchNinos);	
+		
+	}else{
+		printf( "\n***No se han encontrado Ninos(as) registrados***");
+	}
+}
+
+
 
 /****************************************************************Gestion de Ayudantes***********************************************************************************************/
 
