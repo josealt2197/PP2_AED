@@ -57,6 +57,7 @@ void GestionEntregas();
 void AnalisisDeDatos();
 
 void cargarValores();
+int cargarNinos(struct ListaNinos *LNinos);
 
 //Procedimientos para Gestion de Ninos/as
 void registrarNinos(struct ListaNinos *LNinos);
@@ -81,6 +82,8 @@ void modificarJuguetes();
 struct Juguete* buscarJuguete(struct Juguete *arbol, char jugueteBuscado[]);
 struct Juguete *borrarJuguete(struct Juguete *aux, char porBorrar[]);
 void eliminarJuguete();
+void guardarJuguetes();
+void escribirJuguete(struct Juguete *iJuguete, FILE *ArchJuguetes);
 
 //Procedimientos para Gestion de Cartas para Santa
 
@@ -340,7 +343,7 @@ struct ListaPorVisitar{
 	LugPorVisitar *final;
 };
 
-/****************************************************************Punteros a Lista y Valores Iniciales***********************************************************************************************/
+/****************************************************************Punteros a Listas y Valores Iniciales***********************************************************************************************/
 
 Juguete *jugueteRaiz=NULL;
 Domicilio *lugarInicial=NULL;
@@ -365,6 +368,7 @@ void cargarValores(){
 	LNinos = (struct ListaNinos *) malloc(sizeof(struct ListaNinos));
 	LNinos->inicio = NULL;
 	LNinos->final = NULL;
+	int resultado = cargarNinos(LNinos);
 	
 	//Obtener valores de Lista de Comportamientos
 	LComp = (struct ListaComport *) malloc(sizeof(struct ListaComport));
@@ -391,6 +395,84 @@ void cargarValores(){
 	LDeseos->inicio = NULL;
 	LDeseos->final = NULL;
 		
+}
+
+/*
+    Entradas: Una cadena de caracteres.
+    Salidas: La cadena de caracteres recibida, sustituyendo el valor de los campos con un salto de linea (\n) por un caracter nulo.
+    Restricciones: El parametro debe corresponder con el tipo cadena de caracteres.
+*/
+void borrarSaltoLinea(char linea[]){
+    int i;
+    for(i=0; linea[i]!='\0'; i++){
+        if(linea[i] == '\n'){
+            linea[i]='\0';
+            break;
+        }
+    }
+}
+
+/*
+    Entradas: Un puntero a una lista del tipo ListaNinos.
+    Salidas: Una lista  enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarNinos(struct ListaNinos *LNinos){
+
+    FILE* ArchNinos;
+
+    struct Nino *aux;
+
+    ArchNinos = fopen("Archivos\\ArchNinos.txt","r");
+
+    if(ArchNinos==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchNinos)){
+            aux =(struct Nino *) malloc (sizeof(struct Nino));
+
+            fgets(aux->cedula, 12, ArchNinos); 
+            borrarSaltoLinea(aux->cedula);
+
+            fgets(aux->nombre_completo, 50, ArchNinos); 
+            borrarSaltoLinea(aux->nombre_completo);
+
+            fgets(aux->nombre_usuario, 20, ArchNinos); 
+            borrarSaltoLinea(aux->nombre_usuario);
+
+            fgets(aux->correo, 50, ArchNinos);
+            borrarSaltoLinea(aux->correo);
+
+            fgets(aux->lugar_domicilio, 20, ArchNinos);
+            borrarSaltoLinea(aux->lugar_domicilio);
+
+            fgets(aux->fecha_nacimiento, 15, ArchNinos);
+            borrarSaltoLinea(aux->fecha_nacimiento);
+
+            fgets(aux->edad, 5, ArchNinos);
+            borrarSaltoLinea(aux->edad);
+
+            fgets(aux->necesidades_esp, 150, ArchNinos);
+            borrarSaltoLinea(aux->edad);
+
+            if(LNinos->inicio == NULL) 
+            {
+                //Inserta al inicio de la lista
+                LNinos->inicio = aux;
+                LNinos->inicio->siguiente = NULL; 
+                LNinos->final = LNinos->inicio;
+
+            }else{
+                //Inserta al final de la lista
+                LNinos->final->siguiente = aux; 
+                LNinos->final->siguiente->siguiente = NULL; 
+                LNinos->final = LNinos->final->siguiente;
+            }
+        }
+        fclose(ArchNinos);
+    }
+    return 1;
+
 }
 
 /****************************************************************Menús de Opciones***********************************************************************************************/
@@ -983,7 +1065,6 @@ int validarCedula(struct ListaNinos *LNinos, const char identificacion []){
 	Salidas: Se modifican los datos un nodo de tipo Nino de la lista recibida.
 	Restricciones: Ninguna.
 */
-
 void modificarNino(struct ListaNinos *LNinos){
 	system( "CLS" );
 	printf("\n\n*********************************\n");
@@ -1286,7 +1367,6 @@ void mostrarNinos(struct ListaNinos *LNinos){
 
 }
 
-
 /*
 	Entradas: Una lista de tipo ListaComport para tomar los datos de comportamiento de un Nino/Nina
 	Salidas: Se muestran los datos un nodo de tipo Nino de la lista recibida.
@@ -1318,7 +1398,6 @@ void mostrarComp(struct ListaComport *LComp){
 	}
 
 }
-
 
 /*
 	Entradas: Una lista de tipo ListaNinos para tomar los datos que deben guardarse en el Archivo de niños
@@ -1792,6 +1871,8 @@ void registrarJuguetes(){
             
     }
 
+	guardarJuguetes();
+	
 	printf("\n+++ Informacion registrada correctamente +++" );
 	
 	printf("\n\nPresione una tecla para regresar..." );
@@ -1974,6 +2055,8 @@ void modificarJuguetes(){
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
 	
+	guardarJuguetes();
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -2095,7 +2178,7 @@ void eliminarJuguete(){
 		printf( "\n***No se han encontrado Juguetes registrados***");
 	}
 	
-//	mostrarJuguetes(jugueteRaiz);
+	guardarJuguetes();
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -2114,6 +2197,46 @@ void mostrarJuguetes(struct Juguete *recorrer){
 		printf("       %s - %s - %s\n",recorrer->codigo, recorrer->nombre, recorrer->categoria);
         mostrarJuguetes(recorrer->der);
     }
+}
+
+/*
+	Entradas: Ninguna
+	Salidas: Se realza la escitura de los valores de un Juguete en un archivo de texto.
+	Restricciones: Ninguna.
+*/
+void escribirJuguete(struct Juguete *iJuguete, FILE *ArchJuguetes){
+    if (iJuguete != NULL)
+    {
+        fprintf(ArchJuguetes,"%s\n%s\n%s\n%s\n%s\n%s\n", iJuguete->codigo, iJuguete->nombre, iJuguete->descripcion, iJuguete->categoria, iJuguete->rango_edad, iJuguete->costo_fabricacion);
+        escribirJuguete(iJuguete->izq, ArchJuguetes);
+        escribirJuguete(iJuguete->der, ArchJuguetes);
+    }
+}
+
+/*
+	Entradas: Ninguna
+	Salidas: Se guardan los valores del arbol de juguetes en un archivo de texto.
+	Restricciones: Ninguna.
+*/
+void guardarJuguetes(){
+
+	FILE* ArchJuguetes;
+
+    if(jugueteRaiz!=NULL)
+	{
+		remove("Archivos\\ArchJuguetes.txt");
+		ArchJuguetes=fopen("Archivos\\ArchJuguetes.txt","a+");
+		
+		if(ArchJuguetes==NULL){
+			printf("\n Error al intentar usar el archivo de Ayudantes.\n");	
+		}else{
+			escribirJuguete(jugueteRaiz, ArchJuguetes);	
+		}	
+		fclose(ArchJuguetes);	
+		
+	}else{
+		printf( "\n***No se han encontrado Juguetes registrados***");
+	}
 }
 
 /****************************************************************Gestion de Cartas***********************************************************************************************/
