@@ -58,6 +58,12 @@ void AnalisisDeDatos();
 
 void cargarValores();
 int cargarNinos(struct ListaNinos *LNinos);
+int cargarJugCarta(struct ListaJugCarta *LJugCarta);
+int cargarCartas(struct ListaCartas *LCartas);
+int cargarDeseos(struct ListaDeseos *LDeseos);
+int cargarComp(struct ListaComport *LComp);
+int cargarAyudantes(struct ListaAyudantes *LAyudantes);
+int cargarJuguetes();
 
 //Procedimientos para Gestion de Ninos/as
 void registrarNinos(struct ListaNinos *LNinos);
@@ -353,7 +359,7 @@ ListaNinos *LNinos;
 ListaComport *LComp;
 ListaAyudantes *LAyudantes;
 ListaCartas *LCartas;
-ListaJugCarta *LJugCartas;
+ListaJugCarta *LJugCarta;
 ListaDeseos *LDeseos;
 
 /*
@@ -363,12 +369,13 @@ ListaDeseos *LDeseos;
 */
 void cargarValores(){
 	char opcion;
+	int resultado;
 
 	//Obtener valores de Lista de Ninos
 	LNinos = (struct ListaNinos *) malloc(sizeof(struct ListaNinos));
 	LNinos->inicio = NULL;
 	LNinos->final = NULL;
-	int resultado = cargarNinos(LNinos);
+	resultado = cargarNinos(LNinos);
 	
 	//Obtener valores de Lista de Comportamientos
 	LComp = (struct ListaComport *) malloc(sizeof(struct ListaComport));
@@ -379,21 +386,24 @@ void cargarValores(){
 	LAyudantes = (struct ListaAyudantes *) malloc(sizeof(struct ListaAyudantes));
 	LAyudantes->inicio = NULL;
 	LAyudantes->final = NULL;
-	
+		
 	//Obtener valores de Lista de Cartas
 	LCartas = (struct ListaCartas *) malloc(sizeof(struct ListaCartas));
 	LCartas->inicio = NULL;
 	LCartas->final = NULL;
+	resultado = cargarCartas(LCartas);
 	
 	//Obtener valores de Lista de Juguetes por Carta
-	LJugCartas = (struct ListaJugCarta *) malloc(sizeof(struct ListaJugCarta));
-	LJugCartas->inicio = NULL;
-	LJugCartas->final = NULL;
+	LJugCarta = (struct ListaJugCarta *) malloc(sizeof(struct ListaJugCarta));
+	LJugCarta->inicio = NULL;
+	LJugCarta->final = NULL;
+	resultado = cargarJugCarta(LJugCarta);
 	
 	//Obtener valores de Lista de Deseos
 	LDeseos = (struct ListaDeseos *) malloc(sizeof(struct ListaDeseos));
 	LDeseos->inicio = NULL;
 	LDeseos->final = NULL;
+	resultado = cargarDeseos(LDeseos);
 		
 }
 
@@ -475,6 +485,339 @@ int cargarNinos(struct ListaNinos *LNinos){
 
 }
 
+/*
+    Entradas: Un puntero a una lista del tipo ListaJugCarta.
+    Salidas: Una lista enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarJugCarta(struct ListaJugCarta *LJugCarta){
+
+    FILE* ArchJugCarta;
+
+    struct JuguetesCarta *aux;
+
+    ArchJugCarta = fopen("Archivos\\ArchJugCarta.txt","r");
+
+    if(ArchJugCarta==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchJugCarta)){
+            aux =(struct JuguetesCarta *) malloc (sizeof(struct JuguetesCarta));
+
+            fgets(aux->identificacion, 12, ArchJugCarta); 
+            borrarSaltoLinea(aux->identificacion);
+
+            fgets(aux->anno, 50, ArchJugCarta); 
+            borrarSaltoLinea(aux->anno);
+
+            fgets(aux->nombre_juguete, 20, ArchJugCarta); 
+            borrarSaltoLinea(aux->nombre_juguete);
+
+            fgets(aux->estado, 50, ArchJugCarta);
+            borrarSaltoLinea(aux->estado);
+
+            if(LJugCarta->inicio == NULL) 
+            {
+                //Inserta al inicio de la lista
+                LJugCarta->inicio = aux;
+                LJugCarta->inicio->siguiente = NULL; 
+                LJugCarta->final = LJugCarta->inicio;
+
+            }else{
+                //Inserta al final de la lista
+                LJugCarta->final->siguiente = aux; 
+                LJugCarta->final->siguiente->siguiente = NULL; 
+                LJugCarta->final = LJugCarta->final->siguiente;
+            }
+        }
+        fclose(ArchJugCarta);
+    }
+    return 1;
+
+}
+
+/*
+    Entradas: Un puntero a una lista del tipo ListaCartas.
+    Salidas: Una lista enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarCartas(struct ListaCartas *LCartas){
+
+    FILE* ArchCartas;
+
+    struct Carta *aux;
+
+    ArchCartas = fopen("Archivos\\ArchCartas.txt","r");
+
+    if(ArchCartas==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchCartas)){
+            aux =(struct Carta *) malloc (sizeof(struct Carta));
+
+            fgets(aux->identificacion, 12, ArchCartas); 
+            borrarSaltoLinea(aux->identificacion);
+
+            fgets(aux->anno, 50, ArchCartas); 
+            borrarSaltoLinea(aux->anno);
+
+            fgets(aux->estado, 50, ArchCartas); 
+            borrarSaltoLinea(aux->estado);
+
+            fgets(aux->procesada_por, 50, ArchCartas);
+            borrarSaltoLinea(aux->procesada_por);
+            
+            if(LCartas->inicio == NULL) 
+            {
+                //Inserta al inicio de la lista
+                LCartas->inicio = aux;
+                LCartas->inicio->siguiente = NULL; 
+                LCartas->final = LCartas->inicio;
+
+            }else{
+                //Inserta al final de la lista
+                LCartas->final->siguiente = aux; 
+                LCartas->final->siguiente->siguiente = NULL; 
+                LCartas->final = LCartas->final->siguiente;
+            }
+        }
+        fclose(ArchCartas);
+    }
+    return 1;
+
+}
+
+/*
+    Entradas: Un puntero a una lista del tipo ListaDeseos.
+    Salidas: Una lista enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarDeseos(struct ListaDeseos *LDeseos){
+
+    FILE* ArchDeseos;
+
+    struct Deseo *aux;
+
+    ArchDeseos = fopen("Archivos\\ArchDeseos.txt","r");
+
+    if(ArchDeseos==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchDeseos)){
+            aux =(struct Deseo *) malloc (sizeof(struct Deseo));
+
+            fgets(aux->identificacion, 12, ArchDeseos); 
+            borrarSaltoLinea(aux->identificacion);
+
+            fgets(aux->anno, 50, ArchDeseos); 
+            borrarSaltoLinea(aux->anno);
+
+            fgets(aux->nombre_juguete, 20, ArchDeseos); 
+            borrarSaltoLinea(aux->nombre_juguete);
+
+            if(LDeseos->inicio == NULL) 
+            {
+                //Inserta al inicio de la lista
+                LDeseos->inicio = aux;
+                LDeseos->inicio->siguiente = NULL; 
+                LDeseos->final = LDeseos->inicio;
+
+            }else{
+                //Inserta al final de la lista
+                LDeseos->final->siguiente = aux; 
+                LDeseos->final->siguiente->siguiente = NULL; 
+                LDeseos->final = LDeseos->final->siguiente;
+            }
+        }
+        fclose(ArchDeseos);
+    }
+    return 1;
+
+}
+
+
+/*
+    Entradas: Un puntero a una lista del tipo ListaComport.
+    Salidas: Una lista  enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarComp(struct ListaComport *LComp){
+
+    FILE* ArchComp;
+
+    struct Comportamiento *aux;
+
+    ArchComp = fopen("Archivos\\ArchComp.txt","r");
+
+    if(ArchComp==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchComp)){
+            aux =(struct Comportamiento *) malloc (sizeof(struct Comportamiento));
+
+            fgets(aux->cedula_nino, 12, ArchComp); 
+            borrarSaltoLinea(aux->cedula_nino);
+
+            fgets(aux->descripcion, 150, ArchComp); 
+            borrarSaltoLinea(aux->descripcion);
+
+            fgets(aux->fecha_registro, 20, ArchComp); 
+            borrarSaltoLinea(aux->fecha_registro);
+
+            fgets(aux->indicacion, 15, ArchComp);
+            borrarSaltoLinea(aux->indicacion);
+
+            fgets(aux->nombre_padre_madre, 50, ArchComp);
+            borrarSaltoLinea(aux->nombre_padre_madre);       
+
+            if(LComp->inicio == NULL) 
+            {
+                //Inserta al inicio de la lista
+                LComp->inicio = aux;
+                LComp->inicio->siguiente = NULL; 
+                LComp->final = LComp->inicio;
+
+            }else{
+                //Inserta al final de la lista
+                LComp->final->siguiente = aux; 
+                LComp->final->siguiente->siguiente = NULL; 
+                LComp->final = LComp->final->siguiente;
+            }
+        }
+        fclose(ArchComp);
+    }
+    return 1;
+
+}
+
+/*
+    Entradas: Un puntero a una lista del tipo ListaAyudantes.
+    Salidas: Una lista  enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarAyudantes(struct ListaAyudantes *LAyudantes){
+
+    FILE* ArchAyudantes;
+
+    struct AydanteSanta *aux;
+
+    ArchAyudantes = fopen("Archivos\\ArchAyudantes.txt","r");
+
+    if(ArchAyudantes==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchAyudantes)){
+            aux =(struct AydanteSanta *) malloc (sizeof(struct AydanteSanta));
+
+            fgets(aux->identificacion, 15, ArchAyudantes); 
+            borrarSaltoLinea(aux->identificacion);
+
+            fgets(aux->nombre, 50, ArchAyudantes); 
+            borrarSaltoLinea(aux->nombre);
+
+            fgets(aux->puesto, 50, ArchAyudantes); 
+            borrarSaltoLinea(aux->puesto);
+
+            fgets(aux->funcionPuesto, 50, ArchAyudantes);
+            borrarSaltoLinea(aux->funcionPuesto);
+
+            fgets(aux->fechaComienzo, 10, ArchAyudantes);
+            borrarSaltoLinea(aux->fechaComienzo);       
+
+            if(LAyudantes->inicio == NULL) 
+            {
+                //Inserta al inicio de la lista
+                LAyudantes->inicio = aux;
+                LAyudantes->inicio->siguiente = NULL; 
+                LAyudantes->final = LAyudantes->inicio;
+
+            }else{
+                //Inserta al final de la lista
+                LAyudantes->final->siguiente = aux; 
+                LAyudantes->final->siguiente->siguiente = NULL; 
+                LAyudantes->final = LAyudantes->final->siguiente;
+            }
+        }
+        fclose(ArchAyudantes);
+    }
+    return 1;
+
+}
+
+/*
+    Entradas: Un puntero a una lista del tipo ListaAyudantes.
+    Salidas: Una lista  enlazada con los diferentes valores de la estructura.
+    Restricciones: Ninguna.
+*/
+int cargarJuguetes(){
+
+    FILE* ArchJuguetes;
+
+    struct Juguete *nuevo;
+    
+
+    ArchJuguetes = fopen("Archivos\\ArchJuguetes.txt","r");
+
+    if(ArchJuguetes==NULL){
+        return 0;
+    }else{
+        while(!feof(ArchJuguetes)){
+        	
+        	nuevo = (struct Juguete *) malloc (sizeof(struct Juguete));
+        	
+        	fgets(nuevo->codigo, 12, ArchJuguetes); 
+            borrarSaltoLinea(nuevo->codigo);
+            
+            fgets(nuevo->nombre, 50, ArchJuguetes); 
+            borrarSaltoLinea(nuevo->nombre);
+            
+            fgets(nuevo->descripcion, 150, ArchJuguetes); 
+            borrarSaltoLinea(nuevo->descripcion);
+            
+            fgets(nuevo->categoria, 50, ArchJuguetes); 
+            borrarSaltoLinea(nuevo->categoria);
+            
+            fgets(nuevo->rango_edad, 20, ArchJuguetes); 
+            borrarSaltoLinea(nuevo->rango_edad);
+            
+            fgets(nuevo->costo_fabricacion, 15, ArchJuguetes); 
+            borrarSaltoLinea(nuevo->costo_fabricacion);
+            
+			nuevo->izq = NULL;
+		    nuevo->der = NULL;
+		    
+		    if (jugueteRaiz == NULL)
+		        jugueteRaiz = nuevo;
+		    else
+		    {
+		        struct Juguete *anterior, *aux;
+		        anterior = NULL;
+		        aux = jugueteRaiz;
+		        while (aux != NULL)
+		        {
+		            anterior = aux;
+		            if ( strcmp(aux->nombre, nuevo->nombre)> 0 ){
+		            	aux = aux->izq;
+					}
+		                
+		            else{
+		                aux = aux->der;
+					}
+		           
+		        }
+		        if (strcmp(anterior->nombre, nuevo->nombre) > 0){
+		        	anterior->izq = nuevo;
+				}else{
+		        	anterior->der = nuevo;
+				}   
+		    }
+        }
+        fclose(ArchJuguetes);
+    }
+    return 1;
+
+}
+
 /****************************************************************Menús de Opciones***********************************************************************************************/
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
@@ -516,11 +859,11 @@ void MenuPrincipal(){
                 break;
 			case '4': GestionAyudantes(LAyudantes);
                 break;
-            case '5': GestionCartas(LNinos, LJugCartas, LCartas, LDeseos, LAyudantes, LComp);
+            case '5': GestionCartas(LNinos, LJugCarta, LCartas, LDeseos, LAyudantes, LComp);
 				break;
-			case '6': GestionEntregas(LCartas, LNinos, LJugCartas);
+			case '6': GestionEntregas(LCartas, LNinos, LJugCarta);
 				break;
-			case '7': AnalisisDeDatos(LJugCartas, LCartas, LComp, LNinos);
+			case '7': AnalisisDeDatos(LJugCarta, LCartas, LComp, LNinos);
 				break;
 			case '8': exit(1);
 				break;
@@ -2294,7 +2637,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 		strcpy(carta->identificacion, identificacion);
 		strcpy(carta->anno, anno);
 		strcpy(carta->estado, "Solicitada");
-		strcpy(carta->procesada_por, " ");
+		strcpy(carta->procesada_por, "Sin Procesar");
 		
 		if(LCartas->inicio == NULL) 
 		{
@@ -2967,7 +3310,7 @@ void mostrarListaCartas(struct ListaCartas *LCartas){
 	if(LCartas->inicio!=NULL)
 	{
         while(iCarta!=NULL){
-            printf("\n+Identificacion: %s    -    Anno: %s   -   Estado: %s\n", iCarta->identificacion, iCarta->anno, iCarta->estado);
+            printf("\nIdentificacion: %s    -    Anno: %s   -   Estado: %s\n", iCarta->identificacion, iCarta->anno, iCarta->estado);
             iCarta = iCarta->siguiente;
         }		
 		
@@ -3452,7 +3795,7 @@ void guardarDeseo(struct ListaDeseos *LDeseos){
 		}else{
 			iDeseo = LDeseos->inicio;
 	        while(iDeseo!=NULL){
-				fprintf(ArchDeseos,"%s\n%s\n%s\n\n", iDeseo->identificacion, iDeseo->anno, iDeseo->nombre_juguete);
+				fprintf(ArchDeseos,"%s\n%s\n%s\n", iDeseo->identificacion, iDeseo->anno, iDeseo->nombre_juguete);
 
 				iDeseo = iDeseo->siguiente;
         	}
