@@ -56,6 +56,8 @@ void GestionCartas();
 void GestionEntregas();
 void AnalisisDeDatos();
 
+void cargarValores();
+
 //Procedimientos para Gestion de Ninos/as
 void registrarNinos(struct ListaNinos *LNinos);
 void mostrarNinos(struct ListaNinos *LNinos);
@@ -149,6 +151,11 @@ void agregarLugarPorVisitar(struct ListaPorVisitar *LPorVisitar, const char domi
 
 //Funciones para persistencia de datos
 void guardarNinos(struct ListaNinos *LNinos);
+void guardarComportamiento(struct ListaComport *LComp);
+void guardarAyudantes(struct ListaAyudantes *LAyudantes);
+void guardarJugCarta(struct ListaJugCarta *LJugCarta);
+void guardarDeseo(struct ListaDeseos *LDeseos);
+void guardarCartas(struct ListaCartas *LCartas);
 
 
 struct Nino{
@@ -332,12 +339,61 @@ struct ListaPorVisitar{
 	LugPorVisitar *inicio;
 	LugPorVisitar *final;
 };
-/****************************************************************Menús de Opciones***********************************************************************************************/
+
+/****************************************************************Punteros a Lista y Valores Iniciales***********************************************************************************************/
 
 Juguete *jugueteRaiz=NULL;
 Domicilio *lugarInicial=NULL;
 Recorrido *lugarPartida=NULL;
 Recorrido *lugarLlegada=NULL;
+ListaNinos *LNinos;
+ListaComport *LComp;
+ListaAyudantes *LAyudantes;
+ListaCartas *LCartas;
+ListaJugCarta *LJugCartas;
+ListaDeseos *LDeseos;
+
+/*
+	Entradas: Ninguna
+	Salidas: Invoca a las funciones que obtiene los valores de las listas, arbol y grafo registrados en los archivos de texto
+	Restricciones: Ninguna.
+*/
+void cargarValores(){
+	char opcion;
+
+	//Obtener valores de Lista de Ninos
+	LNinos = (struct ListaNinos *) malloc(sizeof(struct ListaNinos));
+	LNinos->inicio = NULL;
+	LNinos->final = NULL;
+	
+	//Obtener valores de Lista de Comportamientos
+	LComp = (struct ListaComport *) malloc(sizeof(struct ListaComport));
+	LComp->inicio = NULL;
+	LComp->final = NULL;
+	
+	//Obtener valores de Lista de Ayudante
+	LAyudantes = (struct ListaAyudantes *) malloc(sizeof(struct ListaAyudantes));
+	LAyudantes->inicio = NULL;
+	LAyudantes->final = NULL;
+	
+	//Obtener valores de Lista de Cartas
+	LCartas = (struct ListaCartas *) malloc(sizeof(struct ListaCartas));
+	LCartas->inicio = NULL;
+	LCartas->final = NULL;
+	
+	//Obtener valores de Lista de Juguetes por Carta
+	LJugCartas = (struct ListaJugCarta *) malloc(sizeof(struct ListaJugCarta));
+	LJugCartas->inicio = NULL;
+	LJugCartas->final = NULL;
+	
+	//Obtener valores de Lista de Deseos
+	LDeseos = (struct ListaDeseos *) malloc(sizeof(struct ListaDeseos));
+	LDeseos->inicio = NULL;
+	LDeseos->final = NULL;
+		
+}
+
+/****************************************************************Menús de Opciones***********************************************************************************************/
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
 	Salidas: Llamada a las demás funciones de menús.
@@ -346,36 +402,8 @@ Recorrido *lugarLlegada=NULL;
 void MenuPrincipal(){
 	char opcion;
 	
-	struct ListaNinos *LNinos;
-	LNinos = (struct ListaNinos *) malloc(sizeof(struct ListaNinos));
-	LNinos->inicio = NULL;
-	LNinos->final = NULL;
-	
-	struct ListaComport *LComp;
-	LComp = (struct ListaComport *) malloc(sizeof(struct ListaComport));
-	LComp->inicio = NULL;
-	LComp->final = NULL;
-	
-	struct ListaAyudantes *LAyudantes;
-	LAyudantes = (struct ListaAyudantes *) malloc(sizeof(struct ListaAyudantes));
-	LAyudantes->inicio = NULL;
-	LAyudantes->final = NULL;
-	
-	struct ListaCartas *LCartas;
-	LCartas = (struct ListaCartas *) malloc(sizeof(struct ListaCartas));
-	LCartas->inicio = NULL;
-	LCartas->final = NULL;
-	
-	struct ListaJugCarta *LJugCartas;
-	LJugCartas = (struct ListaJugCarta *) malloc(sizeof(struct ListaJugCarta));
-	LJugCartas->inicio = NULL;
-	LJugCartas->final = NULL;
-	
-	struct ListaDeseos *LDeseos;
-	LDeseos = (struct ListaDeseos *) malloc(sizeof(struct ListaDeseos));
-	LDeseos->inicio = NULL;
-	LDeseos->final = NULL;
-	
+	cargarValores();
+		
 	registrarPoloNorte();
 	
 	do{
@@ -765,6 +793,7 @@ void AnalisisDeDatos(struct ListaJugCarta *LJugCarta, struct ListaCartas *LCarta
 
 }
 
+
 /****************************************************************Gestion de Niños***********************************************************************************************/
 
 /*
@@ -911,8 +940,8 @@ void registrarComportamiento(struct ListaNinos *LNinos, struct ListaComport *LCo
 			LComp->final = LComp->final->siguiente;
 		}	
 	    
-//		mostrarComp(LComp);
-//		validarComp(LComp, comport->cedula_nino);
+		guardarComportamiento(LComp);
+		
 		printf("\n+++ Informacion registrada correctamente +++" );
 	
 	}else{
@@ -1142,6 +1171,8 @@ void modificarNino(struct ListaNinos *LNinos){
 		printf( "\n***No se han encontrado Ninos(as) registrados***");
 	}
 	
+	guardarNinos(LNinos);
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -1217,7 +1248,8 @@ void eliminarNino(struct ListaNinos *LNinos){
 		printf( "\n***No se han encontrado Ninos(as) registrados***");
 	}
 	
-
+	guardarNinos(LNinos);
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -1322,7 +1354,39 @@ void guardarNinos(struct ListaNinos *LNinos){
 	}
 }
 
+/*
+	Entradas: Una lista de tipo ListaComport para tomar los datos que deben guardarse en el Archivo de comportamientos
+	Salidas: Se  guardan los valores de la lista de comportamientos en un archivo especifico
+	Restricciones: Ninguna.
+*/
+void guardarComportamiento(struct ListaComport *LComp){
 
+	struct Comportamiento *iComp;
+	
+	FILE* ArchComp;
+
+    if(LComp->inicio!=NULL)
+	{
+		remove("Archivos\\ArchComp.txt");
+		ArchComp=fopen("Archivos\\ArchComp.txt","a+");
+		
+		if(ArchComp==NULL){
+			printf("\n Error al intentar usar el archivo de Comportamientos.\n");	
+		}else{
+			iComp = LComp->inicio;
+	        while(iComp!=NULL){
+				fprintf(ArchComp,"%s\n%s\n%s\n%s\n%s\n\n", iComp->cedula_nino, iComp->descripcion, iComp->fecha_registro, iComp->indicacion, iComp->nombre_padre_madre );
+
+				iComp = iComp->siguiente;
+        	}
+        	
+		}	
+		fclose(ArchComp);	
+		
+	}else{
+		printf( "\n***No se han encontrado Comportamientos registrados***");
+	}
+}
 
 /****************************************************************Gestion de Ayudantes***********************************************************************************************/
 
@@ -1378,6 +1442,8 @@ void registrarAyudante(struct ListaAyudantes *LAyudantes){
 		LAyudantes->final->siguiente->anterior = LAyudantes->final; 
 		LAyudantes->final = LAyudantes->final->siguiente;
 	}
+	
+	guardarAyudantes(LAyudantes);
 	
 	printf("\n+++ Informacion registrada correctamente +++" );
 	
@@ -1528,6 +1594,9 @@ void modificarAyudante(struct ListaAyudantes *LAyudantes){
 	}else{
 		printf( "\n***No se han encontrado Ayudantes registrados***");
 	}
+	
+	guardarAyudantes(LAyudantes);
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -1606,10 +1675,47 @@ void eliminarAyudante(struct ListaAyudantes *LAyudantes){
 		printf( "\n***No se han encontrado Ayudantes registrados***");
 	}
 	
+	guardarAyudantes(LAyudantes);
 
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
+
+
+/*
+	Entradas: Una lista de tipo ListaAyudantes para tomar los datos que deben guardarse en el Archivo de Ayudantes
+	Salidas: Se guardan los valores de la lista de Ayudantes en un archivo especifico
+	Restricciones: Ninguna.
+*/
+void guardarAyudantes(struct ListaAyudantes *LAyudantes){
+
+	struct AydanteSanta *iAyudante;
+	
+	FILE* ArchAyudantes;
+
+    if(LAyudantes->inicio!=NULL)
+	{
+		remove("Archivos\\ArchAyudantes.txt");
+		ArchAyudantes=fopen("Archivos\\ArchAyudantes.txt","a+");
+		
+		if(ArchAyudantes==NULL){
+			printf("\n Error al intentar usar el archivo de Ayudantes.\n");	
+		}else{
+			iAyudante = LAyudantes->inicio;
+	        while(iAyudante!=NULL){
+				fprintf(ArchAyudantes,"%s\n%s\n%s\n%s\n%s\n", iAyudante->identificacion, iAyudante->nombre, iAyudante->puesto, iAyudante->funcionPuesto, iAyudante->fechaComienzo);
+
+				iAyudante = iAyudante->siguiente;
+        	}
+        	
+		}	
+		fclose(ArchAyudantes);	
+		
+	}else{
+		printf( "\n***No se han encontrado Ayudantes de Santa registrados***");
+	}
+}
+
 
 /****************************************************************Gestion de Juguetes***********************************************************************************************/
 
@@ -2065,6 +2171,7 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 		strcpy(carta->identificacion, identificacion);
 		strcpy(carta->anno, anno);
 		strcpy(carta->estado, "Solicitada");
+		strcpy(carta->procesada_por, " ");
 		
 		if(LCartas->inicio == NULL) 
 		{
@@ -2171,6 +2278,10 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 	//Mostrar Carta y Lista de Desos resultante  
 	mostrarCarta(LCartas, LJugCarta, carta->identificacion, carta->anno);
 	mostrarListaDeDeseos(LDeseos, carta->identificacion, carta->anno);
+	
+	guardarCartas(LCartas);
+	guardarJugCarta(LJugCarta);
+	guardarDeseo(LDeseos);
 	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
@@ -2320,7 +2431,6 @@ int eliminarJugueteCarta(struct ListaJugCarta *LJugCarta, const char identificac
 	return 0;
 
 }
-
 
 /*
 	Entradas: Una lista de tipo ListaDeseos, un char identificacion, otro Anno, y el nombre de un juguete, para agregar los datos de un juguete una carta para Santa
@@ -2552,6 +2662,10 @@ void modificarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta
 		printf( "\n***No se han encontrado Cartas para Santa registradas***");
 	}
 	
+	guardarCartas(LCartas);
+	guardarJugCarta(LJugCarta);
+	guardarDeseo(LDeseos);
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -2672,7 +2786,6 @@ void mostrarCarta(struct ListaCartas *LCartas, struct ListaJugCarta *LJugCarta, 
 		
 
 }
-
 
 /*
 	Entradas: Una lista de tipo ListaDeseos, un char identificacion y otro Anno, para tomar los datos de los juguetes de una lista de deseos
@@ -2815,7 +2928,6 @@ void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre){
 		printf( "\n***No se han encontrado Ninos(as) registrados***");
 	}
 }
-
 
 /*
 	Entradas: Una lista de tipo ListaCartas, un char que denote una identificacion, otro un anno y un puntero a un char
@@ -3051,6 +3163,9 @@ void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 			
 	}
 		
+	guardarCartas(LCartas);
+	guardarJugCarta(LJugCarta);
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
 }
@@ -3126,8 +3241,108 @@ void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [
 }
 
 
-/****************************************************************Gestion de Domicilios y Rutas ************************************************************************************/
+/*
+	Entradas: Una lista de tipo ListaJugCarta para tomar los datos que deben guardarse en el Archivo de Juguetes por Carta
+	Salidas: Se guardan los valores de la lista de juguetes por carta en un archivo especifico
+	Restricciones: Ninguna.
+*/
+void guardarJugCarta(struct ListaJugCarta *LJugCarta){
 
+	struct JuguetesCarta *iJugCarta;
+	
+	FILE* ArchJugCarta;
+
+    if(LJugCarta->inicio!=NULL)
+	{
+		remove("Archivos\\ArchJugCarta.txt");
+		ArchJugCarta=fopen("Archivos\\ArchJugCarta.txt","a+");
+		
+		if(ArchJugCarta==NULL){
+			printf("\n Error al intentar usar el archivo de Juguetes en Cartas.\n");	
+		}else{
+			iJugCarta = LJugCarta->inicio;
+	        while(iJugCarta!=NULL){
+				fprintf(ArchJugCarta,"%s\n%s\n%s\n%s\n", iJugCarta->identificacion, iJugCarta->anno, iJugCarta->nombre_juguete, iJugCarta->estado);
+
+				iJugCarta = iJugCarta->siguiente;
+        	}	
+		}	
+		fclose(ArchJugCarta);	
+		
+	}else{
+		printf( "\n***No se han encontrado Juguetes registrados en las Cartas para Santa ***");
+	}
+}
+
+
+/*
+	Entradas: Una lista de tipo ListaJugCarta para tomar los datos que deben guardarse en el Archivo de Cartas
+	Salidas: Se guardan los valores de la lista de Cartas en un archivo especifico
+	Restricciones: Ninguna.
+*/
+void guardarCartas(struct ListaCartas *LCartas){
+
+	struct Carta *iCarta;
+	
+	FILE* ArchCartas;
+
+    if(LCartas->inicio!=NULL)
+	{
+		remove("Archivos\\ArchCartas.txt");
+		ArchCartas=fopen("Archivos\\ArchCartas.txt","a+");
+		
+		if(ArchCartas==NULL){
+			printf("\n Error al intentar usar el archivo de Cartas para Santa.\n");	
+		}else{
+			iCarta = LCartas->inicio;
+	        while(iCarta!=NULL){
+				fprintf(ArchCartas,"%s\n%s\n%s\n%s\n", iCarta->identificacion, iCarta->anno, iCarta->estado, iCarta->procesada_por);
+
+				iCarta = iCarta->siguiente;
+        	}	
+		}	
+		fclose(ArchCartas);	
+		
+	}else{
+		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+	}
+}
+
+/*
+	Entradas: Una lista de tipo ListaDeseos para tomar los datos que deben guardarse en el Archivo de Deseos
+	Salidas: Se guardan los valores de la lista de deseos en un archivo especifico
+	Restricciones: Ninguna.
+*/
+void guardarDeseo(struct ListaDeseos *LDeseos){
+
+	struct Deseo *iDeseo;
+	
+	FILE* ArchDeseos;
+
+    if(LDeseos->inicio!=NULL)
+	{
+		remove("Archivos\\ArchDeseos.txt");
+		ArchDeseos=fopen("Archivos\\ArchDeseos.txt","a+");
+		
+		if(ArchDeseos==NULL){
+			printf("\n Error al intentar usar el archivo de Deseos.\n");	
+		}else{
+			iDeseo = LDeseos->inicio;
+	        while(iDeseo!=NULL){
+				fprintf(ArchDeseos,"%s\n%s\n%s\n\n", iDeseo->identificacion, iDeseo->anno, iDeseo->nombre_juguete);
+
+				iDeseo = iDeseo->siguiente;
+        	}
+        	
+		}	
+		fclose(ArchDeseos);	
+		
+	}else{
+		printf( "\n***No se han encontrado Deseos registrados***");
+	}
+}
+
+/****************************************************************Gestion de Domicilios y Rutas ************************************************************************************/
 /*
 	Entradas: Ninguna
 	Salidas: Se agrega un nuevo domicilio a la estructura del Grafo 
