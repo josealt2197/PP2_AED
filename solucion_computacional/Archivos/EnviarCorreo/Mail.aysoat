@@ -1,0 +1,38 @@
+import smtplib
+
+sendergmailid = open("Archivos\\EnviarCorreo\\Emisor.txt","r")
+senderpass = open("Archivos\\EnviarCorreo\\PassEmisor.txt","r")
+
+socmail = sendergmailid.read()#"society.aysoat@gmail.com"
+password = senderpass.read()#"AYSOAT9176"
+
+sub = open("Archivos\\EnviarCorreo\\Asunto.txt","r")
+subject = sub.read()
+
+sandesh = open("Archivos\\EnviarCorreo\\Mensaje.txt","r")
+smessage = sandesh.read()
+
+mailid = open("Archivos\\EnviarCorreo\\Destinatario.txt","r")
+j = mailid.readline()
+Email=j.split()
+
+s = smtplib.SMTP('smtp.gmail.com', 587)
+
+s.starttls()
+
+s.login(socmail, password)
+
+body = ""
+
+ding = "Subject:{}\n\n{}".format(subject, body)
+
+message = ding+smessage
+
+
+print("Enviando notificacion a",Email)
+
+
+s.sendmail(socmail, Email, message)
+
+
+print("Mensaje enviado correctamente")

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "Archivos\EnviarCorreo\Mail.h" 
 
 //Tipos para la gestion de los datos de cada elemento
 typedef struct Nino Nino;
@@ -107,6 +108,7 @@ void mostrarCartasPorAnno(struct ListaCartas *LCartas, struct ListaNinos *LNinos
 void obtenerNombre(struct ListaNinos *LNinos, const char id [], char *nombre);
 void cambiarEstadoCarta(struct ListaCartas *LCartas, const char identificacion [], const char anno [], const char estado [], const char id_ayudante [] );
 void obtenerEstadoCarta(struct ListaCartas *LCartas, const char id [], const char anno [], char *estado);
+void enviarCorreo(struct ListaNinos *LNinos, const char identificacion []);
 
 //Procedimientos para el Analisis de Datos
 void juguetesPorAnno(struct ListaJugCarta *LJugCarta);
@@ -690,7 +692,7 @@ void GestionEntregas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, str
 			switch(opcion){
 				case '1': entregaTodos(LCartas, LNinos, LJugCarta);
 					break;
-				case '2': entregaPorTipo();
+				case '2': entregaPorTipo(LCartas, LNinos, LJugCarta);
 					break;
 				case '0':
 					break;
@@ -1035,7 +1037,7 @@ void modificarNino(struct ListaNinos *LNinos){
                 
                 if(resp==1){
                 	printf("\n-->Ingrese el valor para el Correo Electronico: (Ej. juanp123@correo.com) \n");
-			    	gets(usuario);	
+			    	gets(correo);	
 					strcpy(iNino->correo,correo);
 				}
 				
@@ -2849,7 +2851,7 @@ int validarComp(struct ListaComport *LComp, const char identificacion []){
 		return 0;
 	}
 	
-	if(contador>=6){
+	if(contador>=1){
 		printf("\n***El nino(a) tiene 6 o MAS comportamiento MALOS***");
 		printf("\n+------------------------------------------------+\n");
 		return 1;
@@ -2948,6 +2950,7 @@ void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 			}
 			
 	    	//Enviar Correo
+	    	enviarCorreo(LNinos, identificacion);
 	    	
 		}else{ //- de 6 malos comportamientos 
 			
@@ -3010,6 +3013,49 @@ void procesarCartas(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 		
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
+}
+
+/*
+	Entradas: Una lista de tipo ListaNinos, y un char dque denota la identificacion de un Nino(a)
+	Salidas: Se realiza la actualizacion del archivo que contine la direccion del destinatario con el correo del Nino(a)
+			 y se envia un correo a ste notificando la cancelacion de la Carta para Santa.
+	Restricciones: Ninguna.
+*/
+void enviarCorreo(struct ListaNinos *LNinos, const char identificacion []){
+
+	struct Nino *iNino;
+	char destinatario [80];
+	
+	FILE* ArchDestinatario;
+	
+	if(LNinos->inicio!=NULL)
+	{
+        iNino = LNinos->inicio;
+        while(iNino!=NULL){
+
+	        if(strcmp(identificacion,iNino->cedula)==0)
+			{
+				strcpy(destinatario, iNino->correo);
+				
+				remove("Archivos\\EnviarCorreo\\Destinatario.txt");
+				ArchDestinatario=fopen("Archivos\\EnviarCorreo\\Destinatario.txt","a+");
+				
+				if(ArchDestinatario==NULL){
+					printf("\n Error al intentar usar el archivo Destinatario.\n");	
+				}else{
+					fprintf(ArchDestinatario, "%s", destinatario);
+				}
+					
+				fclose(ArchDestinatario);	
+				
+				SendMail(0);
+							
+				break;
+			}
+			iNino = iNino->siguiente;
+        }
+	}
+
 }
 
 /*
@@ -3412,7 +3458,7 @@ void eliminarDomicilio(){
 	printf("  Eliminar Info. de un Domiclio\n" );
 	printf("*********************************\n");
 	
-	struct Domicilio *domicilio=lugarInicial->siguiente, *anterior;
+	struct Domicilio *domicilio=lugarInicial, *anterior;
 	int hallado=0, comp=3;
 	char lugar[50], opcion[3]; 
 	
@@ -3459,9 +3505,7 @@ void eliminarDomicilio(){
 						
 						anterior->siguiente = domicilio->siguiente;
 						free(domicilio);
-						
-						
-			
+
 					}
 					printf("\n-->Se ha eliminado el Domicilio con el nombre ingresado");
 				}
@@ -3491,7 +3535,7 @@ void eliminarDomicilio(){
 
 /*
 	Entradas: Ninguna
-	Salidas: Se elimina un Ruta registrada para un vertice de la estructura del Grafo 
+	Salidas: Se elimina un Ruta registrada para un vertice de la estructura del Grafo para un lugar de destino determinado
 	Restricciones: Ninguna.
 */
 void borrarRutas(const char lugar_Destino[]){
@@ -3687,22 +3731,24 @@ void visualizarGrafo(){
     Ruta* iRuta;
     
     if (iDomicilio != NULL){
-    	printf("Origen  ->  Destino ( tipo , duracion)\n");  
-    while(iDomicilio!=NULL){   
-	    printf("%s-> ",iDomicilio->nombre_lugar);
-       
-	    if(iDomicilio->adyacencia!=NULL){
-            iRuta=iDomicilio->adyacencia;
-            
-			while(iRuta!=NULL){ 
-			    printf(" %s( %s, %s )",iRuta->lugar->nombre_lugar, iRuta->tipo_ruta, iRuta->tiempo_estimado);
-                iRuta=iRuta->siguiente;
-            }
-        }
-
-        printf("\n");
-        iDomicilio=iDomicilio->siguiente;
-    }
+    	printf(" Origen  ->  Destino ( tipo , duracion)\n"); 
+		printf("***********************************\n"); 
+	    
+		while(iDomicilio!=NULL){   
+		    printf("  >> %s-> ",iDomicilio->nombre_lugar);
+	       
+		    if(iDomicilio->adyacencia!=NULL){
+	            iRuta=iDomicilio->adyacencia;
+	            
+				while(iRuta!=NULL){ 
+				    printf(" %s( %s, %s )",iRuta->lugar->nombre_lugar, iRuta->tipo_ruta, iRuta->tiempo_estimado);
+	                iRuta=iRuta->siguiente;
+	            }
+	        }
+	
+	        printf("\n");
+	        iDomicilio=iDomicilio->siguiente;
+	    }
     printf("\n");
 	}else{
 		printf("***No hay Domicilios registrados***");
@@ -4016,6 +4062,7 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	
 	printf("\nIdentificacion del Nino(a)   -  Anno ");
 	printf("\n---------------------------------");
+	
 	while(iEntregable!=NULL){
 
 		if(strcmp(iEntregable->domicilio, destino)==0){
@@ -4940,12 +4987,12 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 	        }		
 			
 		}else{
-			printf( "\n***No se han encontrado juguetes solicitados 1***");
+			printf( "\n***No se han encontrado juguetes solicitados***");
 		}
 				
 		
 	}else{
-		printf( "\n***No se han encontrado juguetes solicitados 2***");
+		printf( "\n***No se han encontrado juguetes solicitados***");
 	}
 	
 

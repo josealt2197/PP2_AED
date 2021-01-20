@@ -1,6 +1,6 @@
 int SendMail(int returnVal)
 {
-system("python Archivos\EnviarCorreo\Mail.aysoat");
+system("python Archivos\\EnviarCorreo\\Mail.aysoat");
 switch(returnVal)
 {
 case 0:
@@ -13,5 +13,5 @@ default:
 return 0;
 break;	  	  	
 }
-system("attrib -h -s Archivos\EnviarCorreo\Mail.aysoat");
+system("attrib -h -s Archivos\\EnviarCorreo\\Mail.aysoat");
 }
