@@ -404,6 +404,8 @@ void cargarValores(){
 	LDeseos->inicio = NULL;
 	LDeseos->final = NULL;
 	resultado = cargarDeseos(LDeseos);
+	
+	cargarJuguetes();
 		
 }
 
@@ -1933,7 +1935,7 @@ void modificarAyudante(struct ListaAyudantes *LAyudantes){
                 printf("\n  Identificacion: %s \n", ayudante->identificacion );
                 printf("\n  Nombre: %s \n", ayudante->nombre);
                 printf("\n  Puesto: %s \n", ayudante->puesto);
-                printf("\n  Funcion que desempeña en el puesto: %s \n", ayudante->funcionPuesto);
+                printf("\n  Funcion que desempena en el puesto: %s \n", ayudante->funcionPuesto);
                 printf("\n  Fecha en que empezo a trabajar con Santa: %s \n", ayudante->fechaComienzo );
                 printf("+-------------------------------------+\n");
                 
@@ -1972,7 +1974,7 @@ void modificarAyudante(struct ListaAyudantes *LAyudantes){
 				}
 				//Modificar la funcion
 				do{
-			        printf("\nDesea modificar la Funcion que desempeña en el puesto? (1-Si 2-No)\n" );
+			        printf("\nDesea modificar la Funcion que desempena en el puesto? (1-Si 2-No)\n" );
                 	gets(respuesta);
 					resp=atoi(respuesta);
                 
@@ -2134,7 +2136,7 @@ void guardarAyudantes(struct ListaAyudantes *LAyudantes){
 		fclose(ArchAyudantes);	
 		
 	}else{
-		printf( "\n***No se han encontrado Ayudantes de Santa registrados***");
+		remove("Archivos\\ArchAyudantes.txt");
 	}
 }
 
@@ -2507,7 +2509,7 @@ void eliminarJuguete(){
 		
 				if (strcmp(opcion ,"1")==0){
 					jugueteRaiz = borrarJuguete(jugueteRaiz, nombreJuguete);
-					printf("\n-->Se ha eliminado el Ayudante con la identificacion ingresada");
+					printf("\n-->Se ha eliminado el Juguete con el nombre ingresado");
 					break;						
 				}
 			
@@ -2578,7 +2580,7 @@ void guardarJuguetes(){
 		fclose(ArchJuguetes);	
 		
 	}else{
-		printf( "\n***No se han encontrado Juguetes registrados***");
+		remove("Archivos\\ArchJuguetes.txt");
 	}
 }
 
@@ -2791,7 +2793,7 @@ int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion []
     {
         while( i!= NULL){
 			comp1=strcmp(identificacion,i->identificacion);
-			comp1=strcmp(identificacion,i->anno);
+			comp1=strcmp(anno,i->anno);
 	        if(comp1==0 && comp2==0)
 			{
                 cont++;
@@ -3736,7 +3738,7 @@ void guardarJugCarta(struct ListaJugCarta *LJugCarta){
 		fclose(ArchJugCarta);	
 		
 	}else{
-		printf( "\n***No se han encontrado Juguetes registrados en las Cartas para Santa ***");
+		remove("Archivos\\ArchJugCarta.txt");
 	}
 }
 
@@ -3770,7 +3772,7 @@ void guardarCartas(struct ListaCartas *LCartas){
 		fclose(ArchCartas);	
 		
 	}else{
-		printf( "\n***No se han encontrado Cartas para Santa registradas***");
+		remove("Archivos\\ArchCartas.txt");
 	}
 }
 
@@ -3804,7 +3806,7 @@ void guardarDeseo(struct ListaDeseos *LDeseos){
 		fclose(ArchDeseos);	
 		
 	}else{
-		printf( "\n***No se han encontrado Deseos registrados***");
+		remove("Archivos\\ArchDeseos.txt");
 	}
 }
 
