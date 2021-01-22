@@ -556,6 +556,7 @@ int cargarJugCarta(struct ListaJugCarta *LJugCarta){
 			}else{
 				strcpy(aux->estado,linea);
 				borrarSaltoLinea(aux->estado);
+				
 				if(LJugCarta->inicio == NULL) 
 	            {
 	                //Inserta al inicio de la lista
@@ -566,7 +567,7 @@ int cargarJugCarta(struct ListaJugCarta *LJugCarta){
 	            }else{
 	                //Inserta al final de la lista
 	                LJugCarta->final->siguiente = aux; 
-	                LAyudantes->final->siguiente->siguiente = NULL; 
+	                LJugCarta->final->siguiente->siguiente = NULL; 
 	                LJugCarta->final = LJugCarta->final->siguiente;
 	            } 	
 				numLectura = 0;
@@ -3710,7 +3711,7 @@ int validarComp(struct ListaComport *LComp, const char identificacion []){
 		return 0;
 	}
 	
-	if(contador>=1){
+	if(contador>=6){
 		printf("\n***El nino(a) tiene 6 o MAS comportamiento MALOS***");
 		printf("\n+------------------------------------------------+\n");
 		return 1;
@@ -5936,22 +5937,24 @@ void ordenarTopJuguetes(struct ListaJugSolicitados *TopJuguetes){
 	i = TopJuguetes->inicio;
 	while( i->siguiente!= NULL){
 		j = i->siguiente;
+
 		while( j!= NULL){
-			
+
 			if(i->cantidad < j->cantidad){
-				
+				printf("\n ordenarTopJuguetes %d", i->cantidad);
+				printf("\n ordenarTopJuguetes %d", j->cantidad);
 				//Guardar los valores del nodo i
 				temp->cantidad = i->cantidad;
 				strcpy(temp->nombre_juguete,i->nombre_juguete);
-				
+
 				//Asignar los valores del nodo j al nodo i
 				i->cantidad = j->cantidad;			
 				strcpy(temp->nombre_juguete,i->nombre_juguete);
-				
+
 				//Asignar los valores guardados del nodo i al nodo j
 				j->cantidad = temp->cantidad;
 				strcpy(temp->nombre_juguete,i->nombre_juguete);
-				
+
 			}			
 			j = j->siguiente;
 		}
@@ -6030,7 +6033,25 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 			
 			iJugCarta = iJugCarta->siguiente;
 		}
-				
+		
+		iJugSolicitado = TopJuguetes->inicio;
+		int cont=0;
+		if(TopJuguetes->inicio!=NULL)
+		{
+	        while(iJugSolicitado!=NULL){
+	            printf("\n     %s   -   %d", iJugSolicitado->nombre_juguete, iJugSolicitado->cantidad);
+	            iJugSolicitado = iJugSolicitado->siguiente;
+	            cont++;
+	            
+	            if(cont==10){
+	            	break;
+				}
+	        }		
+			
+		}else{
+			printf( "\n***No se han encontrado juguetes solicitados***");
+		}
+						
 		ordenarTopJuguetes(TopJuguetes);
 		
 		//Mostrar cantidades contadas
@@ -6039,7 +6060,7 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 		printf("\n+------------------------------------------+\n");
 		
 		iJugSolicitado = TopJuguetes->inicio;
-		int cont=0;
+		cont=0;
 		if(TopJuguetes->inicio!=NULL)
 		{
 	        while(iJugSolicitado!=NULL){
