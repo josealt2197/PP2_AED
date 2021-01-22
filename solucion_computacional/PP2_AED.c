@@ -174,7 +174,7 @@ struct Nino{
 	char nombre_completo[50];
     char nombre_usuario[20];
     char correo[50];
-    char lugar_domicilio[20];
+    char lugar_domicilio[80];
     char fecha_nacimiento[15];
     char edad[5];
     char necesidades_esp[150];
@@ -323,7 +323,7 @@ struct Ruta{
 };
 
 struct Recorrido{
-	Domicilio *nombre_lugar;
+	Domicilio *nombre_domicilio;
 	Recorrido *siguiente;
 };
 
@@ -2904,77 +2904,76 @@ void registrarCartas(struct ListaNinos *LNinos, struct ListaJugCarta *LJugCarta,
 	    	
 			if (strcmp(opcion ,"1")==0){
 				
-				printf("\n+---------------------------------------------+\n");
-				printf( "              Lista de Juguetes" );
-				printf("\n+---------------------------------------------+\n");
-				printf("        Codigo - Nombre  - Categoria ");
-				printf("\n+---------------------------------------------+\n");
-				mostrarJuguetes(jugueteRaiz);
-				printf("\n+---------------------------------------------+\n");
-						
-				printf("\n-->Ingrese el nombre del juguete que desea agregar:\n");
-	        	gets(nombreJuguete);
-				
-				buscado = buscarJuguete(jugueteRaiz, nombreJuguete);
-				
-				if(buscado!=NULL)
-				{
-				   	printf("\n+------------------------------------+");
-					printf("\n        Datos del Juguete " );
-			    	printf("\n+------------------------------------+");
-			        printf("\n  Nombre: %s \n", buscado->nombre);
-			        printf("  Codigo: %s \n", buscado->codigo);
-			        printf("  Descripcion: %s \n", buscado->descripcion);
-			        printf("  Categoria: %s \n", buscado->categoria);
-			        printf("  Rango de Edad: %s \n", buscado->rango_edad);
-			        printf("+-------------------------------------+\n");
-			       	
-					do{
-						printf("\n-->Desea agregar este juguete?:");
-				    	printf("\nDigite 1-Carta para Santa"); 
-						printf("\n       2-Lista de Deseos");
-						printf("\n       3-Omitir\n<--");
-						gets(opcion2);
+				juguetesRegistrados=contarJuguetes(LJugCarta, identificacion, anno);
 							
-						if (strcmp(opcion2 ,"1")==0){
+				if(juguetesRegistrados==1){
+					printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
+					break;
+				}else{	
+					
+					printf("\n+---------------------------------------------+\n");
+					printf( "              Lista de Juguetes" );
+					printf("\n+---------------------------------------------+\n");
+					printf("        Codigo - Nombre  - Categoria ");
+					printf("\n+---------------------------------------------+\n");
+					mostrarJuguetes(jugueteRaiz);
+					printf("\n+---------------------------------------------+\n");
 							
-							juguetesRegistrados=contarJuguetes(LJugCarta, identificacion, anno);
-							
-							if(juguetesRegistrados==1){
-								printf( "\n***Ya se han registrado 10 juguetes en la Carta para Santa***");
-								break;
-							}else{	
+					printf("\n-->Ingrese el nombre del juguete que desea agregar:\n");
+		        	gets(nombreJuguete);
+					
+					buscado = buscarJuguete(jugueteRaiz, nombreJuguete);
+					
+					if(buscado!=NULL)
+					{
+					   	printf("\n+------------------------------------+");
+						printf("\n        Datos del Juguete " );
+				    	printf("\n+------------------------------------+");
+				        printf("\n  Nombre: %s \n", buscado->nombre);
+				        printf("  Codigo: %s \n", buscado->codigo);
+				        printf("  Descripcion: %s \n", buscado->descripcion);
+				        printf("  Categoria: %s \n", buscado->categoria);
+				        printf("  Rango de Edad: %s \n", buscado->rango_edad);
+				        printf("+-------------------------------------+\n");
+				       	
+						do{
+							printf("\n-->Desea agregar este juguete?:");
+					    	printf("\nDigite 1-Carta para Santa"); 
+							printf("\n       2-Lista de Deseos");
+							printf("\n       3-Omitir\n<--");
+							gets(opcion2);
+								
+							if (strcmp(opcion2 ,"1")==0){
 								agregarJuguete(LJugCarta, identificacion, anno, nombreJuguete);											
+								break;		
 							}
-							break;
-								
-						}
-						
-						if (strcmp(opcion2 ,"2")==0){
 							
-							agregarDeseo(LDeseos, identificacion, anno, nombreJuguete);
-							break;						
-						}
+							if (strcmp(opcion2 ,"2")==0){
+								agregarDeseo(LDeseos, identificacion, anno, nombreJuguete);
+								break;						
+							}
+							
+							if (strcmp(opcion2 ,"3")==0){
+								break;			
+							}
 						
-						if (strcmp(opcion2 ,"3")==0){
-							break;			
-						}
+						}while(1); 
+						
+			        }else{
+						printf( "\n***No se ha encontrado un Juguete con el Nombre ingresado***");
+					}
+									
+					printf("\n-->Desea agregar otro juguete?:\n");
+					printf("   Digite 1-SI, 2-NO\n<--");
+					gets(opcion);
 					
-					}while(1); 
-					
-		        }else{
-					printf( "\n***No se ha encontrado un Juguete con el Nombre ingresado***");
+					if (strcmp(opcion ,"1")!=0){
+						printf("\n+-------------------------------------+\n");
+						break;			
+					}
+					printf("\n+-------------------------------------+\n");												
 				}
 								
-				printf("\n-->Desea agregar otro juguete?:\n");
-				printf("   Digite 1-SI, 2-NO\n<--");
-				gets(opcion);
-				
-				if (strcmp(opcion ,"1")!=0){
-					printf("\n+-------------------------------------+\n");
-					break;			
-				}
-				printf("\n+-------------------------------------+\n");					
 			}	
 		
 		}while(1);	
@@ -3032,9 +3031,7 @@ int contarJuguetes(struct ListaJugCarta *LJugCarta, const char identificacion []
     if(LJugCarta->inicio!=NULL)
     {
         while( i!= NULL){
-			comp1=strcmp(identificacion,i->identificacion);
-			comp1=strcmp(anno,i->anno);
-	        if(comp1==0 && comp2==0)
+	        if(strcmp(i->identificacion, identificacion)==0 && strcmp(i->anno,anno)==0)
 			{
                 cont++;
             }
@@ -4706,8 +4703,8 @@ void visualizarGrafo(){
 	printf("\n\n*********************************\n");
 	printf("        Sistema NaviTEC \n");
 	printf("***********************************\n");
-	printf("  Lista de Rutas entre Domicilios\n" );
-	printf("***********************************\n");
+	printf("  Lista de Rutas entre Domicilios" );
+	printf("\n***********************************\n");
     Domicilio* iDomicilio=lugarInicial;
     
     Ruta* iRuta;
@@ -4717,7 +4714,7 @@ void visualizarGrafo(){
 		printf("***********************************\n"); 
 	    
 		while(iDomicilio!=NULL){   
-		    printf("  >> %s-> ",iDomicilio->nombre_lugar);
+		    printf("  >> %s (%s, %d, %d, %d)-> ",iDomicilio->nombre_lugar, iDomicilio->anterior, iDomicilio->monto, iDomicilio->terminado, iDomicilio->visitado);
 	       
 		    if(iDomicilio->adyacencia!=NULL){
 	            iRuta=iDomicilio->adyacencia;
@@ -4775,7 +4772,7 @@ void guardarDomiciliosYRutas(){
 	Domicilio* iDomicilio=lugarInicial;
 	Ruta* iRuta;
 	
-	char buffer[20];
+	char terminado[10], visitado[10], monto[10];
 
 	FILE* ArchDomicilios;
 	FILE* ArchRutas;
@@ -4792,7 +4789,7 @@ void guardarDomiciliosYRutas(){
 			printf("\n Error al intentar usar el archivo de Ayudantes.\n");	
 		}else{
 			while(iDomicilio!=NULL){   
-			    fprintf(ArchDomicilios,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n",iDomicilio->codigo, iDomicilio->nombre_lugar, iDomicilio->codigo_postal, itoa(iDomicilio->visitado, buffer, 10), itoa(iDomicilio->terminado, buffer, 10), itoa(iDomicilio->monto, buffer, 10), iDomicilio->anterior);
+			    fprintf(ArchDomicilios,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n",iDomicilio->codigo, iDomicilio->nombre_lugar, iDomicilio->codigo_postal, itoa(iDomicilio->visitado, visitado, 10), itoa(iDomicilio->terminado, terminado, 10), itoa(iDomicilio->monto, monto, 10), iDomicilio->anterior);
 		        
 				if(iDomicilio->adyacencia != NULL){
 
@@ -4857,7 +4854,7 @@ void entregaTodos(struct ListaCartas *LCartas, struct ListaNinos *LNinos, struct
 				
 				//Llamar a la función con el Algoritmo de Dijkstra
 				while(iLugarPorVisitar!=NULL){
-
+					
 					dijkstraTodos(LEntregables, iLugarPorVisitar->nombre_Lugar);
 					
 					iLugarPorVisitar=iLugarPorVisitar->siguiente;
@@ -4953,7 +4950,7 @@ void entregaPorTipo(struct ListaCartas *LCartas, struct ListaNinos *LNinos, stru
 */
 void insertarEnRecorrido(Domicilio* domicilio){
 	Recorrido *nuevo=(Recorrido*)malloc(sizeof(Recorrido));
-	nuevo->nombre_lugar=domicilio;
+	nuevo->nombre_domicilio=domicilio;
 	nuevo->siguiente=NULL;
 	if(lugarPartida==NULL){
 		lugarPartida=nuevo;
@@ -4963,6 +4960,26 @@ void insertarEnRecorrido(Domicilio* domicilio){
 	   lugarPartida=nuevo;    	
 	}
 }
+
+/*
+	Entradas: Ninguna
+	Salidas: Se verifica si el Polo Norte se encuentre dentro del recorrido planteado
+	Restricciones: Ninguna.
+*/
+int validarRecorrido(struct Recorrido *parada){
+	int hallado=0;
+	
+	while(parada!=NULL){
+		if(strcmp(parada->nombre_domicilio->nombre_lugar, "Polo Norte")==0){
+			hallado=1;
+			break;
+		}
+		parada=parada->siguiente;
+	}
+	
+	return hallado;
+}
+
 
 /*
 	Entradas: Ninguna
@@ -4982,7 +4999,7 @@ Domicilio *extraerLugar(){
 			lugarLlegada=NULL;
 	}
 	
-	Domicilio *resultado=aux->nombre_lugar;
+	Domicilio *resultado=aux->nombre_domicilio;
 	free(aux);
 	
 	return resultado;
@@ -5011,25 +5028,7 @@ void reiniciarDomicilios(){
 void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]){
 		
 	Domicilio *iDomicilio = lugarInicial;
-	char origen[50];
-	
-	strcpy(origen, "Polo Norte");
 
-	while(iDomicilio!=NULL){
-
-		if(strcmp(iDomicilio->nombre_lugar, origen)==0){
-			iDomicilio->terminado=1;
-			iDomicilio->monto=0;
-			break;
-		}
-		iDomicilio=iDomicilio->siguiente;
-	}
-	
-	if(iDomicilio==NULL){
-		printf("***Domicilio no encontrado***\n");
-		return;
-	}
-	
 	while(iDomicilio!=NULL){
 
 		Ruta *iRuta=iDomicilio->adyacencia;
@@ -5048,13 +5047,11 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 	    Domicilio *masCorto = lugarInicial;
 	    
 	    while(masCorto->anterior==0 || masCorto->terminado ==1){
-
 	    	masCorto=masCorto->siguiente;
 		}
 	    	
 	    
 		while(iDomicilio!=NULL){
-
 	    	if(iDomicilio->monto<masCorto->monto && iDomicilio->terminado==0 && strcmp(iDomicilio->anterior, "0")!=0)
 	    		masCorto=iDomicilio;
 	    	iDomicilio=iDomicilio->siguiente;
@@ -5063,8 +5060,10 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 		iDomicilio=masCorto;
 		iDomicilio->terminado=1;
 		
-		if(strcmp(iDomicilio->nombre_lugar,destino)==0)
+		if(strcmp(iDomicilio->nombre_lugar,destino)==0){
 			break;
+		}
+			
 	}
 	
 	while(strcmp(iDomicilio->anterior, "0")!=0){
@@ -5082,32 +5081,38 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 		}
 	}
 	
-	
-	printf("\n-->Entregando Juguetes en... %s", destino);
+//	printf("\n-->Lugar de Partida: %s", lugarPartida->nombre_domicilio->nombre_lugar);
 
-	printf("\n-->Recorrido: ");
 	insertarEnRecorrido(iDomicilio);
-	while(lugarLlegada!=NULL){
-
-		printf("->%s ",extraerLugar()->nombre_lugar);
-	}
-	printf("\n");
 	
-	struct CartaEntregable *iEntregable = LEntregables->inicio;
+	int resultado = validarRecorrido(lugarPartida);
 	
-	printf("\nIdentificacion del Nino(a)   -  Anno ");
-	printf("\n---------------------------------");
+	if(resultado==1){
+		
+		printf("\n-->Entregando Juguetes en... %s", destino);
+		printf("\n-->Recorrido: ");
+		while(lugarLlegada!=NULL){
 	
-	while(iEntregable!=NULL){
-
-		if(strcmp(iEntregable->domicilio, destino)==0){
-			printf("\n  -> %s  -  %s", iEntregable->identificacion, iEntregable->anno);
+			printf("->%s ",extraerLugar()->nombre_lugar);
 		}
-
-		iEntregable=iEntregable->siguiente;
-	}
+		printf("\n");
+		
+		struct CartaEntregable *iEntregable = LEntregables->inicio;
+		
+		printf("\nIdentificacion del Nino(a)   -  Anno ");
+		printf("\n---------------------------------");
+		
+		while(iEntregable!=NULL){
 	
-	printf("\n---------------------------------");	
+			if(strcmp(iEntregable->domicilio, destino)==0){
+				printf("\n  -> %s  -  %s", iEntregable->identificacion, iEntregable->anno);
+			}
+	
+			iEntregable=iEntregable->siguiente;
+		}
+		printf("\n---------------------------------");	
+	}
+
 	reiniciarDomicilios();
 }
 
@@ -5119,24 +5124,24 @@ void dijkstraTodos(struct ListaEntregables *LEntregables, const char destino[50]
 void dijkstraPorTipo(struct ListaEntregables *LEntregables, const char destino[50], const char tipo[10]){
 		
 	Domicilio *iDomicilio = lugarInicial;
-	char origen[50];
-	
-	strcpy(origen, "Polo Norte");
-
-	while(iDomicilio!=NULL){
-
-		if(strcmp(iDomicilio->nombre_lugar, origen)==0){
-			iDomicilio->terminado=1;
-			iDomicilio->monto=0;
-			break;
-		}
-		iDomicilio=iDomicilio->siguiente;
-	}
-	
-	if(iDomicilio==NULL){
-		printf("***Domicilio no encontrado***\n");
-		return;
-	}
+//	char origen[50];
+//	
+//	strcpy(origen, "Polo Norte");
+//
+//	while(iDomicilio!=NULL){
+//
+//		if(strcmp(iDomicilio->nombre_lugar, origen)==0){
+//			iDomicilio->terminado=1;
+//			iDomicilio->monto=0;
+//			break;
+//		}
+//		iDomicilio=iDomicilio->siguiente;
+//	}
+//	
+//	if(iDomicilio==NULL){
+//		printf("***Domicilio no encontrado***\n");
+//		return;
+//	}
 	
 	while(iDomicilio!=NULL){
 
@@ -5191,7 +5196,6 @@ void dijkstraPorTipo(struct ListaEntregables *LEntregables, const char destino[5
 		   	
 		}
 	}
-	
 	
 	printf("\n-->Entregando Juguetes en... %s", destino);
 

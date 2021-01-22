@@ -1,10 +1,10 @@
 Polo Norte
-Guadalupe, Cartuanis
-3
-1600
-A
-Guadalupe, Cartuanis
-Pocosol, San Carlos
-120
-180
+Pocosol
+1
+1
+T
+Pocosol
+Cartuanis
+1
+1
 T
