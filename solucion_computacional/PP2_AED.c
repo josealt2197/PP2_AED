@@ -167,7 +167,7 @@ void guardarAyudantes(struct ListaAyudantes *LAyudantes);
 void guardarJugCarta(struct ListaJugCarta *LJugCarta);
 void guardarDeseo(struct ListaDeseos *LDeseos);
 void guardarCartas(struct ListaCartas *LCartas);
-
+void guardarDomiciliosYRutas();
 
 struct Nino{
     char cedula[12];
@@ -320,7 +320,6 @@ struct Ruta{
     char distancia[20];
     char tipo_ruta[20];
 	Ruta *siguiente;
-	int peso;
 };
 
 struct Recorrido{
@@ -410,6 +409,12 @@ void cargarValores(){
 	resultado = cargarDeseos(LDeseos);
 	
 	cargarJuguetes();
+	
+	//cargarDomicilios();
+	
+	if(lugarInicial==NULL){
+		registrarPoloNorte();
+	}
 		
 }
 
@@ -428,6 +433,7 @@ void borrarSaltoLinea(char linea[]){
     }
 }
 
+
 /*
     Entradas: Un puntero a una lista del tipo ListaNinos.
     Salidas: Una lista  enlazada con los diferentes valores de la estructura.
@@ -439,56 +445,74 @@ int cargarNinos(struct ListaNinos *LNinos){
 
     struct Nino *aux;
 
+    char linea [256];
+    int numLectura=0;
+
     ArchNinos = fopen("Archivos\\ArchNinos.txt","r");
 
     if(ArchNinos==NULL){
         return 0;
     }else{
-        while(!feof(ArchNinos)){
-            aux =(struct Nino *) malloc (sizeof(struct Nino));
-
-            fgets(aux->cedula, 12, ArchNinos); 
-            borrarSaltoLinea(aux->cedula);
-
-            fgets(aux->nombre_completo, 50, ArchNinos); 
-            borrarSaltoLinea(aux->nombre_completo);
-
-            fgets(aux->nombre_usuario, 20, ArchNinos); 
-            borrarSaltoLinea(aux->nombre_usuario);
-
-            fgets(aux->correo, 50, ArchNinos);
-            borrarSaltoLinea(aux->correo);
-
-            fgets(aux->lugar_domicilio, 20, ArchNinos);
-            borrarSaltoLinea(aux->lugar_domicilio);
-
-            fgets(aux->fecha_nacimiento, 15, ArchNinos);
-            borrarSaltoLinea(aux->fecha_nacimiento);
-
-            fgets(aux->edad, 5, ArchNinos);
-            borrarSaltoLinea(aux->edad);
-
-            fgets(aux->necesidades_esp, 150, ArchNinos);
-            borrarSaltoLinea(aux->edad);
-
-            if(LNinos->inicio == NULL) 
-            {
-                //Inserta al inicio de la lista
-                LNinos->inicio = aux;
-                LNinos->inicio->siguiente = NULL; 
-                LNinos->final = LNinos->inicio;
-
-            }else{
-                //Inserta al final de la lista
-                LNinos->final->siguiente = aux; 
-                LNinos->final->siguiente->siguiente = NULL; 
-                LNinos->final = LNinos->final->siguiente;
-            }
-        }
+    	while(fgets(linea, 256, (FILE *) ArchNinos)){
+	    	if(numLectura == 0){
+				aux =(struct Nino *) malloc (sizeof(struct Nino));
+				strcpy(aux->cedula,linea);
+				borrarSaltoLinea(aux->cedula);
+				numLectura++;
+				
+			}else if(numLectura == 1){
+				strcpy(aux->nombre_completo,linea);
+				borrarSaltoLinea(aux->nombre_completo);
+				numLectura++;
+				
+			}else if(numLectura == 2){
+				strcpy(aux->nombre_usuario,linea);
+				borrarSaltoLinea(aux->nombre_usuario);
+				numLectura++;
+				
+			}else if(numLectura == 3){
+				strcpy(aux->correo,linea);
+				borrarSaltoLinea(aux->correo);
+				numLectura++;
+				
+			}else if(numLectura == 4){
+				strcpy(aux->lugar_domicilio,linea);
+				borrarSaltoLinea(aux->lugar_domicilio);
+				numLectura++;
+				
+			}else if(numLectura == 5){
+				strcpy(aux->fecha_nacimiento,linea);
+				borrarSaltoLinea(aux->fecha_nacimiento);
+				numLectura++;
+				
+			}else if(numLectura == 6){
+				strcpy(aux->edad,linea);
+				borrarSaltoLinea(aux->edad);
+				numLectura++;
+				
+			}else{
+				strcpy(aux->necesidades_esp,linea);
+				borrarSaltoLinea(aux->necesidades_esp);
+				
+				if(LNinos->inicio == NULL) 
+	            {
+	                //Inserta al inicio de la lista
+	                LNinos->inicio = aux;
+	                LNinos->inicio->siguiente = NULL; 
+	                LNinos->final = LNinos->inicio;
+	
+	            }else{
+	                //Inserta al final de la lista
+	                LNinos->final->siguiente = aux; 
+	                LNinos->final->siguiente->siguiente = NULL; 
+	                LNinos->final = LNinos->final->siguiente;
+	            }	
+				numLectura = 0;
+			}
+	    }
         fclose(ArchNinos);
     }
     return 1;
-
 }
 
 /*
@@ -502,40 +526,50 @@ int cargarJugCarta(struct ListaJugCarta *LJugCarta){
 
     struct JuguetesCarta *aux;
 
+    char linea [256];
+    int numLectura=0;
+
     ArchJugCarta = fopen("Archivos\\ArchJugCarta.txt","r");
 
     if(ArchJugCarta==NULL){
         return 0;
     }else{
-        while(!feof(ArchJugCarta)){
-            aux =(struct JuguetesCarta *) malloc (sizeof(struct JuguetesCarta));
-
-            fgets(aux->identificacion, 12, ArchJugCarta); 
-            borrarSaltoLinea(aux->identificacion);
-
-            fgets(aux->anno, 50, ArchJugCarta); 
-            borrarSaltoLinea(aux->anno);
-
-            fgets(aux->nombre_juguete, 20, ArchJugCarta); 
-            borrarSaltoLinea(aux->nombre_juguete);
-
-            fgets(aux->estado, 50, ArchJugCarta);
-            borrarSaltoLinea(aux->estado);
-
-            if(LJugCarta->inicio == NULL) 
-            {
-                //Inserta al inicio de la lista
-                LJugCarta->inicio = aux;
-                LJugCarta->inicio->siguiente = NULL; 
-                LJugCarta->final = LJugCarta->inicio;
-
-            }else{
-                //Inserta al final de la lista
-                LJugCarta->final->siguiente = aux; 
-                LJugCarta->final->siguiente->siguiente = NULL; 
-                LJugCarta->final = LJugCarta->final->siguiente;
-            }
-        }
+    	while(fgets(linea, 256, (FILE *) ArchJugCarta)){
+	    	if(numLectura == 0){
+				aux =(struct JuguetesCarta *) malloc (sizeof(struct JuguetesCarta));
+				strcpy(aux->identificacion,linea);
+				borrarSaltoLinea(aux->identificacion);
+				numLectura++;
+				
+			}else if(numLectura == 1){
+				strcpy(aux->anno,linea);
+				borrarSaltoLinea(aux->anno);
+				numLectura++;
+				
+			}else if(numLectura == 2){
+				strcpy(aux->nombre_juguete,linea);
+				borrarSaltoLinea(aux->nombre_juguete);
+				numLectura++;
+				
+			}else{
+				strcpy(aux->estado,linea);
+				borrarSaltoLinea(aux->estado);
+				if(LJugCarta->inicio == NULL) 
+	            {
+	                //Inserta al inicio de la lista
+	                LJugCarta->inicio = aux;
+	                LJugCarta->inicio->siguiente = NULL; 
+	                LJugCarta->final = LJugCarta->inicio;
+	
+	            }else{
+	                //Inserta al final de la lista
+	                LJugCarta->final->siguiente = aux; 
+	                LAyudantes->final->siguiente->siguiente = NULL; 
+	                LJugCarta->final = LJugCarta->final->siguiente;
+	            } 	
+				numLectura = 0;
+			}
+	    }
         fclose(ArchJugCarta);
     }
     return 1;
@@ -611,37 +645,46 @@ int cargarDeseos(struct ListaDeseos *LDeseos){
 
     struct Deseo *aux;
 
+    char linea [256];
+    int numLectura=0;
+
     ArchDeseos = fopen("Archivos\\ArchDeseos.txt","r");
 
     if(ArchDeseos==NULL){
         return 0;
     }else{
-        while(!feof(ArchDeseos)){
-            aux =(struct Deseo *) malloc (sizeof(struct Deseo));
-
-            fgets(aux->identificacion, 12, ArchDeseos); 
-            borrarSaltoLinea(aux->identificacion);
-
-            fgets(aux->anno, 50, ArchDeseos); 
-            borrarSaltoLinea(aux->anno);
-
-            fgets(aux->nombre_juguete, 20, ArchDeseos); 
-            borrarSaltoLinea(aux->nombre_juguete);
-
-            if(LDeseos->inicio == NULL) 
-            {
-                //Inserta al inicio de la lista
-                LDeseos->inicio = aux;
-                LDeseos->inicio->siguiente = NULL; 
-                LDeseos->final = LDeseos->inicio;
-
-            }else{
-                //Inserta al final de la lista
-                LDeseos->final->siguiente = aux; 
-                LDeseos->final->siguiente->siguiente = NULL; 
-                LDeseos->final = LDeseos->final->siguiente;
-            }
-        }
+    	while(fgets(linea, 256, (FILE *) ArchDeseos)){
+	    	if(numLectura == 0){
+				aux =(struct Deseo *) malloc (sizeof(struct Deseo));
+				strcpy(aux->identificacion,linea);
+				borrarSaltoLinea(aux->identificacion);
+				numLectura++;
+				
+			}else if(numLectura == 1){
+				strcpy(aux->anno,linea);
+				borrarSaltoLinea(aux->anno);
+				numLectura++;
+				
+			}else{
+				strcpy(aux->nombre_juguete,linea);
+				borrarSaltoLinea(aux->nombre_juguete);
+				
+				if(LDeseos->inicio == NULL) 
+	            {
+	                //Inserta al inicio de la lista
+	                LDeseos->inicio = aux;
+	                LDeseos->inicio->siguiente = NULL; 
+	                LDeseos->final = LDeseos->inicio;
+	
+	            }else{
+	                //Inserta al final de la lista
+	                LDeseos->final->siguiente = aux; 
+	                LDeseos->final->siguiente->siguiente = NULL; 
+	                LDeseos->final = LDeseos->final->siguiente;
+	            }	
+				numLectura = 0;
+			}
+	    }
         fclose(ArchDeseos);
     }
     return 1;
@@ -660,43 +703,56 @@ int cargarComp(struct ListaComport *LComp){
 
     struct Comportamiento *aux;
 
+    char linea [256];
+    int numLectura=0;
+
     ArchComp = fopen("Archivos\\ArchComp.txt","r");
 
     if(ArchComp==NULL){
         return 0;
     }else{
-        while(!feof(ArchComp)){
-            aux =(struct Comportamiento *) malloc (sizeof(struct Comportamiento));
-
-            fgets(aux->cedula_nino, 12, ArchComp); 
-            borrarSaltoLinea(aux->cedula_nino);
-
-            fgets(aux->descripcion, 150, ArchComp); 
-            borrarSaltoLinea(aux->descripcion);
-
-            fgets(aux->fecha_registro, 20, ArchComp); 
-            borrarSaltoLinea(aux->fecha_registro);
-
-            fgets(aux->indicacion, 15, ArchComp);
-            borrarSaltoLinea(aux->indicacion);
-
-            fgets(aux->nombre_padre_madre, 50, ArchComp);
-            borrarSaltoLinea(aux->nombre_padre_madre);       
-
-            if(LComp->inicio == NULL) 
-            {
-                //Inserta al inicio de la lista
-                LComp->inicio = aux;
-                LComp->inicio->siguiente = NULL; 
-                LComp->final = LComp->inicio;
-
-            }else{
-                //Inserta al final de la lista
-                LComp->final->siguiente = aux; 
-                LComp->final->siguiente->siguiente = NULL; 
-                LComp->final = LComp->final->siguiente;
-            }
-        }
+    	while(fgets(linea, 256, (FILE *) ArchComp)){
+	    	if(numLectura == 0){
+				aux =(struct Comportamiento *) malloc (sizeof(struct Comportamiento));
+				strcpy(aux->cedula_nino,linea);
+				borrarSaltoLinea(aux->cedula_nino);
+				numLectura++;
+				
+			}else if(numLectura == 1){
+				strcpy(aux->descripcion,linea);
+				borrarSaltoLinea(aux->descripcion);
+				numLectura++;
+				
+			}else if(numLectura == 2){
+				strcpy(aux->fecha_registro,linea);
+				borrarSaltoLinea(aux->fecha_registro);
+				numLectura++;
+				
+			}else if(numLectura == 3){
+				strcpy(aux->indicacion,linea);
+				borrarSaltoLinea(aux->indicacion);
+				numLectura++;
+				
+			}else{
+				strcpy(aux->nombre_padre_madre,linea);
+				borrarSaltoLinea(aux->nombre_padre_madre);
+				
+				if(LComp->inicio == NULL) 
+	            {
+	                //Inserta al inicio de la lista
+	                LComp->inicio = aux;
+	                LComp->inicio->siguiente = NULL; 
+	                LComp->final = LComp->inicio;
+	
+	            }else{
+	                //Inserta al final de la lista
+	                LComp->final->siguiente = aux; 
+	                LComp->final->siguiente->siguiente = NULL; 
+	                LComp->final = LComp->final->siguiente;
+	            }	
+				numLectura = 0;
+			}
+	    }
         fclose(ArchComp);
     }
     return 1;
@@ -867,8 +923,6 @@ void MenuPrincipal(){
 	char opcion;
 	
 	cargarValores();
-		
-	registrarPoloNorte();
 	
 	do{
         system( "CLS" );
@@ -3902,6 +3956,8 @@ void registrarDomicilio(){
         aux->siguiente=nuevo;
     }
     
+    guardarDomiciliosYRutas();
+    
     printf("\n+++ Informacion registrada correctamente +++\n" );
 	
 	printf("\n\nPresione una tecla para regresar..." );
@@ -3996,7 +4052,11 @@ void registrarRuta(){
     gets(nuevaRuta->tiempo_estimado);  
 	
     agregarRuta(origen,destino,nuevaRuta);
-    	
+    
+	guardarDomiciliosYRutas();
+	
+	printf("\n+++ Informacion registrada correctamente +++\n" );
+		
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
 }
@@ -4102,6 +4162,10 @@ void modificarDomicilio(){
 		printf("\n ***No se han encontrado Domicilios registrados***");
 	}
 		
+	guardarDomiciliosYRutas();
+	
+	printf("\n+++ Informacion registrada correctamente +++\n" );
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -4204,6 +4268,10 @@ void modificarRuta(){
 		printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
 	}	
 	
+	guardarDomiciliosYRutas();
+    
+    printf("\n+++ Informacion registrada correctamente +++\n" );
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
 }
@@ -4290,6 +4358,8 @@ void eliminarDomicilio(){
 	}else{
 		printf("\n ***No se han encontrado Domicilios registrados***");
 	}
+	
+	guardarDomiciliosYRutas();
 		
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();	
@@ -4439,11 +4509,14 @@ void eliminarRuta(){
 		printf( "\n***No se ha encontrado una Ruta con los datos ingresados***");
 	}	
 	
+	guardarDomiciliosYRutas();
+	
 	printf("\n\nPresione una tecla para regresar..." );
 	getchar();
 		
 	
 }
+
 
 /*
 	Entradas: Ninguna
@@ -4543,6 +4616,59 @@ void registrarPoloNorte(){
     
 	lugarInicial=poloNorte;
 	
+	guardarDomiciliosYRutas();
+}
+
+/*
+	Entradas: Ninguna
+	Salidas: Se guardan los Domicilios en un archivo de texto.
+	Restricciones: Ninguna.
+*/
+void guardarDomiciliosYRutas(){
+
+	Domicilio* iDomicilio=lugarInicial;
+	Ruta* iRuta;
+	
+	char buffer[20];
+
+	FILE* ArchDomicilios;
+	FILE* ArchRutas;
+
+    if(iDomicilio!=NULL)
+	{
+		remove("Archivos\\ArchDomicilios.txt");
+		remove("Archivos\\ArchRutas.txt");
+		
+		ArchDomicilios=fopen("Archivos\\ArchDomicilios.txt","a+");
+		ArchRutas=fopen("Archivos\\ArchRutas.txt","a+");
+			
+		if(ArchDomicilios==NULL){
+			printf("\n Error al intentar usar el archivo de Ayudantes.\n");	
+		}else{
+			while(iDomicilio!=NULL){   
+			    fprintf(ArchDomicilios,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n",iDomicilio->codigo, iDomicilio->nombre_lugar, iDomicilio->codigo_postal, itoa(iDomicilio->visitado, buffer, 10), itoa(iDomicilio->terminado, buffer, 10), itoa(iDomicilio->monto, buffer, 10), iDomicilio->anterior);
+		        
+				if(iDomicilio->adyacencia != NULL){
+
+					iRuta=iDomicilio->adyacencia;
+					
+					while(iRuta!=NULL){                               /*         Origen                  Destino         */                                             
+					    fprintf(ArchRutas,"%s\n%s\n%s\n%s\n%s\n",iDomicilio->nombre_lugar, iRuta->lugar->nombre_lugar, iRuta->tiempo_estimado, iRuta->distancia, iRuta->tipo_ruta);
+		                iRuta=iRuta->siguiente;
+		            }
+				}
+				
+				iDomicilio=iDomicilio->siguiente;
+		    }
+		}	
+		fclose(ArchDomicilios);	
+		fclose(ArchRutas);
+		
+		
+	}else{
+		remove("Archivos\\ArchDomicilios.txt");
+		remove("Archivos\\ArchRutas.txt");
+	}
 }
 
 /**************************************************************** Gestion de Entregas  ***********************************************************************************************/
