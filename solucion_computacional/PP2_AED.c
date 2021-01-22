@@ -410,10 +410,12 @@ void cargarValores(){
 	
 	cargarJuguetes();
 	
-	//cargarDomicilios();
+	cargarDomicilios();
 	
 	if(lugarInicial==NULL){
 		registrarPoloNorte();
+	}else{
+		cargarRutas();
 	}
 		
 }
@@ -913,6 +915,143 @@ int cargarJuguetes(){
 
 }
 
+/*
+    Entradas: Ninguna
+    Salidas: Se cargan los valores de los domicilios registrados a la lista.
+    Restricciones: Ninguna.
+*/
+int cargarDomicilios(){
+	Domicilio* aux;
+	Domicilio* aux2;
+	
+	char buffer[20], linea [256];
+    int numLectura=0;
+
+	FILE* ArchDomicilios;
+
+    if(aux!=NULL)
+	{	
+		ArchDomicilios=fopen("Archivos\\ArchDomicilios.txt","a+");
+			
+		if(ArchDomicilios==NULL){
+			return 0;	
+		}else{
+	    	while(fgets(linea, 256, (FILE *) ArchDomicilios)){
+		    	if(numLectura == 0){
+					aux =(struct Domicilio *) malloc (sizeof(struct Domicilio));
+					strcpy(aux->codigo,linea);
+					borrarSaltoLinea(aux->codigo);
+					numLectura++;
+					
+				}else if(numLectura == 1){
+					strcpy(aux->nombre_lugar,linea);
+					borrarSaltoLinea(aux->nombre_lugar);
+					numLectura++;
+					
+				}else if(numLectura == 2){
+					strcpy(aux->codigo_postal,linea);
+					borrarSaltoLinea(aux->codigo_postal);
+					numLectura++;
+					
+				}else if(numLectura == 3){
+					borrarSaltoLinea(linea);
+					aux->visitado=atoi(linea);
+					numLectura++;
+					
+				}else if(numLectura == 4){
+					borrarSaltoLinea(linea);
+					aux->terminado=atoi(linea);
+					numLectura++;
+				
+				}else if(numLectura == 5){
+					borrarSaltoLinea(linea);
+					aux->monto=atoi(linea);
+					numLectura++;
+					
+				}else{
+					strcpy(aux->anterior,linea);
+					borrarSaltoLinea(aux->anterior);
+					
+					aux->siguiente=NULL;
+				    aux->adyacencia=NULL;
+				    if(lugarInicial==NULL){
+				        lugarInicial=aux;
+				    }else{
+				        aux2=lugarInicial;
+				        while(aux2->siguiente!=NULL){
+				            aux2=aux2->siguiente;
+				        }
+				        aux2->siguiente=aux;
+				    }	
+					numLectura = 0;
+				}
+		    }
+		}	
+		fclose(ArchDomicilios);		
+	}else{
+		return 0;
+	}
+	return 1;
+}
+
+/*
+    Entradas: Ninguna.
+    Salidas: Se agregan los valores de las rutas a los domicilios registrados.
+    Restricciones: Ninguna.
+*/
+int cargarRutas(){
+
+    FILE* ArchRutas;
+
+	struct Domicilio *origen, *destino;
+	struct Ruta *aux;
+    char linea [256], lugar_origen[50], lugar_destino[50];
+    int numLectura=0;
+
+    ArchRutas = fopen("Archivos\\ArchRutas.txt","r");
+
+    if(ArchRutas==NULL){
+        return 0;
+    }else{
+    	while(fgets(linea, 256, (FILE *) ArchRutas)){
+	    	if(numLectura == 0){
+				aux =(struct Ruta *) malloc (sizeof(struct Ruta));
+				strcpy(lugar_origen, linea);
+				borrarSaltoLinea(lugar_origen);
+				numLectura++;
+			}else if(numLectura == 1){
+				strcpy(lugar_destino,linea);
+				borrarSaltoLinea(lugar_destino);
+				numLectura++;
+			}else if(numLectura == 2){
+				strcpy(aux->tiempo_estimado,linea);
+				borrarSaltoLinea(aux->tiempo_estimado);
+				numLectura++;
+			}else if(numLectura == 3){
+				strcpy(aux->distancia,linea);
+				borrarSaltoLinea(aux->distancia);
+				numLectura++;
+			}else{
+				strcpy(aux->tipo_ruta,linea);
+				borrarSaltoLinea(aux->tipo_ruta);
+				
+				origen = validarDomicilio(lugar_origen);
+				destino = validarDomicilio(lugar_destino);
+				aux->siguiente = NULL;
+				
+				if(origen!=NULL && destino!=NULL){
+					agregarRuta(origen, destino, aux);
+				}
+
+				numLectura = 0;
+			}
+	    }
+        fclose(ArchRutas);
+    }
+    return 1;
+
+}
+
 /****************************************************************Menús de Opciones***********************************************************************************************/
 /*
 	Entradas: Un número (tipo char) en un rango de 0 a 7 para escoger una de las opciones disponibles en el menú. 
@@ -1006,6 +1145,12 @@ void GestionNinos(struct ListaNinos *LNinos, struct ListaComport *LComp){
 					break;
 				case '4': eliminarNino(LNinos);
 					break;
+				case '5': mostrarComp(LComp);
+						  getchar();
+					break;
+				case '6': mostrarNinos(LNinos);
+						  getchar();
+					break;	
 				case '0': 
 					break;
 				default:
@@ -1859,7 +2004,7 @@ void guardarNinos(struct ListaNinos *LNinos){
 		}else{
 			iNino = LNinos->inicio;
 	        while(iNino!=NULL){
-				fprintf(ArchNinos,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n", iNino->cedula, iNino->nombre_completo, iNino->correo, iNino->lugar_domicilio, iNino->fecha_nacimiento, iNino->edad, iNino->necesidades_esp );
+				fprintf(ArchNinos,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", iNino->cedula, iNino->nombre_completo, iNino->nombre_usuario, iNino->correo, iNino->lugar_domicilio, iNino->fecha_nacimiento, iNino->edad, iNino->necesidades_esp );
 
 				iNino = iNino->siguiente;
         	}
