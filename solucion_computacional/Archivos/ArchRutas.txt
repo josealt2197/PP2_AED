@@ -2,9 +2,14 @@ Polo Norte
 Pocosol
 1
 1
+A
+Polo Norte
+Cartago
+3
+3
 T
 Pocosol
-Cartuanis
+Cartago
 1
 1
-T
+M

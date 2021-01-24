@@ -5,16 +5,16 @@ H0H0H0
 0
 -1
 0
-2
-Pocosol
-2
-0
-0
-0
-Polo Norte
 123
-Cartuanis
+Pocosol
 321
+0
+0
+-1
+0
+456
+Cartago
+654
 0
 0
 -1
