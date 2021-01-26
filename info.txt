@@ -4,5 +4,5 @@ Estudiantes:
 	Jose Manuel Altamirano Salazar - 2020426159
 	Josue Brenes Alfaro - 2020054427
 Proyecto Programado 2
-Fecha de Entrega: 22 de enero de 2021
+Fecha de Entrega: 27 de enero de 2021
 Estatus de la entrega: Excelente
