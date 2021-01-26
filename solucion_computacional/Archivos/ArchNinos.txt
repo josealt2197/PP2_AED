@@ -1,16 +1,24 @@
-305000781
-Jose Altamirano
-josealta
-josealt2197@gmail.com
-Cartago
-21/02/1997
-23
-Pasar el semestre
 208140809
 Josue Brenes
-josueb
+JosueBA
 josuebrenesa26@gmail.com
-Pocosol
+Santa Rosa
 26/02/2001
 19
-Pasar el semestre
+ninguna
+123456789
+Juanito
+juani
+josuebrenesa26@estudiantec.cr
+Santa Rosa
+14/3/2001
+19
+ninguna
+305000781
+Jose Altamirano
+JuanPerez
+josealt2197@gmail.com
+Cartago
+5/6/1997
+23
+ninguna

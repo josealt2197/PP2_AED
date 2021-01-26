@@ -1,18 +1,60 @@
 JUG-001
+Jenga
+Cubos de madera
+Juegos de mesa
+8 en adelante
+4500
+JUG-002
 Dron
 Dron de 6 helices
-Drones
-15 en adelante
-150000
-JUG-002
-Jenga
-Jenga de madera de 54 piezas
-Juegos de Mesa
+Electronicos
+13 en adelante
+80000
+JUG-007
+Bicicleta
+Aluminio
+Medios de transporte
+10 en adelante
+200000
+JUG-010
+Beyblade 
+Trompo de plastico
+Tronpos
 5 en adelante
-18000
+1500
+JUG-009
+Hot Wheels 
+Carrito de aluminio
+Carros
+5 en adelante
+900
 JUG-003
-Vehiculo Monster Jam
-Carrito de Plastico
-Carros de Juguete
-5-10
-7000
+Play Station 5
+Con disco
+Electronicos
+10 en adelante
+250000
+JUG-005
+Monopoly
+Carton y piezas
+Juegos de mesa
+7 en adelante
+9000
+JUG-006
+Lego Star Wars
+bloques de plastico
+Legos
+10 en adelante
+20000
+JUG-008
+Nerf Alpha Strike 
+pistola de plastico
+Armas
+15 en adelante
+20000
+JUG-004
+Uno
+Cartas de juego
+Juegos de mesa
+7 en adelante
+2000

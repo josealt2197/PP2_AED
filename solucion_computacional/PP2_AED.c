@@ -5993,7 +5993,6 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 	TopJuguetes->inicio = NULL;
 	TopJuguetes->final = NULL;
 	int hallado=0;
-
     //Conteo de las Juguetes Solicitados	
 	if(LJugCarta->inicio!=NULL)
 	{
@@ -6001,38 +6000,33 @@ void juguetesMasPedidos(struct ListaJugCarta *LJugCarta){
 		while( iJugCarta!= NULL){
 			if(TopJuguetes->inicio==NULL)
 			{
+				printf( "\n***Aqui 1***");
 				nJugSolicitado = (struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 					
 				strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
 				nJugSolicitado->cantidad = 1;
-				
+				nJugSolicitado->siguiente = NULL;
 				TopJuguetes->inicio = nJugSolicitado;
 				TopJuguetes->final = nJugSolicitado;
 			}else{
 
-				for(iJugSolicitado = TopJuguetes->inicio; iJugSolicitado!= NULL; iJugSolicitado = iJugSolicitado->siguiente){
-
+				iJugSolicitado = TopJuguetes->inicio;
+				while( iJugSolicitado != NULL){
 					if(strcmp(iJugCarta->nombre_juguete,iJugSolicitado->nombre_juguete)==0){
 						iJugSolicitado->cantidad = (iJugSolicitado->cantidad)+1;
 						hallado=1;
 						break;
-					}	
+					}
+					iJugSolicitado=iJugSolicitado->siguiente;
 				}
-				
 				if(hallado==0){
 					nJugSolicitado =(struct JugSolicitado *) malloc (sizeof(struct JugSolicitado));
 					
 					strcpy(nJugSolicitado->nombre_juguete, iJugCarta->nombre_juguete);
 					nJugSolicitado->cantidad = 1;
-					
-					if(TopJuguetes->inicio == NULL) 
-					{
-						TopJuguetes->inicio = nJugSolicitado;
-						TopJuguetes->final = nJugSolicitado;
-					}else{
-						TopJuguetes->final->siguiente = nJugSolicitado;
-						TopJuguetes->final = TopJuguetes->final->siguiente;
-					}
+					nJugSolicitado->siguiente = NULL;
+					TopJuguetes->final->siguiente = nJugSolicitado;
+					TopJuguetes->final = TopJuguetes->final->siguiente;
 
 				}else{
 					hallado=0;

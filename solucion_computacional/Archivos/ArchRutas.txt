@@ -1,15 +1,20 @@
 Polo Norte
-Pocosol
-1
-1
+Cartago
+15
+150
 A
 Polo Norte
-Cartago
-3
-3
+Santa Rosa
+10
+150
 T
-Pocosol
+Santa Rosa
 Cartago
-1
-1
+2
+20
+T
+Cartago
+Santa Rosa
+25
+250
 M
